@@ -1,0 +1,5312 @@
+1 
+ 
+TİCİMAX  ÜRÜN  SERVİS   
+DÖKÜMANTASYONU 
+ 
+Servis Ekleme; 
+ 
+ 
+.Net uygulamalarda .config dosyasında servisin binding bölümüne < security mode= “Transport” /> 
+eklenmelidir. 
+Ekran görüntüsü: http://prntscr.com/un0z7j 
+Servis Adresi: https://www.alanadiniz.com/Servis/UrunServis.svc 
+1- Kategori 
+1- Kategori Silmek(DeleteKategori) 
+2- Kategori Eklemek(SaveKategori) 
+3- Kategoriye Üst Kategori Eklemek(SaveKategoriParent) 
+2 
+ 
+4- Kategori Bilgisini Almak(SelectKategori) 
+5- Kategori Dili Güncellemek(UpdateKategoriDil) 
+2- Marka 
+1- Marka Silmek(DeleteMarka) 
+2- Marka Eklemek(SaveMarka) 
+3- Marka Bilgisini Almak(SelectMarka) 
+3- Tedarikçi 
+1- Tedarikçi Silmek(DeleteTedarikci) 
+2- Tedarikçi Eklemek(SaveTedarikci) 
+3- Tedarikçi Bilgisini Almak(SelectTedarikci) 
+4- Ürün 
+1- Ürün Eklemek(SaveUrun) 
+2- Ürün Bilgisini Getirmek(SelectUrun) 
+3- Belirlenen Filtrelere Göre Ürün Sayısı Bilgisini Getirmek(SelectUrunCount) 
+4- Ürün Ödeme Seçenekleri Bilgisini Almak(SelectUrunOdemeSecenek) 
+5- Ürün Yorumlarını Getirmek(SelectUrunYorum) 
+6- Ürün ve  Kategori Bilgisini Getirmek(SelectUrunKategori) 
+7- Ürün Kartına Resim Eklemek (SaveResim) 
+8- Ürünlere Mağaza Bazlı Stok Girmek(SaveMagazaStok)  
+9- Ürün Dilini Güncellemek(UpdateUrunDil)  
+10- İlgili Ürün Eklemek(SaveIlgiliUrun) 
+5- Teknik Detay 
+1- Teknik Detay Eklemek(SaveTeknikDetayDeger) 
+2- Teknik Detay Grup Eklemek(SaveTeknikDetayGrup) 
+3- Teknik Detay Özellik Eklemek(SaveTeknikDetayOzellik) 
+4- Teknik Detay Değer Getirmek(SelectTeknikDetayDeger) 
+3 
+ 
+5- Teknik Detay Grup Getirmek(SelectTeknikDetayGrup) 
+6- Teknik Detay Özellik Getirmek(SelectTeknikDetayOzellik) 
+7- Teknik Detay Değer Dili Güncellemek(UpdateTeknikDetayDegerDil) 
+8- Teknik Detay Grup Dili Güncellemek(UpdateTeknikDetayGrupDil) 
+9- Teknik Detay Özellik Dili Güncellemek(UpdateTeknikDetayOzellikDil) 
+ 
+6- Etiket 
+1- Etiket Eklemek(SaveEtiket) 
+2- Etiket Bilgisini Almak(SelectEtiket) 
+7- Varyasyon 
+1- Varyosyon Bilgisini Getirmek(SelectVaryasyon) 
+2- Girilen Filtrelere Uyan Varyasyon Sayısını Getirmek(SelectVaryasyonCount) 
+3- Varyasyon Bilgilerini Güncellemek(VaryasyonGuncelle) 
+4- Varyasyon Bilgilerini Güncellemek(SaveVaryasyon)  
+8- Asorti 
+1- Asorti Grup Eklemek(SaveAsortiGrup) 
+2- Asorti Miktar Eklemek(SaveAsortiMiktar) 
+3- Asorti Grup Bilgisini Getirmek(SelectAsortiGrup) 
+4- Asorti Miktar Bilgisini Getirmek(SelectAsortiMiktar) 
+9- Ek Seçenek 
+1- Ek Secenek Değerlerini Getirmek(SelectEkSecenekDeger) 
+2- Ek Secenek Gruplarını Getirmek(SelectEkSecenekGrup) 
+3- Ek Secenek Değer Dili  Güncellemek(UpdateEkSecenekDegerDil) 
+4- Ek Secenek Grup Dili Güncellemek(UpdateEkSecenekGrupDil) 
+10- Para Birimi 
+1- Para Birimi Eklemek(SaveParaBirimi) 
+4 
+ 
+2- Para Birimi Bilgisini Getirmek(SelectParaBirimi) 
+11- Diğer Metodlar  
+1- Sipariş durumlarını getirmek(GetProductStatus)  
+2- Kategori, Ürün, Marka ve Tedarikçilerde url Güncellemek(UpdateUrl) 
+3- Taksit Seçeneklerini Getirmek(GetTaksitSecenekleri) 
+4-Magaza Stoklarını Getirmek(SelectMagazaStok) 
+5- Stok Adedi Güncellemek(StokAdediGuncelle)                        
+METOD KULLANIMLARI(UrunService) 
+ 
+1.1 - DeleteKategori 
+ Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+KategoriId 
+ integer 
+ evet 
+ Silinmek istenen kategoriye ait tekil anahtar(id) 
+ 
+Response =  WebServisResponse  
+WebServisResponse 
+ Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+Örnek kullanım; 
+ 
+ 
+  
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+WebServisResponse webServisResponse = urunServisClient.DeleteKategori(uyeKodu, 4); 
+// webServisResponse da işlemin ne şekilde sonuçlandığına dair bilgi döndürülüyor. 
+5 
+ 
+1.2 - SaveKategori 
+ Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+Kategori 
+ Kategori 
+ evet 
+Eklenecek kategorinin bilgilerini içeren Kategori sınıfı. 
+ 
+Kategori 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Id 
+ integer 
+ evet 
+0 gönderilir ise yeni kategori eklenir 0 dan büyük gönderilir ise 
+gönderilen id li kategori güncellenir. 
+Pid 
+ integer 
+ evet 
+Üst kategori id. Üst kategori yoksa 0 gönderilmelidir. 
+Aktif 
+ bool 
+ hayır 
+Kategori aktif olma durumu. 
+Tanim 
+ string 
+ evet 
+Kategori adı.  
+Kod 
+ string 
+ evet 
+Kategori Kodu. 
+SeoAnahtarKelime  string 
+ hayır 
+Seo optimizasyonu için kullanılan kelimeler. 
+SeoSayfaBaslik 
+ string 
+ hayır 
+Seo optimizasyonu için kullanılan sayfa başlığı. 
+SeoSayfaAciklama 
+ string 
+ hayır 
+Seo optimizasyonu için kullanılan açıklama 
+Icerik 
+ string 
+ hayır 
+Html içerik alanı. 
+Sira 
+ integer 
+ hayır 
+Kategorinin sıra numarası. 
+Url 
+ string 
+ hayır 
+Kategori url bilgisi 
+ 
+Response = integer eklenenKategoriId  
+6 
+ 
+Örnek kullanım; 
+ 
+1.3 - SaveKategoriParent  
+ Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+KategoriId 
+ int 
+ evet 
+ Üst kategori eklenecek kategorinin Id değeri. 
+ParentId 
+ int 
+ evet 
+ Üst kategori Id değeri. 
+ 
+Örnek kullanım;     
+ 
+1.4 - SelectKategori 
+ Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+ 
+Kategori kategori = new Kategori 
+            { 
+                ID = 0, // 0 ise yeni kategori ekler, 0 dan farkli ise o id'ye sahip kategoriyi 
+günceller. 
+                PID = 10, // Üst kategori id si. Ekleyeceğiniz kategorinin üst kategorisi yoksa 0 
+değerini gönderiniz. 
+                Aktif = true, 
+                Tanim = "Giyim", //Kategori adı 
+                Kod = "GYM", // Kategori kodu 
+                SeoAnahtarKelime = "giysi giyim", // SEO optimizasyonu için kullanılan kelimeler 
+                SeoSayfaAciklama = "Açıklama", // SEO optimizasyonu için kullanılan açıklama 
+                SeoSayfaBaslik = "Başlık", // SEO optimizasyonu için kullanılan sayfa başlığı 
+                Icerik = "içerik", // html içerik alanı 
+                Sira = 1, // kategorinin sıralamadaki yeri 
+                Url = "" // kategori link i  
+            }; 
+ 
+            // Servisten cevap olarak eklediğimiz kategorinin id si döndürülüyor.  
+            int eklenenKategoriId = urunServisClient.SaveKategori("U15saQ48dW453X1cA", kategori); 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+urunServisClient.SaveKategoriParent("U15saQ48dW453X1cA", 1, 8); 
+7 
+ 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+KategoriId 
+ int 
+ evet 
+Getirilmek istenen kategorinin id değeri.(0 girilirse tüm 
+kategoriler listelenir). 
+Dil  
+ string 
+ hayır 
+ Kategorinin hangi dilde geleceğinin belirtildiği parametre. 
+ 
+Response = List<Kategori> 
+Kategori 
+ Adı 
+ Tipi 
+ Açıklama 
+Id 
+ integer 
+Kategori id. 
+Pid 
+ integer 
+Üst kategori id.  
+Aktif 
+ bool 
+Kategori aktif olma durumu. 
+Tanim 
+ string 
+Kategori adı.  
+Kod 
+ string 
+Kategori Kodu. 
+SeoAnahtarKelime  string 
+Seo optimizasyonu için kullanılan kelimeler. 
+SeoSayfaBaslik 
+ string 
+Seo optimizasyonu için kullanılan sayfa başlığı. 
+SeoSayfaAciklama 
+ string 
+Seo optimizasyonu için kullanılan açıklama 
+Icerik 
+ string 
+Html içerik alanı. 
+Sira 
+ integer 
+Kategorinin sıra numarası. 
+Url 
+ string 
+Kategori url bilgisi 
+8 
+ 
+Örnek kullanım;   
+ 
+1.5 - UpdateKategoriDil 
+ Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+UpdateKategoriDi
+lRequest 
+UpdateKategorDil
+Request 
+evet 
+Kategorileri 
+ve 
+ayarlari 
+içeren 
+UpdateKategoriDilRequest sınıfı 
+ 
+UpdateKategorDilRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Ayar 
+KategoriDilAyar 
+evet 
+Güncelleme ayarlarını içeren KategoriDilAyar sınıfı 
+Dil 
+string 
+evet 
+Dil kodu örn = “en” 
+Liste 
+List<KategoriDil> 
+evet 
+Kategori ve değişecek değerleri içeren KategoriDil sınıfı 
+listesi  
+ 
+KategoriDilAyar 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+// Kategori Id 0 olarak gönderilirse tüm kategorileri gönderir. 0 dan büyük gönderilirse id si 
+girilen kategoriyi geri döndürür. 
+//Dil boş gönderilir ise kategoriler türkçe olarak döner. 
+// Eğer sitede dil seçeneği aktif ise dil parametresi ile kategoriyi farklı dillerde 
+getirebilirsiniz.  
+ 
+// tüm kategorileri getirmek için 
+List<Kategori> kategoriListesi = urunServisClient.SelectKategori("U15saQ48dW453X1cA", 0, ""); 
+ 
+// 10 id li kategoriyi getirmek için 
+List<Kategori> kategoriler = urunServisClient.SelectKategori("U15saQ48dW453X1cA", 10, ""); 
+ 
+// 10 id li kategoriyi ingilizce olarak getirmek için (Bunun için sitenizin dil özelliği aktif 
+olmalı)  
+List<Kategori> kategorilist = urunServisClient.SelectKategori("U15saQ48dW453X1cA", 10, "En"); 
+9 
+ 
+IcerikGuncelle 
+bool 
+hayır 
+Içerik güncelleme durumu 
+SeoAnahtarKelim
+eGuncelle 
+bool 
+hayır 
+Seo anahtar kelime güncelleme durumu 
+SeoSayfaAciklama
+Guncelle 
+bool 
+hayır 
+Seo sayfa açıklama güncelleme durumu 
+SeoSayfaBaslikGu
+ncelle 
+bool 
+hayır 
+Seo sayfa başlık güncelleme durumu 
+TanimGuncelle 
+bool 
+hayır 
+Tanım güncelleme durumu 
+ 
+KategoriDil 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+ID 
+Integer 
+evet 
+Kategori id  
+Icerik 
+string 
+hayır 
+Güncellenecek içerik değeri  
+SeoAnahtarKelime 
+string 
+hayır 
+Günellenecek seo anahtar kelime  
+SeoSayfaAciklama 
+string 
+hayır 
+Güncellenecek seo sayfa açıklama 
+SeoSayfaBaslik 
+string 
+hayır 
+Güncellenecek seo sayfa başlık  
+Tanim 
+string 
+hayır 
+Güncellenecek tanım  
+ 
+Response = List<UpdateKategoriDilResponse> 
+UpdateKategoriDilResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+10 
+ 
+Örnek kullanım;   
+ 
+2.1 - DeleteMarka 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+MarkaId 
+ int 
+ evet 
+Silinmek istenen markanın id değeri. 
+ 
+ Response = WebServisResponse  
+ Adı 
+ Tipi 
+ Açıklama 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+             
+            //güncelleme yapılacak alanların ayarı  
+            // burada girilmeyen veya false girilen alan güncellenmez  
+            KategoriDilAyar kategoriDilAyar = new KategoriDilAyar 
+            { 
+                IcerikGuncelle = true, 
+                SeoAnahtarKelimeGuncelle=true, 
+                SeoSayfaAciklamaGuncelle=true, 
+                SeoSayfaBaslikGuncelle=true, 
+                TanimGuncelle=true 
+            }; 
+ 
+            List<KategoriDil> kategoriDilListe = new List<KategoriDil>(); 
+            KategoriDil kategoriDil = new KategoriDil 
+            { 
+                ID=3, 
+                Icerik= "icerik ingilizce", 
+                SeoAnahtarKelime="seo anahtar kelime ingilizce", 
+                SeoSayfaAciklama="seo sayfa açıklama ingilizce", 
+                SeoSayfaBaslik="seo sayfa başlık ingilizce", 
+                Tanim="tanım ingilizce" 
+            }; 
+ 
+            kategoriDilListe.Add(kategoriDil); 
+            UpdateKategoriDilRequest updateKategoriDilRequest = new UpdateKategoriDilRequest 
+            { 
+                Ayar = kategoriDilAyar, 
+                Dil = "en", // dil kodu  
+                Liste = kategoriDilListe 
+            }; 
+ 
+UrunServis.WebServisResponse webServisResponse= urunServisClient.UpdateKategoriDil(uyeKodu, 
+updateKategoriDilRequest); 
+11 
+ 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+Örnek kullanım;    
+ 
+2.2 - SaveMarka 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre. 
+Marka 
+ Marka 
+ evet 
+Eklenecek markanın bilgilerini içeren Marka sınıfı. 
+ 
+Marka 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Aktif 
+ bool 
+ hayır 
+ Markanın aktiflik durumu. 
+ID 
+ integer 
+ evet 
+0 gönderilir ise yeni marka eklenir 0 dan büyük gönderilir ise 
+gönderilen id li marka güncellenir. 
+SeoAnahtarKelime  string 
+ hayır 
+Seo optimizasyonu için kullanılan kelimeler. 
+SeoSayfaAciklama 
+ string 
+ hayır 
+Seo optimizasyonu için kullanılan açıklama. 
+SeoSayfaBaslik 
+ string 
+ hayır 
+Seo optimizasyonu için kullanılan sayfa başlığı. 
+Tanim 
+ string 
+ evet 
+Marka adı. 
+ 
+Response = integer eklenenMarkaId 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+WebServisResponse webServisResponse = urunServisClient.DeleteMarka(uyeKodu,8); 
+// Serviscevap ta işlemin ne şekilde sonuçlandığına dair bilgi döndürülüyor. 
+12 
+ 
+Örnek kullanım;           
+ 
+2.3 - SelectMarka 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre. 
+MarkaID 
+ integer 
+ evet 
+Getirilmek istenen Markaya ait tekil anahtar(id). 
+ 
+Response = List<Marka>  
+Marka 
+ Adı 
+ Tipi 
+ Açıklama 
+Aktif 
+ bool 
+Markanın aktiflik durumu. 
+ID 
+ integer 
+Marka Id. 
+SeoAnahtarKelime 
+ string 
+Seo optimizasyonu için kullanılan kelimeler. 
+SeoSayfaAciklama 
+ string 
+Seo optimizasyonu için kullanılan açıklama. 
+SeoSayfaBaslik 
+ string 
+Seo optimizasyonu için kullanılan sayfa başlığı. 
+Tanim 
+ string 
+Marka adı. 
+ 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+  Marka marka = new Marka 
+  { 
+   
+Aktif = true, 
+ID = 0, //id 0 gönderilir ise yeni marka ekler 0 dan büyük gönderilirse gönderilen id li 
+marka güncellenir. 
+       SeoAnahtarKelime = "Anahtar kelime", 
+       SeoSayfaAciklama = "Sayfa Aciklama ", 
+       SeoSayfaBaslik = "Sayfa baslik", 
+       Tanim = "Marka Adi" 
+  }; 
+int eklenenMarkaId= urunServisClient.SaveMarka(uyeKodu, marka); 
+13 
+ 
+Örnek kullanım;   
+ 
+3.1 - DeleteTedarikci 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+TedarikciID 
+ int 
+ evet 
+Silinmek istenen Tedarikçiye ait tekil anahtar(id). 
+ 
+Response = WebServisResponse  
+ Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+Örnek kullanım;  
+ 
+3.2 – SaveTedarikci 
+Parametre 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+WebServisResponse webServisResponse = urunServisClient.DeleteTedarikci(uyeKodu, 4); 
+// webServisResponse da işlemin ne şekilde sonuçlandığına dair bilgi döndürülüyor. 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+List<Marka> markaList = new List<Marka>(); 
+ 
+// eğer markaID değeri 0 gönderilir ise cevap olarak tüm markaların listesi gelir. 
+markaList=  urunServisClient.SelectMarka(uyeKodu, 0); 
+ 
+// eğer markaID değeri 0 dan büyük gönderilir ise id si girilen marka gelir.  
+markaList = urunServisClient.SelectMarka(uyeKodu, 3);. 
+14 
+ 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre. 
+Marka 
+ Tedarikci 
+ evet 
+Eklenecek markanın bilgilerini içeren Marka sınıfı. 
+ 
+Tedarikci 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Aktif 
+ bool 
+ hayır 
+ Tedarikçinin aktiflik durumu. 
+ID 
+ integer 
+ evet 
+0 gönderilir ise yeni tedarikçi eklenir 0 dan büyük gönderilir ise 
+gönderilen id li tedarikçi güncellenir. 
+Mail 
+ string 
+ hayır 
+Tedarikçi mail adresi. 
+Not 
+ string 
+ hayır 
+Eklenmek istenen not bilgisi.  
+Tanım 
+ string 
+ evet 
+Tedarikçi adı.  
+ 
+Response ; integer eklenenTedarikciId 
+Örnek kullanım; 
+ 
+3.3 – SelectTedarikci 
+ Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre. 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            Tedarikci tedarikci = new Tedarikci 
+            { 
+                Aktif = true, 
+                ID=0,//id 0 gönderilir ise yeni tedarikçi ekler 0 dan büyük gönderilirse  
+                gönderilen id li tedarikçi güncellenir. 
+                Mail ="Tedarikçi Mail", 
+                Not="", 
+                Tanim="Tedarikçi adi" 
+            }; 
+           int eklenenTedarikciId urunServisClient.SaveTedarikci(uyeKodu, tedarikci) 
+15 
+ 
+TedarikciId 
+ integer 
+ evet 
+Getirilmek istenen Tedarikçiye ait tekil anahtar(id). 
+ 
+Response = List<Tedarikci>  
+Tedarikci 
+ Adı 
+ Tipi 
+ Açıklama 
+Aktif 
+ bool 
+ Tedarikçinin aktiflik durumu. 
+ID 
+ integer 
+Tedarikçi id. 
+Mail 
+ string 
+Tedarikçi mail adresi. 
+Not 
+ string 
+ Not bilgisi.  
+Tanım 
+ string 
+Tedarikçi adı.  
+ 
+Örnek kullanım; 
+ 
+4.1 – SaveUrun 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre. 
+UrunKartlari 
+ List<UrunKarti> 
+ evet 
+Eklenecek olan ürün kartlarını içeren UrunKarti listesi. 
+UrunKartiAyar 
+UrunKartiAyar 
+ evet 
+Ürün Kartı  ayarlarını içeren UrunKartiAyar sınıfı. 
+VaryasyonAyar VaryasyonAyar 
+ evet 
+Ürün ayarlarını içeren VaryasyonAyar sınıfı. 
+ 
+  UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            List<Tedarikci> tedarikciList = new List<Tedarikci>(); 
+     // TedarikciID değeri 0 gönderilirse tüm tedarikçilerin listesi gelir. 
+            tedarikciList = urunServisClient.SelectTedarikci(uyeKodu, 0); 
+ 
+            // TedarikciID değeri 0 da büyük gönderilirse id si verilen tedarikçi gelir. 
+            tedarikciList = urunServisClient.SelectTedarikci(uyeKodu, 5); 
+16 
+ 
+UrunKartiAyar 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+AciklamaGuncelle 
+bool 
+hayır 
+Açıklama güncelleme durumu. 
+AktifGuncelle 
+bool 
+hayır 
+Aktiflik güncelleme durumu. 
+FBStoreGosterGuncelle 
+bool 
+hayır 
+Facebook store da ki görünürlüğü güncelleme 
+durumu. 
+FirsatUrunuGuncelle 
+bool 
+hayır 
+Fırsat ürünü güncelleme durumu. 
+KategoriGuncelle 
+bool 
+hayır 
+Kategorileri güncelleme durumu. 
+MaksTaksitSayisiGuncelle 
+bool 
+hayır 
+Maksimum taksit sayısı güncelleme durumu. 
+MarkaGuncelle 
+bool 
+hayır 
+Marka güncelleme durumu. 
+OnYaziGuncelle 
+bool 
+hayır 
+Ön yazı güncelleme durumu. 
+ParaPuanGuncelle 
+bool 
+hayır 
+Para puan güncelleme durumu. 
+SatisBirimiGuncelle 
+bool 
+hayır 
+Satış birimi güncelleme durumu. 
+SeoAnahtarKelimeGuncelle 
+bool 
+hayır 
+Seo anahtar kelime güncelleme durumu. 
+SeoSayfaAciklamaGuncelle 
+bool 
+hayır 
+Seo sayfa açıklama güncelleme durumu. 
+SeoSayfaBaslikGuncelle 
+bool 
+hayır 
+Seo sayfa başlık güncelleme durumu. 
+TedarikciGuncelle 
+bool 
+hayır 
+Tedarikçi güncelleme durumu. 
+UcretsizKargoGuncelle 
+bool 
+hayır 
+Ücretsiz kargo güncelleme durumu. 
+UrunAdiGuncelle 
+bool 
+hayır 
+Ürün adi güncelleme durumu. 
+UrunResimGuncelle 
+bool 
+hayır 
+Ürün resim güncelleme durumu. 
+VitrinGuncelle 
+bool 
+hayır 
+Vitrin görünürlüğü güncelleme durumu. 
+YeniUrunGuncelle 
+bool 
+hayır 
+Yeni ürün güncelleme durumu. 
+AdwordsAciklamaGuncelle 
+bool 
+hayır 
+Adwords açıklama güncelleme durumu. 
+AdwordsKategoriGuncelle 
+bool 
+hayır 
+Adwords kategori güncelleme durumu. 
+AdwordsTipGuncelle 
+bool 
+hayır 
+Adwords tipi güncelleme durumu. 
+17 
+ 
+UserAgent 
+string 
+hayır 
+User agent bilgisi  
+AramaAnahtarKelimeGuncelle 
+bool 
+hayır 
+Arama anahtar kelime güncelleme durumu. 
+AsortiGrupGuncelle 
+bool 
+hayır 
+Asorti grup güncelleme durumu. 
+Base64resim 
+bool 
+hayır 
+Base64 resim güncelleme durumu. 
+EtiketGuncelle 
+bool 
+hayır 
+Etkiet güncelleme durumu. 
+KargoTipiGuncelle 
+bool 
+hayır 
+Kargo tipi güncelleme durumu. 
+OncekiKategoriEslestirmeleriniTemizle bool 
+hayır 
+Önceki kategorileri temizleme durumu. 
+OncekiResimleriSil 
+bool 
+hayır 
+Önceki resimleri silme durumu. 
+OzelAlan1Guncelle 
+bool 
+hayır 
+Özel alan 1 güncelleme durumu. 
+OzelAlan2Guncelle 
+bool 
+hayır 
+Özel alan 2 güncelleme durumu. 
+OzelAlan3Guncelle 
+bool 
+hayır 
+Özel alan 3 güncelleme durumu. 
+OzelAlan4Guncelle 
+bool 
+hayır 
+Özel alan 4 güncelleme durumu. 
+OzelAlan5Guncelle 
+bool 
+hayır 
+Özel alan 5 güncelleme durumu. 
+ResimleriIndirme 
+bool 
+hayır 
+Resimleri indirme durumu. 
+ResmiOlmayanlaraResimEkle  
+bool 
+hayır 
+Resmi olmayanlara resim ekleme durumu.  
+SeoNoFollowGuncelle 
+bool 
+hayır 
+Seo no follow özelliği  güncelleme durumu. 
+SeoNoIndexGuncelle 
+bool 
+hayır 
+Seo no index özelliği güncelleme durumu. 
+TahminiTeslimSuresiGuncelle 
+bool 
+hayır 
+Tahmini teslim süresi güncelleme durumu. 
+TedarikciKodunaGoreGuncelle 
+bool 
+hayır 
+Tedarikçi koduna göre güncelleme durumu.  
+TeknikDetayGuncelle 
+bool 
+hayır 
+Teknik detay güncelleme durumu. 
+UrunAdresiniElleOlustur 
+bool 
+hayır 
+Ürün adresini elle oluşturma durumu. 
+UyeAlimMaxGuncelle 
+bool 
+hayır 
+Üye maksimum alım güncelleme durumu. 
+UyeAlimMinGuncelle 
+bool 
+hayır 
+Üye minumum alım güncelleme durumu. 
+YayinTarihiGuncelle 
+bool 
+hayır 
+Yayın tarihi güncelleme durumu. 
+ 
+VaryasyonAyar 
+18 
+ 
+ Adı 
+ Tipi 
+Zorunlu 
+ Açıklama 
+AktifGuncelle 
+bool 
+hayır 
+Aktiflik  güncelleme durumu. 
+AlisFiyatiGuncelle 
+bool 
+hayır 
+Alış fiyatı güncelleme durumu. 
+BarkodGuncelle 
+bool 
+hayır 
+Barkod güncelleme durumu. 
+IndirimliFiyatiGuncelle 
+bool 
+hayır 
+Indirimli fiyat güncelleme durumu. 
+KargoUcretiGuncelle 
+bool 
+hayır 
+Kargo ücreti güncelleme durumu. 
+KargoAgirligiGuncelle 
+bool 
+hayır 
+Kargo ağırlığı güncelleme durumu. 
+ParaBirimiGuncelle 
+bool 
+hayır 
+Para birimi güncelleme durumu. 
+PiyasaFiyatiGuncelle 
+bool 
+hayır 
+Piyasa fiyatı güncelleme durumu. 
+SatisFiyatiGuncelle 
+bool 
+hayır 
+Satış fiyatı güncelleme durumu. 
+StokAdediGuncelle 
+bool 
+hayır 
+Stok adedi güncelleme durumu. 
+UyeTipiFiyat1Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  1 güncelleme durumu. 
+UyeTipiFiyat2Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  2 güncelleme durumu. 
+UyeTipiFiyat3Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  3 güncelleme durumu. 
+UyeTipiFiyat4Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  4 güncelleme durumu. 
+UyeTipiFiyat5Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  5 güncelleme durumu. 
+EksiStokAdediGuncelle 
+bool 
+hayır 
+Eksi stok adedi güncelleme durumu. 
+KdvDahilGuncelle 
+bool 
+hayır 
+Kdv dahil güncelleme durumu. 
+KdvOraniGuncelle 
+bool 
+hayır 
+Kdv oranı güncelleme durumu. 
+OncekiResimleriSil 
+bool 
+hayır 
+Önceki resimlerin silinmesi  durumu. 
+ResimOlmayanlaraResimEkle bool 
+hayır 
+Resmi olmayanlara resim eklenmesi durumu. 
+StokKoduGuncelle 
+bool 
+hayır 
+Stok kodu güncelleme  durumu. 
+UrunResimGuncelle 
+bool 
+hayır 
+Ürün resmi güncelleme durumu. 
+ 
+UrunKarti      
+19 
+ 
+ Adı 
+ Tipi 
+ 
+Zorunlu  
+ Açıklama 
+Aktif 
+ bool 
+ hayır 
+Ürünün aktiflik durumu. 
+ID 
+ integer 
+ evet 
+0 gönderilir ise yeni ürün eklenir 0 dan büyük 
+gönderilir ise gönderilen id li ürün güncellenir. 
+UrunAdi 
+ string 
+ evet 
+Ürün adı. 
+Aciklama 
+ string 
+ evet 
+Ürün açıklaması.  
+AnaKategori 
+ string 
+ evet 
+Ana kategori adı.  
+AnaKategoriID 
+ integer 
+  evet 
+Ana kategori id değeri. 
+Kategoriler 
+ List<integer> 
+ evet 
+Kategori id leri listesi. 
+MarkaID 
+ integer 
+ evet 
+Marka id değeri (Verilen id ile kayıtlı bir marka yoksa 
+ürün eklenmez). 
+TedarikciID 
+ integer 
+ evet 
+Tedarikçi id değeri. 
+Resimler 
+ List<string> 
+ evet 
+Ürün resimleri listesi. 
+SatisBirimi 
+ string 
+ evet 
+Ürün satış birimi. Örn=”adet”. 
+UcretsizKargo 
+ bool 
+ evet 
+Ücretsiz kargo seçeneği.  
+OnYazi 
+ string 
+ hayır 
+Ürün önyazısı. 
+SeoAnahtarKelime 
+ string 
+ hayır 
+Seo optimizasyonu için kullanılan kelimeler. 
+SeoSayfaAciklama 
+ string 
+ hayır 
+Seo optimizasyonu için kullanılan açıklama. 
+SeoSayfaBaslik 
+ string 
+ hayır 
+Seo optimizasyonu için kullanılan sayfa başlık. 
+Varyasyonlar 
+List<Varyasyon>  evet 
+Ürün kartına eklenecek olan ürünlerin listesi. 
+Vitrin 
+ bool 
+ hayır 
+Ürünün vitrinde görünme durumu. 
+YeniUrun 
+ bool 
+ hayır 
+Ürünün yeni ürün olarak görünme durumu. 
+AdwordsAciklama 
+ string 
+ hayır 
+Xml deki açıklama. 
+AdwordsKategori 
+ string 
+ hayır 
+Xml deki kategori. 
+AdwordsTip 
+ string 
+ hayır 
+Xml deki tip. 
+20 
+ 
+AramaAnahtarKelime 
+ string 
+ hayır 
+Sitede arama yaparken kullanılacak anahtar 
+kelimeler  
+AsortiGrupId 
+ integer 
+ hayır 
+Ürüne eklenecek asorti grup id değeri.  
+DuzenleyenKullanici 
+ integer 
+ hayır 
+Düzenleyen kullanıcı id değeri. 
+EkleyenKullanici 
+ integer 
+ hayır 
+Ekleyen kullanıcı id değeri. 
+EntegrasyonID 
+ integer 
+ hayır 
+Ürüne eklenecek entegrasyon id değeri. 
+FBStoreGoster 
+ bool 
+ hayır 
+Ürünün facebook store da gösterilme durumu. 
+FirsatUrunu 
+ bool 
+ hayır 
+Ürünün fırsat ürünlerine eklenme durumu. 
+IndirimliFiyatOzellik 
+ integer 
+ hayır 
+Bu alanda 3 farklı değer girebiliyoruz. 0=Devamlı 
+indirim , 1=Stok adedine göre indirim, 2= Tarihe 
+göre indirim.  
+IndirimliFiyatOzellikStok1 
+ integer 
+ hayır 
+İndirim başlangıç stok adedi . 
+IndirimliFiyatOzellikStok2 
+ integer 
+ hayır 
+İndirim bitiş stok adedi.  
+IndirimliFiyatOzellikTarih1  datetime 
+ hayır 
+İndirim başlangıç tarihi. 
+IndirimliFiyatOzellikTarih2  datetime 
+ hayır 
+İndirim bitiş tarihi. 
+MaksTaksitSayisi 
+ integer 
+ hayır 
+Ürünün maksimum taksit sayısı değeri. 
+OzelAlan1 
+ string 
+ hayır 
+Eklenecek farklı özelliklerde kullanılacak özel alan.  
+OzelAlan2 
+ string 
+ hayır 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+OzelAlan3 
+ string 
+ hayır 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+OzelAlan4 
+ string 
+ hayır 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+OzelAlan5 
+ string 
+ hayır 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+SeoNoFollow 
+ bool 
+ hayır 
+ 
+SeoNoIndex 
+ bool 
+ hayır 
+ 
+TahminiTeslimSuresi 
+ integer 
+ hayır 
+Ürünün tahmini teslim süresi 
+TedarikciKodu 
+ string 
+ evet 
+Ürünün Tedarikci kodu  
+TeknikDetayGrupID 
+ integer 
+ hayır 
+Teknik Detay grup id değeri. 
+21 
+ 
+UrunSayfaAdresi 
+ string 
+ hayır 
+Ürün url bilgisi. 
+UyeAlimMax 
+ integer 
+ hayır 
+Bir üyenin en fazla kaç ürün alabileceği değeri. 
+UyeAlimMin 
+ integer 
+ hayır 
+Bir üyenin en az kaç ürün alabileceği değeri.  
+YayinTarihi 
+datetime 
+hayır 
+Ürünün yayın tarihi değeri.  
+ 
+Varyasyon  
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+ID 
+integer 
+evet 
+0 gönderilir ise yeni varyasyon eklenir 0 dan büyük 
+gönderilir 
+ise 
+gönderilen 
+id 
+li 
+varyasyon 
+güncellenir 
+AlisFiyati 
+double 
+hayır 
+Varyasyona ait alis fiyatı değeri.  
+Barkod 
+string 
+hayır 
+Varyasyon barkod değeri. 
+Desi 
+double 
+hayır 
+Varyasyon desi değeri. 
+KargoUcreti 
+double 
+hayır 
+Varyasyon kargo ücreti değeri. 
+KdvDahil 
+bool 
+hayır 
+Kdv dahil olma durumu. 
+KdvOrani 
+integer 
+hayır 
+Varyasyon kdv orani değeri. 
+Ozellikler 
+List<VaryasyonOzellik> hayır 
+Varyasyonun özellikleri. 
+ParaBirimiID 
+integer 
+evet 
+Varyasyon para birimi (sitede yer alan para 
+birimlerinden biri girilmelidir). 
+Resimler 
+List<string> 
+hayır 
+Varyasyon resimleri. 
+SatisFiyati 
+double 
+evet 
+Satış fiyati değeri.  
+StokAdedi 
+double 
+hayır 
+Stok adedi değeri.  
+StokKodu 
+string 
+hayır 
+Varyasyon stok kodu . 
+Aktif 
+bool 
+hayır 
+Varyasyonun aktif olma durumu.  
+DuzenleyenKullanici integer 
+hayır 
+Düzenleyen kullanıcı id değeri.  
+EkleyenKullanici 
+integer 
+hayır 
+Ekleyen kullanıcı id değeri. 
+22 
+ 
+EksiStokAdedi 
+double 
+hayır 
+Ayrılacak olan stok adedi. 
+İndirimliFiyati 
+double 
+hayır 
+Varyasyon indirimli fiyat değeri.  
+ParaBirimi 
+string 
+hayır 
+Eğer para birimiId girildiyse boş gönderilebilir. 
+ParaBirimiKodu 
+string 
+hayır 
+Eğer para birimiId girildiyse boş gönderilebilir. 
+TedarikciKodu 
+string 
+hayır 
+Tedarikçi koduna göre güncelle true ise zorunlu 
+UyeTipiFiyat1 
+double 
+hayır 
+Üye tipi 1 e özel fiyat değeri.  
+UyeTipiFiyat2 
+double 
+hayır 
+Üye tipi 2 ye özel fiyat değeri.  
+UyeTipiFiyat3 
+double 
+hayır 
+Üye tipi 3 e özel fiyat değeri.  
+UyeTipiFiyat4 
+double 
+hayır 
+Üye tipi 4 e özel fiyat değeri.  
+UyeTipiFiyat5 
+double 
+hayır 
+Üye tipi 5 e özel fiyat değeri.  
+ 
+VaryasyonOzellik 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+Tanım 
+ string 
+ evet 
+Varyasyon  özellik tanımı. Örn= “Renk” 
+Deger 
+ string 
+ evet 
+Varyasyon özellik Değer,. Örn=”Mavi”  
+ 
+23 
+ 
+Örnek Kullanım; 
+// Ürün Ekleme 
+            // Ürünün ait olduğu kategori idleri 
+            List<int> kategoriIDS = new List<int>(); 
+            kategoriIDS.Add(15); 
+            kategoriIDS.Add(56); 
+            kategoriIDS.Add(50); 
+            // Ürünün resim linkleri 
+            List<string> resimLinkleri = new List<string>(); 
+            resimLinkleri.Add("http://www.siteniz.com/resim1.png"); 
+            resimLinkleri.Add("http://www.siteniz.com/resim2.png"); 
+            // Ürün varyasyon özelliklerini belirleme 
+            List<UrunServis.VaryasyonOzellik> ozellikler = new List<UrunServis.VaryasyonOzellik>(); 
+            ozellikler.Add(new UrunServis.VaryasyonOzellik { Tanim = "Numara", Deger = "38" }); 
+            ozellikler.Add(new UrunServis.VaryasyonOzellik { Tanim = "Renk", Deger = "Mavi" }); 
+            // Ürün varyasyon resim linkleri 
+            List<string> varyasyonResimler = new List<string>(); 
+            varyasyonResimler.Add("http://www.siteniz.com/varyasyonluResim.png"); 
+            varyasyonResimler.Add("http://www.siteniz.com/varyasyonluResim2.png"); 
+            varyasyonResimler.Add("http://www.siteniz.com/varyasyonluResim3.png"); 
+ 
+            //Urun Kartı etiket listeleri 
+            List<UrunKartiEtiket> urunKartiEtiketListe = new List<UrunKartiEtiket> { new 
+UrunKartiEtiket { EtiketID = 1 } }; 
+ 
+            // urun kartı teknik detay liste  
+            List<UrunKartiTeknikDetay> urunKartiTeknikDetayListe = new List<UrunKartiTeknikDetay> 
+            { 
+                new UrunKartiTeknikDetay{ DegerID=1 , OzellikID = 1 } 
+            }; 
+// Ürün varyasyonlarını belirleme. En az bir varyasyon zorunludur! 
+            // * işaretli alanlar zorunlu alanlardır.  
+            UrunServis.Varyasyon varyasyon1 = new UrunServis.Varyasyon 
+            { 
+                ID = 0, //* 0 ise yeni varyasyon ekler, sıfırdan büyük ise o id'ye sahip olan 
+varyasyona 
+                        //günceller.Aktif = true, 
+                AlisFiyati = 10, 
+                Barkod = "BARKOD", 
+                Desi = 1, 
+                KargoUcreti = 5.15, 
+    
+ 
+  KdvDahil = false, 
+                KdvOrani = 18, 
+                Ozellikler = ozellikler, 
+ 
+24 
+ 
+                 
+ParaBirimiID = 1, // * sitede yer alan para birimlerinde birini girmesi gerekir.  
+                Resimler = varyasyonResimler, 
+                SatisFiyati = 100, // *  
+                StokAdedi = 15, 
+                StokKodu = "KOD", 
+                Aktif = true, 
+                //DuzenleyenKullanici = 1, // düzenleyen kullanıcı id  
+                //EkleyenKullanici = 1,// ekleyen kullanıcı id  
+                EksiStokAdedi = 10, // ayrılacak olan stok adedi - zorunlu değil  
+                IndirimliFiyati = 12, 
+                //ParaBirimi = "TL", // parabirimi id girildiyse doldurulmasına gerek yok  
+                //ParaBirimiKodu = "TRY", // parabirimi id girildiyse doldurulmasına gerek yok.  
+                //TedarikciKodu = "",  tedarikçi koduna göre güncelle true ise zorunlu 
+                // uye tiplerine göre fiyatlandırmalar - zorunlu değil   
+                UyeTipiFiyat1 = 12, 
+                UyeTipiFiyat2 = 45, 
+                UyeTipiFiyat3 = 45, 
+                UyeTipiFiyat4 = 87, 
+                UyeTipiFiyat5 = 85, 
+ 
+ 
+            }; 
+            List<UrunServis.Varyasyon> varyasyonlar = new List<UrunServis.Varyasyon>(); 
+            varyasyonlar.Add(varyasyon1); 
+            // Ürün Kartı alanları. "*" işaretli alanlar zorunludur. 
+            UrunServis.UrunKarti urunKarti = new UrunServis.UrunKarti 
+            { 
+                ID = 0, // 0 ise yeni ürünkartı ekler, sıfırdan büyük ise o id'ye sahip olan 
+ürünkartını 
+                        // günceller. 
+                Aktif = true, // * 
+                UrunAdi = "Ürün Adı", // * 
+                Aciklama = "Açıklama", // * 
+                AnaKategori = "Ana Kategori adı", // * Breadcrumbs da kullanılacak 
+                AnaKategoriID = 50, // * Breadcrumbs da kullanılacak - zorunlu 0 olursa ürün 
+görünmez.  
+                Kategoriler = kategoriIDS, // * 
+                MarkaID = 10, // * 
+                TedarikciID = 1, // * 
+                Resimler = resimLinkleri, // * 
+                SatisBirimi = "Adet", // * 
+                UcretsizKargo = true, // * 
+                OnYazi = "Önyazı", 
+                SeoAnahtarKelime = "kelime kelime2", 
+                SeoSayfaAciklama = "Açıklama", 
+                SeoSayfaBaslik = "Başlık", 
+                Varyasyonlar = varyasyonlar, // * 
+                Vitrin = true, 
+                YeniUrun = true,  
+  AdwordsAciklama = "adwors aciklama", // xml deki aciklama - zorunlu değil  
+                AdwordsKategori = "adwors Kategori", // xml deki kategori - zorunlu değil 
+                AdwordsTip = "adwors tip", // xml deki tip - zorunlu değil  
+                AramaAnahtarKelime = "Arama anahtar kelime", // sitede arama yaparken kullanılacak 
+anahtar kelimeler 
+                //AsortiGrupID = 2, // urunun asorti grubu - zorunlu değil  
+                //DuzenleyenKullanici = 1, // düzenleyen kullanıcı id - zorunlu değil 
+                //EkleyenKullanici = 1, // ekleyen kullanıcı id - zorunlu değil 
+                //EntegrasyonID = "4", 
+25 
+ 
+ 
+FBStoreGoster = true, // ürünün facebook store da gösterilme durumu  
+                FirsatUrunu = true, // ürünün fırsat ürünü olma durumu  
+                IndirimliFiyatOzellik = 0, // Bu alanda 3 farklı değer girebiliyoruz  0 = devamlı 
+indirim, 1 = stok adedine göre indirim(1 olduğu zaman IndirimliFiyatOzellikStok1 ve 
+IndirimliFiyatOzellikStok2 alanlarının doldurulması zorunludur bu iki stok adedi arasındayken 
+indirim geçerli olur) , 2 = Tarihe Göre indirim (2 olduğu zaman       IndirimliFiyatOzellikTarih1 ve 
+IndirimliFiyatOzellikTarih2 alanları doldurulması zorunludur. Bu iki tarih aralığında indirim 
+geçerli olur.)     
+                IndirimliFiyatOzellikStok1 = 21, 
+                IndirimliFiyatOzellikStok2 = 23, 
+                IndirimliFiyatOzellikTarih1 = new DateTime(2018, 11, 05), 
+                IndirimliFiyatOzellikTarih2 = new DateTime(2018, 12, 06), 
+                MaksTaksitSayisi = 4, 
+                OzelAlan1 = "", // eklenecek extra özellikleri temsil eder 
+                OzelAlan2 = "", 
+                OzelAlan3 = "", 
+                OzelAlan4 = "", 
+                OzelAlan5 = "", 
+                SeoNoFollow = true, // 
+                SeoNoIndex = false, 
+                TahminiTeslimSuresi = 1, // ürünün tahmini teslim süresi  
+                TedarikciKodu = "5645616846|beden|38", //* zorunlu tekil anahtar şeklinde olması 
+gerekiyor. 
+                TeknikDetayGrupID = 1, // teknik detay grup id si zorunlu değil 
+                UrunSayfaAdresi = "", // ürün url i  
+                UyeAlimMax = 15, //bir üyenin en fazla kaç ürün alabileceği  
+                UyeAlimMin = 1, // bir üyenin en az kaç ürün alabileceği  
+                //Etiketler = new List<UrunKartiEtiket>(), // zorunlu değil  
+                //TeknikDetaylar = new List<UrunKartiTeknikDetay>() // zorunlu değil                  
+            }; 
+            // Ürün Kartını listeye ekleme 
+            List<UrunServis.UrunKarti> urunKartlari = new List<UrunServis.UrunKarti>(); 
+            urunKartlari.Add(urunKarti); 
+ 
+            // Ürün Kartı ayarları. 
+            UrunServis.UrunKartiAyar urunKartiAyar = new UrunServis.UrunKartiAyar 
+            { 
+                AciklamaGuncelle = true, 
+                AktifGuncelle = true, 
+                FBStoreGosterGuncelle = false, 
+                FirsatUrunuGuncelle = true, 
+                KategoriGuncelle = false, 
+                MaksTaksitSayisiGuncelle = false, 
+                MarkaGuncelle = false, 
+                OnYaziGuncelle = false, 
+                ParaPuanGuncelle = true, 
+                SatisBirimiGuncelle = false, 
+                SeoAnahtarKelimeGuncelle = false, 
+                SeoSayfaAciklamaGuncelle = false, 
+                SeoSayfaBaslikGuncelle = false, 
+                TedarikciGuncelle = false, 
+                UcretsizKargoGuncelle = true, 
+                UrunAdiGuncelle = true, 
+                UrunResimGuncelle = false, 
+                VitrinGuncelle = false, 
+                YeniUrunGuncelle = true,  
+  AdwordsAciklamaGuncelle = true, 
+                AdwordsKategoriGuncelle = false, 
+                AdwordsTipGuncelle = true, 
+ 
+26 
+ 
+  
+ 
+UserAgent = "", // boş gönderilebilir . 
+                AramaAnahtarKelimeGuncelle = true, 
+                AsortiGrupGuncelle = true, 
+                Base64Resim = false, 
+                EtiketGuncelle = true, 
+                KargoTipiGuncelle = true, 
+                OncekiKategoriEslestirmeleriniTemizle = false, 
+                OncekiResimleriSil = false, 
+                OzelAlan1Guncelle = true, 
+                OzelAlan2Guncelle = true, 
+                OzelAlan3Guncelle = true, 
+                OzelAlan4Guncelle = true, 
+                OzelAlan5Guncelle = true, 
+                ResimleriIndirme = true, 
+                ResimOlmayanlaraResimEkle = true, 
+                SeoNoFollowGuncelle = false, 
+                SeoNoIndexGuncelle = false, 
+                TahminiTeslimSuresiGuncelle = true, 
+                TedarikciKodunaGoreGuncelle = false, 
+                TeknikDetayGuncelle = false, 
+                UrunAdresiniElleOlustur = false, 
+                UyeAlimMaksGuncelle = false, 
+                UyeAlimMinGuncelle = false 
+ 
+            }; 
+            // Varyasyon ayarları. 
+            UrunServis.VaryasyonAyar urunVaryasyonAyar = new UrunServis.VaryasyonAyar 
+            { 
+ 
+                AktifGuncelle = false, 
+                AlisFiyatiGuncelle = true, 
+                BarkodGuncelle = false, 
+                IndirimliFiyatiGuncelle = true, 
+                KargoUcretiGuncelle = false, 
+                KargoAgirligiGuncelle = true, 
+                ParaBirimiGuncelle = false, 
+                PiyasaFiyatiGuncelle = true, 
+                SatisFiyatiGuncelle = false, 
+                StokAdediGuncelle = true, 
+                UyeTipiFiyat1Guncelle = false, 
+                UyeTipiFiyat2Guncelle = true, 
+                UyeTipiFiyat3Guncelle = false, 
+                UyeTipiFiyat4Guncelle = true, 
+                UyeTipiFiyat5Guncelle = false, 
+                EksiStokAdediGuncelle = true, 
+                KdvDahilGuncelle = false, 
+                KdvOraniGuncelle = true, 
+                OncekiResimleriSil = false, 
+                ResimOlmayanlaraResimEkle = true, 
+                StokKoduGuncelle = true, 
+                UrunResimGuncelle = true, 
+            }; 
+            // Ürünü ekliyoruz. 
+            urunServisClient.SaveUrun(uyeKodu, ref urunKartlari, urunKartiAyar, urunVaryasyonAyar); 
+27 
+ 
+4.2 – SelectUrun 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+UrunFiltre 
+UrunFiltre 
+ evet 
+Ürünlerin filtre değerlerini içeren UrunFiltre sınıfı. 
+UrunSayfalama UrunSayfalama evet 
+Ürünlerin 
+sayfalama 
+ve 
+sıralama 
+değerlerini 
+içeren 
+UrunSayfalama sınıfı. 
+ 
+UrunFiltre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+Aktif 
+integer 
+hayır 
+Ürün aktiflik durumu. -1= filtre yok - 0= false  - 1= true  
+Firsat 
+integer 
+hayır 
+Ürün fırsat -1= filtre yok - 0= false  - 1= true  
+Indirimli 
+integer 
+hayır 
+Ürün indirimli durumu -1= filtre yok - 0= false  - 1= true  
+Vitrin 
+integer 
+hayır 
+Ürün vitrin durumu -1= filtre yok - 0= false  - 1= true  
+KategoriID 
+integer 
+hayır 
+Kategori id değeri. 0 gönderilirse filtre yapılmaz  
+MarkaID 
+integer 
+hayır  
+Marka id değeri. 0 gönderilirse filtre yapılmaz 
+UrunKartiID 
+integer 
+hayır 
+Ürün kartı id değeri. 0 gönderilirse filtre yapılmaz 
+ToplamStokAdediBas 
+double 
+hayır 
+Toplam stok adedi filtre başlangıç değeri 
+ToplamStokAdediSon double 
+hayır 
+Toplam stok adedi filtre bitiş değeri  
+TedarikciID 
+integer 
+hayır 
+Tedarikçi id değeri. 0 gönderilirse filtre yapılmaz. 
+ 
+UrunSayfalama 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+BaşlangicIndex 
+integer 
+hayır 
+Sayfalama başlangıç değeri.  
+KayitSayisi 
+integer 
+hayır 
+Getirilecek kayıt sayısı. 
+SiralamaDeger 
+string 
+hayır 
+Sıralama değeri. Örn: “Id” 
+28 
+ 
+SiralamaYonu 
+string 
+hayır 
+Sıralama yönü. Artan için “ASC” azalan için “DESC” 
+ 
+Response = List<UrunKarti>      
+UrunKarti      
+ Adı 
+ Tipi 
+ Açıklama 
+Aktif 
+ bool 
+Ürünün aktiflik durumu. 
+ID 
+ integer 
+Ürün id  
+UrunAdi 
+ string 
+Ürün adı. 
+Aciklama 
+ string 
+Ürün açıklaması.  
+AnaKategori 
+ string 
+Ana kategori adı.  
+AnaKategoriID 
+ integer 
+Ana kategori id değeri. 
+Kategoriler 
+ List<integer> 
+Kategori id leri listesi. 
+MarkaID 
+ integer 
+Marka id değeri . 
+TedarikciID 
+ integer 
+Tedarikçi id değeri. 
+Resimler 
+ List<string> 
+Ürün resimleri listesi. 
+SatisBirimi 
+ string 
+Ürün satış birimi. Örn=”adet”. 
+UcretsizKargo 
+ bool 
+Ücretsiz kargo seçeneği.  
+OnYazi 
+ string 
+Ürün önyazısı. 
+SeoAnahtarKelime 
+ string 
+Seo optimizasyonu için kullanılan kelimeler. 
+SeoSayfaAciklama 
+ string 
+Seo optimizasyonu için kullanılan açıklama. 
+SeoSayfaBaslik 
+ string 
+Seo optimizasyonu için kullanılan sayfa başlık. 
+Varyasyonlar 
+List<Varyasyon> Ürün kartına eklenecek olan ürünlerin listesi. 
+Vitrin 
+ bool 
+Ürünün vitrinde görünme durumu. 
+YeniUrun 
+ bool 
+Ürünün yeni ürün olarak görünme durumu. 
+AdwordsAciklama 
+ string 
+Xml deki açıklama. 
+29 
+ 
+AdwordsKategori 
+ string 
+Xml deki kategori. 
+AdwordsTip 
+ string 
+Xml deki tip. 
+AramaAnahtarKelime 
+ string 
+Sitede arama yaparken kullanılacak anahtar kelimeler  
+AsortiGrupId 
+ integer 
+Ürüne eklenecek asorti grup id değeri.  
+DuzenleyenKullanici 
+ integer 
+Düzenleyen kullanıcı id değeri. 
+EkleyenKullanici 
+ integer 
+Ekleyen kullanıcı id değeri. 
+EntegrasyonID 
+ integer 
+Ürüne eklenecek entegrasyon id değeri. 
+FBStoreGoster 
+ bool 
+Ürünün facebook store da gösterilme durumu. 
+FirsatUrunu 
+ bool 
+Ürünün fırsat ürünlerine eklenme durumu. 
+IndirimliFiyatOzellik 
+ integer 
+Bu alanda 3 farklı değer girebiliyoruz. 0=Devamlı indirim , 
+1=Stok adedine göre indirim, 2= Tarihe göre indirim.  
+IndirimliFiyatOzellikStok1 
+ integer 
+İndirim başlangıç stok adedi . 
+IndirimliFiyatOzellikStok2 
+ integer 
+İndirim bitiş stok adedi.  
+IndirimliFiyatOzellikTarih1  datetime 
+İndirim başlangıç tarihi. 
+IndirimliFiyatOzellikTarih2  datetime 
+İndirim bitiş tarihi. 
+MaksTaksitSayisi 
+ integer 
+Ürünün maksimum taksit sayısı değeri. 
+OzelAlan1 
+ string 
+Eklenecek farklı özelliklerde kullanılacak özel alan.  
+OzelAlan2 
+ string 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+OzelAlan3 
+ string 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+OzelAlan4 
+ string 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+OzelAlan5 
+ string 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+SeoNoFollow 
+ bool 
+SeoNoFollow durumu  
+SeoNoIndex 
+ bool 
+SeoNoIndex durumu 
+TahminiTeslimSuresi 
+ integer 
+Ürünün tahmini teslim süresi 
+TedarikciKodu 
+ string 
+Ürünün Tedarikci kodu  
+30 
+ 
+TeknikDetayGrupID 
+ integer 
+Teknik Detay grup id değeri. 
+UrunSayfaAdresi 
+ string 
+Ürün url bilgisi. 
+UyeAlimMax 
+ integer 
+Bir üyenin en fazla kaç ürün alabileceği değeri. 
+UyeAlimMin 
+ integer 
+Bir üyenin en az kaç ürün alabileceği değeri.  
+YayinTarihi 
+datetime 
+Ürünün yayın tarihi değeri.  
+ 
+Varyasyon  
+ Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Varyasyon id değeri 
+AlisFiyati 
+double 
+Varyasyona ait alis fiyatı değeri.  
+Barkod 
+string 
+Varyasyon barkod değeri. 
+Desi 
+double 
+Varyasyon desi değeri. 
+KargoUcreti 
+double 
+Varyasyon kargo ücreti değeri. 
+KdvDahil 
+bool 
+Kdv dahil olma durumu. 
+KdvOrani 
+integer 
+Varyasyon kdv orani değeri. 
+Ozellikler 
+List<VaryasyonOzellik> 
+Varyasyonun özellikleri. 
+ParaBirimiID 
+integer 
+Varyasyon para birimiId. 
+Resimler 
+List<string> 
+Varyasyon resimleri. 
+SatisFiyati 
+double 
+Satış fiyati değeri.  
+StokAdedi 
+double 
+Stok adedi değeri.  
+StokKodu 
+string 
+Varyasyon stok kodu . 
+Aktif 
+bool 
+Varyasyonun aktif olma durumu.  
+DuzenleyenKullanici 
+integer 
+Düzenleyen kullanıcı id değeri.  
+EkleyenKullanici 
+integer 
+Ekleyen kullanıcı id değeri. 
+EksiStokAdedi 
+double 
+Ayrılacak olan stok adedi. 
+31 
+ 
+İndirimliFiyati 
+double 
+Varyasyon indirimli fiyat değeri.  
+ParaBirimi 
+string 
+Para birimi tanımı . 
+ParaBirimiKodu 
+string 
+Para birimi kodu . 
+TedarikciKodu 
+string 
+Tedarikçi kodu değeri. 
+UyeTipiFiyat1 
+double 
+Üye tipi 1 e özel fiyat değeri.  
+UyeTipiFiyat2 
+double 
+Üye tipi 2 ye özel fiyat değeri.  
+UyeTipiFiyat3 
+double 
+Üye tipi 3 e özel fiyat değeri.  
+UyeTipiFiyat4 
+double 
+Üye tipi 4 e özel fiyat değeri.  
+UyeTipiFiyat5 
+double 
+Üye tipi 5 e özel fiyat değeri.  
+ 
+VaryasyonOzellik 
+ Adı 
+ Tipi 
+ Açıklama 
+Tanım 
+ string 
+Varyasyon  özellik tanımı. Örn= “Renk” 
+Deger 
+ string 
+Varyasyon özellik Değer,. Örn=”Mavi”  
+ 
+32 
+ 
+Örnek Kullanım; 
+    
+4.3 – SelectUrunCount 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+UrunFiltre 
+UrunFiltre 
+ evet 
+Ürünlerin filtre değerlerini içeren UrunFiltre sınıfı. 
+ 
+UrunFiltre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+Aktif 
+integer 
+hayır 
+Ürün aktiflik durumu. -1= filtre yok - 0= false  - 1= true  
+Firsat 
+integer 
+hayır 
+Ürün fırsat -1= filtre yok - 0= false  - 1= true  
+            UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+             
+            // Filtre değerleri : // -1 : Filtre yok// 0 : false// 1 : true                           
+            // Bu değerler 'Aktif','Firsat','indirimli' ve 'Vitrin' için geçerlidir. 
+            UrunFiltre urunFiltre = new UrunFiltre 
+            { 
+                Aktif = -1, 
+                Firsat = -1, 
+                Indirimli = -1, 
+                Vitrin = -1, 
+                KategoriID = 10, // 0 gönderilirse filtre yapılmaz. 
+                MarkaID = 0, // 0 gönderilirse filtre yapılmaz. 
+                UrunKartiID = 0, //0 gönderilirse filtre yapılmaz. 
+                //Barkod="1564654812", //barkod girilirse sadece o barkodlu ürün gelir.  
+                ToplamStokAdediBas = 0, 
+                ToplamStokAdediSon = 500, 
+                TedarikciID = 1, // 0 gönderilirse filtre yapılmaz 
+            }; 
+            UrunSayfalama urunSayfalama = new UrunSayfalama 
+            { 
+                BaslangicIndex = 0, // Başlangıç değeri 
+                KayitSayisi = 100, // Bir sayfada görüntülenecek ürün sayısı 
+                SiralamaDegeri = "ID", // Hangi sütuna göre sıralanacağı 
+                SiralamaYonu = "ASC", // Artan "ASC", azalan "DESC"                 
+            }; 
+            List<UrunKarti> FiltrelenenUrunKartiListe = urunServisClient.SelectUrun(uyeKodu, 
+urunFiltre, urunSayfalama);   
+ 
+33 
+ 
+Indirimli 
+integer 
+hayır 
+Ürün indirimli durumu -1= filtre yok - 0= false  - 1= true  
+Vitrin 
+integer 
+hayır 
+Ürün vitrin durumu -1= filtre yok - 0= false  - 1= true  
+KategoriID 
+integer 
+hayır 
+Kategori id değeri. 0 gönderilirse filtre yapılmaz  
+MarkaID 
+integer 
+hayır  
+Marka id değeri. 0 gönderilirse filtre yapılmaz 
+UrunKartiID 
+integer 
+hayır 
+Ürün kartı id değeri. 0 gönderilirse filtre yapılmaz 
+ToplamStokAdediBas 
+double 
+hayır 
+Toplam stok adedi filtre başlangıç değeri 
+ToplamStokAdediSon double 
+hayır 
+Toplam stok adedi filtre bitiş değeri  
+TedarikciID 
+integer 
+hayır 
+Tedarikçi id değeri. 0 gönderilirse filtre yapılmaz. 
+ 
+Response  = integer ürün sayısı 
+Örnek kullanım; 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+4.4 – SelectUrunOdemeSecenek 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+             
+            // Filtre değerleri : 
+            // -1 : Filtre yok 
+            // 0 : false 
+            // 1 : true 
+            // Bu değerler 'Aktif','Firsat','indirimli' ve 'Vitrin' için geçerlidir. 
+ 
+            UrunFiltre urunFiltre = new UrunFiltre 
+            {                 
+Aktif = -1, 
+                Firsat = -1, 
+                Indirimli = -1, 
+                Vitrin = -1, 
+                KategoriID = 10, // 0 gönderilirse filtre yapılmaz. 
+                MarkaID = 0, // 0 gönderilirse filtre yapılmaz. 
+                UrunKartiID = 0, //0 gönderilirse filtre yapılmaz.                       
+                //Barkod="1564654812", //barkod girilirse sadece o barkodlu ürün gelir.  
+                ToplamStokAdediBas = 0, 
+                ToplamStokAdediSon = 500, 
+                TedarikciID = 1, // 0 gönderilirse filtre yapılmaz 
+            }; 
+            int urunSayisi = urunServisClient.SelectUrunCount(uyeKodu, urunFiltre); 
+34 
+ 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+VaryasyonId 
+integer 
+ evet 
+Ödeme seçenekleri getirilmek istenen varyasyona ait id 
+değeri. 
+ 
+Response = List<UrunOdemeSecenek> 
+UrunOdemeSecenek 
+ Adı 
+ Tipi 
+ Açıklama 
+BankaAdi 
+string 
+Banka adı.  
+BankaID 
+integer 
+Banka id değeri.  
+Taksitler 
+List<UrunOdemeSecenekTaksit> Ürün 
+ödeme 
+taksit 
+bilgilerini 
+içeren 
+UrunOdemeSecenekTaksit sınıfı listesi. 
+ 
+UrunOdemeSecenekTaksit 
+ Adı 
+ Tipi 
+ Açıklama 
+TaksitSayisi 
+integer 
+Taksit sayısı.  
+TaksitSayisiTanim 
+string 
+Taksit sayisi tanım bilgisi.  
+TaksitTutari 
+doule 
+Taksit tutarı. 
+TaksitTutariStr 
+string 
+Taksit tutari string değeri. 
+ToplamTutar 
+double 
+Toplam tutar. 
+ToplamTutarStr 
+string 
+Toplam tutar string değeri. 
+ 
+Örnek kullanım;     
+ 
+4.5 – SelectUrunYorum 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+List<UrunOdemeSecenek> urunOdemeSecenekListe = urunServisClient.SelectUrunOdemeSecenek(uyeKodu, 
+322); 
+35 
+ 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+UrunKartId   
+integer 
+ evet 
+Yorumları  getirilmek istenen ürün kartına  ait id değeri. 
+ 
+Response = List<UrunYorum> 
+UrunYorum 
+ Adı 
+ Tipi 
+ Açıklama 
+EklemeTarihi 
+datetime 
+Yorumun eklenme tarihi 
+ID 
+integer 
+Yorum id. 
+Isim 
+string 
+Yorumu ekleyenin ismi.  
+Mail 
+string 
+Yorumu ekleyenin mail adresi  
+Mesaj 
+string 
+Yorum içeriği. 
+UrunAdi 
+string 
+Yorum yapılan ürün adı. 
+UrunKartiId 
+integer 
+Ürün kartı id değeri. 
+UyeID 
+integer 
+Yorum yapan üye id değeri.  
+ 
+Örnek kullanım;            
+ 
+4.6 – SelectUrunKategori 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+List<UrunYorum> urunyorumListe = urunServisClient.SelectUrunYorum(uyeKodu, 3); 
+36 
+ 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+UrunKartId   
+integer 
+ hayır 
+Kategorileri getirilmek istenen ürün kartına  ait id değeri. 
+KategoriId 
+integer 
+ hayır 
+Kategoriye ait id değeri 
+ 
+Response = List<UrunKategori> 
+UrunKategori 
+ Adı 
+ Tipi 
+ Açıklama 
+KategoriID 
+integer 
+kategori id değeri 
+Sira 
+integer 
+Kategori sırası 
+UrunKartiID 
+integer 
+Ürün kartı id   
+ 
+Örnek kullanım;                 
+4.7 - SaveResim  
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Kartlar 
+List<UrunKarti>  evet 
+Ürün Katlarını ve kartlara eklenecek resimleri içeren UrunKarti 
+sınıfı listesi. 
+AlanAdi 
+string 
+ hayır 
+Alan adi  değeri.  
+UserAgent 
+string 
+ hayır 
+User agent bilgisi.  
+ 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+ 
+// ürün kartı Id ve ürün kategori id 0 gönderilir ise tüm ürün ve kategori eşleşmeleri getirilir.     
+// Eğer ürün karti id 0 dan büyük kategori id 0 olarak gönderilir ise girilen ürün kartı id yi 
+içeren tüm kayıtlar getirilir.  
+// Eğer kategori id 0 dan büyük ürün kartı id 0 gönderilir ise girilen kategori id yi içeren tüm 
+kayıtlar getirilir.             
+List<UrunKategori> urunKategori=  urunServisClient.SelectUrunKategori(uyeKodu,0,3); 
+37 
+ 
+UrunKarti      
+ Adı 
+ Tipi 
+ 
+Zorunlu  
+ Açıklama 
+Aktif 
+ bool 
+ hayır 
+Ürünün aktiflik durumu. 
+ID 
+ integer 
+ evet 
+0 gönderilir ise yeni ürün eklenir 0 dan büyük 
+gönderilir ise gönderilen id li ürün güncellenir. 
+UrunAdi 
+ string 
+ evet 
+Ürün adı. 
+Aciklama 
+ string 
+ evet 
+Ürün açıklaması.  
+AnaKategori 
+ string 
+ evet 
+Ana kategori adı.  
+AnaKategoriID 
+ integer 
+  evet 
+Ana kategori id değeri. 
+Kategoriler 
+ List<integer> 
+ evet 
+Kategori id leri listesi. 
+MarkaID 
+ integer 
+ evet 
+Marka id değeri (Verilen id ile kayıtlı bir marka yoksa 
+ürün eklenmez). 
+TedarikciID 
+ integer 
+ evet 
+Tedarikçi id değeri. 
+Resimler 
+ List<string> 
+ evet 
+Ürün resimleri listesi. 
+SatisBirimi 
+ string 
+ evet 
+Ürün satış birimi. Örn=”adet”. 
+UcretsizKargo 
+ bool 
+ evet 
+Ücretsiz kargo seçeneği.  
+OnYazi 
+ string 
+ hayır 
+Ürün önyazısı. 
+SeoAnahtarKelime 
+ string 
+ hayır 
+Seo optimizasyonu için kullanılan kelimeler. 
+SeoSayfaAciklama 
+ string 
+ hayır 
+Seo optimizasyonu için kullanılan açıklama. 
+SeoSayfaBaslik 
+ string 
+ hayır 
+Seo optimizasyonu için kullanılan sayfa başlık. 
+Varyasyonlar 
+List<Varyasyon>  evet 
+Ürün kartına eklenecek olan ürünlerin listesi. 
+Vitrin 
+ bool 
+ hayır 
+Ürünün vitrinde görünme durumu. 
+YeniUrun 
+ bool 
+ hayır 
+Ürünün yeni ürün olarak görünme durumu. 
+AdwordsAciklama 
+ string 
+ hayır 
+Xml deki açıklama. 
+AdwordsKategori 
+ string 
+ hayır 
+Xml deki kategori. 
+38 
+ 
+AdwordsTip 
+ string 
+ hayır 
+Xml deki tip. 
+AramaAnahtarKelime 
+ string 
+ hayır 
+Sitede arama yaparken kullanılacak anahtar 
+kelimeler  
+AsortiGrupId 
+ integer 
+ hayır 
+Ürüne eklenecek asorti grup id değeri.  
+DuzenleyenKullanici 
+ integer 
+ hayır 
+Düzenleyen kullanıcı id değeri. 
+EkleyenKullanici 
+ integer 
+ hayır 
+Ekleyen kullanıcı id değeri. 
+EntegrasyonID 
+ integer 
+ hayır 
+Ürüne eklenecek entegrasyon id değeri. 
+FBStoreGoster 
+ bool 
+ hayır 
+Ürünün facebook store da gösterilme durumu. 
+FirsatUrunu 
+ bool 
+ hayır 
+Ürünün fırsat ürünlerine eklenme durumu. 
+IndirimliFiyatOzellik 
+ integer 
+ hayır 
+Bu alanda 3 farklı değer girebiliyoruz. 0=Devamlı 
+indirim , 1=Stok adedine göre indirim, 2= Tarihe 
+göre indirim.  
+IndirimliFiyatOzellikStok1 
+ integer 
+ hayır 
+İndirim başlangıç stok adedi . 
+IndirimliFiyatOzellikStok2 
+ integer 
+ hayır 
+İndirim bitiş stok adedi.  
+IndirimliFiyatOzellikTarih1  datetime 
+ hayır 
+İndirim başlangıç tarihi. 
+IndirimliFiyatOzellikTarih2  datetime 
+ hayır 
+İndirim bitiş tarihi. 
+MaksTaksitSayisi 
+ integer 
+ hayır 
+Ürünün maksimum taksit sayısı değeri. 
+OzelAlan1 
+ string 
+ hayır 
+Eklenecek farklı özelliklerde kullanılacak özel alan.  
+OzelAlan2 
+ string 
+ hayır 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+OzelAlan3 
+ string 
+ hayır 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+OzelAlan4 
+ string 
+ hayır 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+OzelAlan5 
+ string 
+ hayır 
+Eklenecek farklı özelliklerde kullanılacak özel alan. 
+SeoNoFollow 
+ bool 
+ hayır 
+ 
+SeoNoIndex 
+ bool 
+ hayır 
+ 
+TahminiTeslimSuresi 
+ integer 
+ hayır 
+Ürünün tahmini teslim süresi 
+TedarikciKodu 
+ string 
+ evet 
+Ürünün Tedarikci kodu  
+39 
+ 
+TeknikDetayGrupID 
+ integer 
+ hayır 
+Teknik Detay grup id değeri. 
+UrunSayfaAdresi 
+ string 
+ hayır 
+Ürün url bilgisi. 
+UyeAlimMax 
+ integer 
+ hayır 
+Bir üyenin en fazla kaç ürün alabileceği değeri. 
+UyeAlimMin 
+ integer 
+ hayır 
+Bir üyenin en az kaç ürün alabileceği değeri.  
+ 
+Varyasyon  
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+ID 
+integer 
+evet 
+0 gönderilir ise yeni varyasyon eklenir 0 dan büyük 
+gönderilir 
+ise 
+gönderilen 
+id 
+li 
+varyasyon 
+güncellenir 
+AlisFiyati 
+double 
+hayır 
+Varyasyona ait alis fiyatı değeri.  
+Barkod 
+string 
+hayır 
+Varyasyon barkod değeri. 
+Desi 
+double 
+hayır 
+Varyasyon desi değeri. 
+KargoUcreti 
+double 
+hayır 
+Varyasyon kargo ücreti değeri. 
+KdvDahil 
+bool 
+hayır 
+Kdv dahil olma durumu. 
+KdvOrani 
+integer 
+hayır 
+Varyasyon kdv orani değeri. 
+Ozellikler 
+List<VaryasyonOzellik> hayır 
+Varyasyonun özellikleri. 
+ParaBirimiID 
+integer 
+evet 
+Varyasyon para birimi (sitede yer alan para 
+birimlerinden biri girilmelidir). 
+Resimler 
+List<string> 
+hayır 
+Varyasyon resimleri. 
+SatisFiyati 
+double 
+evet 
+Satış fiyati değeri.  
+StokAdedi 
+double 
+hayır 
+Stok adedi değeri.  
+StokKodu 
+string 
+hayır 
+Varyasyon stok kodu . 
+Aktif 
+bool 
+hayır 
+Varyasyonun aktif olma durumu.  
+DuzenleyenKullanici integer 
+hayır 
+Düzenleyen kullanıcı id değeri.  
+EkleyenKullanici 
+integer 
+hayır 
+Ekleyen kullanıcı id değeri. 
+40 
+ 
+EksiStokAdedi 
+double 
+hayır 
+Ayrılacak olan stok adedi. 
+İndirimliFiyati 
+double 
+hayır 
+Varyasyon indirimli fiyat değeri.  
+ParaBirimi 
+string 
+hayır 
+Eğer para birimiId girildiyse boş gönderilebilir. 
+ParaBirimiKodu 
+string 
+hayır 
+Eğer para birimiId girildiyse boş gönderilebilir. 
+TedarikciKodu 
+string 
+hayır 
+Tedarikçi koduna göre güncelle true ise zorunlu 
+UyeTipiFiyat1 
+double 
+hayır 
+Üye tipi 1 e özel fiyat değeri.  
+UyeTipiFiyat2 
+double 
+hayır 
+Üye tipi 2 ye özel fiyat değeri.  
+UyeTipiFiyat3 
+double 
+hayır 
+Üye tipi 3 e özel fiyat değeri.  
+UyeTipiFiyat4 
+double 
+hayır 
+Üye tipi 4 e özel fiyat değeri.  
+UyeTipiFiyat5 
+double 
+hayır 
+Üye tipi 5 e özel fiyat değeri.  
+ 
+VaryasyonOzellik 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+Tanım 
+ string 
+ evet 
+Varyasyon  özellik tanımı. Örn= “Renk” 
+Deger 
+ string 
+ evet 
+Varyasyon özellik Değer,. Örn=”Mavi”  
+ 
+Örnek kullanım;      
+ 
+ 
+ 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+UrunKarti urunKarti = new UrunKarti(); 
+urunKarti.TedarikciKodu = "EXCEL|99"; // resim eklenecek ürünün tedarikçi kodu  
+urunKarti.ID = 158; // resim eklenecek ürün kartının id değeri 
+urunKarti.TedarikciID = 13;  
+ 
+List<string> resimler = new List<string>(); // eklenecek olan resimlerin listesi  
+ 
+resimler.Add("resim link"); 
+resimler.Add("resim link 2"); 
+ 
+urunKarti.Resimler = resimler; 
+List<UrunKarti> urunKartiListesi = new List<UrunKarti>(); 
+urunKartiListesi.Add(urunKarti); 
+urunServisClient.SaveResim(uyeKodu, urunKartiListesi, "selim.ticimax.work", ""); 
+41 
+ 
+4.8 - SaveMagazaStok  
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen 
+şifre. 
+SaveMagazaStokRequest List<SaveMagazaStokRequest>  evet 
+Mağaza ve stok bilgilerini içeren 
+saveMagazaStokRequestModeli. 
+ 
+SaveMagazaStokRequest 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+MagazaStokList 
+List<WebMagazaStok> 
+ evet 
+Magaza stok bilgileri listesi. 
+ 
+WebMagazaStok 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+EksiStokAdedi 
+integer 
+hayır 
+Ayrılmak istenen stok adedi. 
+MagazaKodu  
+string 
+evet 
+Mağaza kodu . 
+StokAdedi  
+integer 
+evet 
+Mağazaya verilmek istenen stok adedi. 
+TedarikciKodu 
+string 
+evet 
+Tedarikçi kodu değeri.  
+UrunID 
+integer 
+evet 
+Ürün id değeri. 
+UrunKartiID 
+integer 
+evet 
+Ürün kartı id değeri. 
+ 
+Response = SaveMagazaStokResponse 
+SaveMagazaStokResponse 
+ Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+42 
+ 
+ Örnek kullanım; 
+ 
+4.9 - UpdateUrunDil 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+UpdateUrunDilRe
+quest 
+UpdateUrunDil
+Request 
+ evet 
+Dil 
+bilgilerini 
+ve 
+güncelleme 
+ayarlarını 
+içeren 
+UpdateUrunDilRequest sınıfı 
+ 
+UpdateUrunDilRequest 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Ayar 
+UrunDilAyar 
+evet 
+Güncelleme ayarlarını içeren UrunDilAyar sınıfı 
+Dil 
+string 
+evet 
+Dil kodu  
+Liste 
+List<UrunDil> 
+evet 
+Ürünü  ve değişecek değerleri içeren UrunDil sınıfı listesi 
+ 
+UrunDilAyar 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+ 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            List<WebMagazaStok> webMagazaStokList = new List<WebMagazaStok>(); 
+            WebMagazaStok webMagazaStok = new WebMagazaStok 
+            { 
+                EksiStokAdedi = 5, // mağazanın ayırmak istediği stok adedi  
+                MagazaKodu = "tici",  
+                StokAdedi = 10, // mağazaya eklenecek stok adedi  
+                TedarikciKodu = "EXCEL|1", 
+                UrunID = 321, 
+                UrunKartiID = 309 
+            }; 
+            webMagazaStokList.Add(webMagazaStok); 
+            SaveMagazaStokRequest saveMagazaStokRequest = new SaveMagazaStokRequest(); 
+            saveMagazaStokRequest.MagazaStokList = webMagazaStokList; 
+            SaveMagazaStokResponse saveMagazaStokResponse = urunServisClient.SaveMagazaStok(uyeKodu, 
+saveMagazaStokRequest); 
+43 
+ 
+AciklamaGuncelle 
+bool 
+hayır 
+Açıklama güncelleme durumu 
+AramaAnahtarKelimeGuncelle bool 
+hayır 
+Arama anahtar kelime güncelleme durumu 
+OnYaziGuncelle 
+bool 
+hayır 
+Ön yazı güncelleme durumu 
+SatisBirimiGuncelle 
+bool 
+hayır 
+Satış birimi güncelleme durumu 
+SeoAnahtarKelimeGuncelle 
+bool 
+hayır 
+Seo anahtar kelime güncelleme durumu 
+SeoNoFollowGuncelle 
+bool 
+hayır 
+Seo no follow güncelleme durumu 
+SeoNoIndexGuncelle 
+bool 
+hayır 
+Seo ne index güncelleme durumu 
+SeoSayfaAciklamaGuncelle 
+bool 
+hayır 
+Seo sayfa açıklama güncelleme durumu 
+SeoSayfaBaslikGuncelle 
+bool 
+hayır 
+Seo sayfa başlık güncelleme durumu 
+UrunAdiGuncelle 
+bool 
+hayır 
+Ürün adı güncelleme durumu 
+ 
+UrunDil 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+ID 
+integer 
+evet 
+Ürün id  
+Aciklama 
+string 
+hayır 
+Güncellenecek açıklama değeri  
+AramaAnahtarKelime 
+string 
+hayır 
+Güncellenecek  arama anahtar kelime  değeri 
+SatisBirimi 
+string 
+hayır 
+Güncellenecek satış birimi değeri  
+UrunAdi 
+string 
+hayır 
+Güncellenecek ürün adı değeri  
+OnYazi 
+string 
+hayır 
+Güncellenecek ön yazı  değeri  
+SeoAnahtarKelime 
+string 
+hayır 
+Güncellenecek seo anahtar kelime değeri  
+SeoNoFollow 
+bool 
+hayır 
+Güncellenecek seo no follow değeri  
+SeoNoIndex 
+bool 
+hayır 
+Güncellenecek seo no index değeri  
+SeoSayfaAciklama 
+string 
+hayır 
+Güncellenecek seo sayfa açıklama değeri  
+SeoSayfaBaslik 
+string 
+hayır 
+Güncellenecek sep sayfa başlık değeri  
+ 
+Response = WebServisResponse 
+44 
+ 
+WebServisResponse 
+ Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+ Örnek kullanım; 
+ 
+4.10 – SaveIlgılıUrun 
+Parametre 
+Adı  
+Tipi 
+Zorunlu 
+Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+IlgiliUrunListe 
+List<IlgiliUrun> 
+evet 
+İlgili ürünleri içeren liste 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            UrunDilAyar urunDilAyar = new UrunDilAyar 
+            { 
+                // hangi alanların güncelleneceğini belirtiyoruz. hiç yazmadığımız alanlar da false 
+kabul edilir  
+                AciklamaGuncelle=true, 
+                AramaAnahtarKelimeGuncelle=true, 
+                OnYaziGuncelle=false, 
+                SatisBirimiGuncelle=true, 
+                SeoAnahtarKelimeGuncelle=false, 
+                SeoNoFollowGuncelle=false, 
+                SeoNoIndexGuncelle=false, 
+                SeoSayfaAciklamaGuncelle=false, 
+                SeoSayfaBaslikGuncelle=false, 
+                UrunAdiGuncelle=true 
+            }; 
+ 
+            // ürün dil listesini oluşturuyoruz. 
+            List<UrunDil> urunDilListe = new List<UrunDil>(); 
+ 
+            // ürün dili oluşturuyoruz  
+            UrunDil urunDil = new UrunDil 
+            {  
+                // güncellenecek alanların güncellenecek değerlerini dolduruyoruz. 
+                ID= 12,  
+ 
+ 
+  Aciklama= "açıklama ingilizce", 
+                AramaAnahtarKelime = "arama anahtar kelime ingilizce", 
+                SatisBirimi="satış birimi ingilizce", 
+   UrunAdi = "ürün adi ingilizce", 
+                //OnYazi="", 
+                //SeoAnahtarKelime="", 
+                //SeoNoFollow=true, 
+                //SeoNoIndex=false, 
+                //SeoSayfaAciklama="", 
+                //SeoSayfaBaslik="" 
+            }; 
+ 
+            // ürün dili  listeye ekliyoruz  
+            urunDilListe.Add(urunDil); 
+ 
+            UpdateUrunDilRequest updateUrunDilRequest = new UpdateUrunDilRequest 
+            { 
+                Ayar=urunDilAyar, 
+                Dil="en", // dil kodu 
+               Liste= urunDilListe 
+            }; 
+ 
+UrunServis.WebServisResponse webServisResponseUpdateUrunDil=  
+urunServisClient.UpdateUrunDil(uyeKodu, updateUrunDilRequest); 
+45 
+ 
+ 
+IlgiliUrun 
+Adı 
+Tipi 
+Zorunlu 
+Açıklama 
+UrunKartiID 
+Int 
+evet 
+İlgili ürün eklenecek ürünün id değeri  
+IlgiliUrunKartiID 
+int 
+evet 
+Eklenecek İlgili ürünün id değeri  
+ 
+ 
+Örnek kullanım; 
+ 
+5.1 – SaveTeknikDetayDeger 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+TeknikDetayDeger TeknikDetayDeger  evet 
+Teknik detay deger bilgilerini içeren TeknikDetayDeger 
+sınıfı. 
+public static void SaveIlgiliUrun() 
+        { 
+            List<IlgiliUrun> ilgiliUrunListe = new List<IlgiliUrun>(); 
+ 
+            // UrunKartiID =205 olan ürüne 206 , 206 olan ürüne de 205 i ilgili ürün olarak ekler. 
+İstersek tek taraflı da ekleyebiliriz.  
+            IlgiliUrun ilgiliUrun = new IlgiliUrun 
+            { 
+                UrunKartiID = 205,   
+                IlgiliUrunKartiID = 206 
+            }; 
+            IlgiliUrun ilgiliUrun2 = new IlgiliUrun 
+            { 
+                UrunKartiID = 206, 
+                IlgiliUrunKartiID = 205 
+            }; 
+ 
+            ilgiliUrunListe.Add(ilgiliUrun); 
+            ilgiliUrunListe.Add(ilgiliUrun2); 
+ 
+            UrunServisClient urunServisClient = new UrunServisClient(); 
+            urunServisClient.SaveIlgiliUrun(StaticVariables.uyeKodu, ilgiliUrunListe); 
+        } 
+46 
+ 
+ 
+TeknikDetayDeger 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+ID 
+integer 
+evet 
+0 girilir ise yani kayıt oluşturulur. 0 dan büyük girilirse 
+girilen id li kayıt güncellenir. 
+OzellikID 
+integer 
+evet 
+Kayıtlı  olan teknik detay özellik Id değeri. 
+Tanim 
+string 
+evet 
+Teknik detay değer tanımı. 
+Sira 
+integer 
+hayır 
+Sıra numarası. 
+ 
+Response = integer eklenen kayıt id değeri.  
+Örnek kullanım;          
+ 
+5.2 - SaveTeknikDetayGrup 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+TeknikDetayGrup TeknikDetayGrup  evet 
+Teknik deyat grup bilgilerini içeren TeknikDetayGrup 
+sınıfı. 
+ 
+TeknikDetayGrup 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            TeknikDetayDeger teknikDetayDeger = new TeknikDetayDeger 
+            { 
+                ID=0, //0 girilir ise yeni kayıt oluşturulur, 0 dan büyük girilirse girilen idli      
+kayıt güncellenir.  
+                OzellikID=2, // Ozellik id değeri.  
+                Tanim="Teknik detay 1", 
+                Sira=1  
+            }; 
+ 
+  Int eklenenTeknikDetayDegerId =  urunServisClient.SaveTeknikDetayDeger(uyeKodu,teknikDetayDeger); 
+47 
+ 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+ID 
+integer 
+evet 
+0 girilir ise yani kayıt oluşturulur. 0 dan büyük girilirse 
+girilen id li kayıt güncellenir. 
+Tanim 
+string 
+evet 
+Teknik detay  grup tanımı. 
+Sira 
+integer 
+hayır 
+Sıra numarası. 
+ 
+Response = integer eklenen kayıt id değeri.  
+Örnek kullanım;   
+ 
+5.3 - SaveTeknikDetayOzellik 
+Parametre 
+ Adı 
+ Tipi 
+ 
+Zorunlu  
+ Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+TeknikDetayOzellik TeknikDetayOzellik  evet 
+Teknik deyat özellik bilgilerini içeren TeknikDetayOzellik 
+sınıfı. 
+ 
+TeknikDetayOzellik 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+ID 
+integer 
+evet 
+0 girilir ise yani kayıt oluşturulur. 0 dan büyük girilirse 
+girilen id li kayıt güncellenir. 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            TeknikDetayGrup teknikDetayGrup = new TeknikDetayGrup 
+            { 
+                ID = 0, //0 girilir ise yeni kayıt oluşturulur, 0 dan büyük girilirse girilen idli 
+kayıt güncellenir. 
+                Sira = 2, 
+                Tanim = "Teknik detay grup ismi" 
+            }; 
+ 
+    int eklenenTeknikDetayGrupId = urunServisClient.SaveTeknikDetayGrup(uyeKodu, teknikDetayGrup); 
+48 
+ 
+Tanim 
+string 
+evet 
+Teknik detay  özellik tanımı. 
+Sira 
+integer 
+hayır 
+Sıra numarası. 
+GrupId 
+integer 
+evet 
+Kayıtlı teknik detay grup id değeri.  
+ 
+Response = integer eklenen kayıt id değeri.  
+Örnek kullanım;     
+ 
+5.4 - SelectTeknikDetayDeger 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+TeknikDetayDegerID integer 
+ evet 
+Getirilmek istenilen TeknikDetayDeger in id değeri. 
+Dil 
+string  
+hayır 
+Dil seçeneği – boş gönderilir ise ‘Tr’ olarak gelir. 
+ 
+Response = List<TeknikDetayDeger>  
+TeknikDetayDeger 
+ Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Id değeri. 
+OzellikID 
+integer 
+Kayıtlı  olan teknik detay özellik Id değeri. 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            TeknikDetayOzellik teknikDetayOzellik = new TeknikDetayOzellik 
+            { 
+                GrupID = 1, 
+                ID = 0, //0 girilir ise yeni kayıt oluşturulur, 0 dan büyük girilirse girilen idli 
+kayıt güncellenir. 
+                Sira = 5, 
+                Tanim = "özellik tanım" 
+            }; 
+    Int eklenenTeknikDetayOzellikId=.SaveTeknikDetayOzellik(uyeKodu, teknikDetayOzellik); 
+49 
+ 
+Tanim 
+string 
+Teknik detay değer tanımı. 
+Sira 
+integer 
+Sıra numarası. 
+ 
+Örnek kullanım;       
+ 
+5.5 - SelectTeknikDetayGrup 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+TeknikDetayGrupID 
+integer 
+ evet 
+Getirilmek istenilen TeknikDetayGrup  id değeri. 
+Dil 
+string  
+hayır 
+Dil seçeneği – boş gönderilir ise ‘Tr’ olarak gelir. 
+ 
+Response = List<TeknikDetayGrup>  
+TeknikDetayGrup 
+ Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Id değeri  
+Tanim 
+string 
+Teknik detay  grup tanımı. 
+Sira 
+integer 
+Sıra numarası. 
+ 
+Örnek kullanım;     
+ 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+List<TeknikDetayDeger>teknikDetayDegerListe=urunServisClient.SelectTeknikDetayDeger(uyeKodu, 1, ""); 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+List<TeknikDetayGrup> teknikDetayGrupList = urunServisClient.SelectTeknikDetayGrup(uyeKodu, 1, ""); 
+50 
+ 
+5.6 - SelectTeknikDetayOzellik 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+TeknikDetayOzellikID integer 
+ evet 
+Getirilmek istenilen TeknikDetayOzellik  id değeri. 
+Dil 
+string  
+hayır 
+Dil seçeneği – boş gönderilir ise ‘Tr’ olarak gelir. 
+ 
+Response = List<TeknikDetayOzellik>  
+TeknikDetayOzellik 
+ Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Id değeri  
+Tanim 
+string 
+Teknik detay  özellik tanımı. 
+Sira 
+integer 
+Sıra numarası. 
+GrupId 
+integer 
+Kayıtlı teknik detay grup id değeri.  
+ 
+Örnek kullanım;   
+ 
+5.7 - UpdateTeknikDetayDegerDil 
+ Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+UpdateTeknikDeta
+yDegerDilRequest 
+UpdeteTeknikDeta
+yDegerDilRequest 
+evet 
+Güncelleme 
+bilgilerini 
+içeren 
+UpdateTeknikDetayDegerDilRequest sınıfı 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+List<TeknikDetayOzellik> teknikDetayOzellikList= urunServisClient.SelectTeknikDetayOzellik(uyeKodu, 
+1, ""); 
+51 
+ 
+ 
+UpdeteTeknikDetayDegerDilRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Dil 
+string 
+evet 
+Dil kodu örn = “en” 
+Liste 
+List<TeknikDetay
+DegerDil> 
+evet 
+Güncellenecek olan teknik detay değerleri içeren 
+TeknikDetayDegerDil sınıfı listesi   
+ 
+TeknikDetayDegerDil 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+ID 
+integer 
+evet 
+Teknik detay değer id  
+Tanim 
+string 
+evet 
+Güncellenecek teknik detay değer tanım  
+ 
+Response = List<WebServisResponse> 
+WebServisResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+Örnek kullanım;   
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            List<TeknikDetayDegerDil> teknikDetayDegerDilListe = new List<TeknikDetayDegerDil>(); 
+            TeknikDetayDegerDil teknikDetayDegerDil = new TeknikDetayDegerDil 
+            { ID = 3, = "tanım ingilizce"            }; 
+            teknikDetayDegerDilListe.Add(teknikDetayDegerDil); 
+            UpdateTeknikDetayDegerDilRequest updateTeknikDetayDegerDilRequest = new 
+UpdateTeknikDetayDegerDilRequest 
+            { 
+                Dil="en", // dil kodu  
+                Liste= teknikDetayDegerDilListe 
+            }; 
+          UrunServis.WebServisResponse webServisResponse=  
+urunServisClient.UpdateTeknikDetayDegerDil(uyeKodu, updateTeknikDetayDegerDilRequest); 
+52 
+ 
+ 
+5.8 - UpdateTeknikDetayGrupDil 
+ Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+UpdateTeknikDeta
+yGrupDilRequest 
+UpdeteTeknikDeta
+yGrupDilRequest 
+evet 
+Güncelleme 
+bilgilerini 
+içeren 
+UpdateTeknikDetayGrupDilRequest sınıfı 
+ 
+UpdeteTeknikDetayGrupDilRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Dil 
+string 
+evet 
+Dil kodu örn = “en” 
+Liste 
+List<TeknikDetay
+GrupDil> 
+evet 
+Güncellenecek olan teknik detay grupları içeren 
+TeknikDetayGrupDil sınıfı listesi   
+ 
+TeknikDetayGrupDil 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+ID 
+integer 
+evet 
+Teknik detay grup  id  
+Tanim 
+string 
+evet 
+Güncellenecek teknik detay grup tanım  
+ 
+Response = List<WebServisResponse> 
+WebServisResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+53 
+ 
+Örnek kullanım;   
+5.9 - UpdateTeknikDetayOzellikDil 
+ Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+UpdateTeknikDeta
+yOzellikDilRequest 
+UpdeteTeknikDeta
+yOzellikDilRequest 
+evet 
+Güncelleme 
+bilgilerini 
+içeren 
+UpdateTeknikDetayOzellikDilRequest sınıfı 
+ 
+UpdeteTeknikDetayOzellikDilRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Dil 
+string 
+evet 
+Dil kodu örn = “en” 
+Liste 
+List<TeknikDetay
+OzellikDil> 
+evet 
+Güncellenecek olan teknik detay özellikleri içeren 
+TeknikDetayOzellikDil sınıfı listesi   
+ 
+TeknikDetayGrup 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+ID 
+integer 
+evet 
+Teknik detay özellik  id  
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            List<TeknikDetayGrupDil> teknikDetayGrupDilListe = new List<TeknikDetayGrupDil>(); 
+            TeknikDetayGrupDil teknikDetayGrupDil = new TeknikDetayGrupDil 
+            { 
+                ID = 5, 
+                Tanim = "tanım ingilizce" 
+            }; 
+            teknikDetayGrupDilListe.Add(teknikDetayGrupDil); 
+ 
+            UpdateTeknikDetayGrupDilRequest updateTeknikDetayGrupDilRequest = new 
+UpdateTeknikDetayGrupDilRequest 
+            { 
+                Dil = "en", // dil kodu 
+                Liste = teknikDetayGrupDilListe 
+            }; 
+ 
+            UrunServis.WebServisResponse webServisResponse = 
+urunServisClient.UpdateTeknikDetayGrupDil(uyeKodu, updateTeknikDetayGrupDilRequest); 
+54 
+ 
+Tanim 
+string 
+evet 
+Güncellenecek teknik detay özellik tanım  
+ 
+Response = List<WebServisResponse> 
+WebServisResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+Örnek kullanım;   
+ 
+6.1 - SaveEtiket 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Etiket 
+Etiket 
+ evet 
+Eklenmek istenen etiketin bilgilerini içeren Etiket sınıfı 
+ 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            List<TeknikDetayOzellikDil> teknikDetayOzellikDilListe = new 
+List<TeknikDetayOzellikDil>(); 
+            TeknikDetayOzellikDil teknikDetayOzellikDil = new TeknikDetayOzellikDil 
+            { 
+                ID = 8, 
+                Tanim = "tanım ingilizce" 
+            }; 
+            teknikDetayOzellikDilListe.Add(teknikDetayOzellikDil); 
+ 
+            UpdateTeknikDetayOzellikDilRequest updateTeknikDetayOzellikDilRequest = new 
+UpdateTeknikDetayOzellikDilRequest 
+            { 
+                Dil = "en", // dil kodu  
+                Liste = teknikDetayOzellikDilListe 
+            }; 
+ 
+            UrunServis.WebServisResponse webServisResponse = 
+urunServisClient.UpdateTeknikDetayOzellikDil(uyeKodu, updateTeknikDetayOzellikDilRequest); 
+55 
+ 
+Etiket 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+ID 
+integer 
+evet 
+0 girilir ise yani kayıt oluşturulur. 0 dan büyük girilirse 
+girilen id li kayıt güncellenir. 
+Resim 
+string 
+hayır 
+Etiket resmi. 
+SeoAnahtarKelime string 
+hayır 
+Seo optimizasyonunda kullanılacak kelimeler. 
+SeoSayfaAciklama 
+string 
+hayır 
+Seo optimizasyonunda kullanılacak açıklama. 
+SeoSayfaBaslik 
+string 
+hayır 
+Seo optimizasyonunda kullanılacak başlık. 
+Tanim 
+string 
+evet 
+Etiket adı  
+Url 
+string 
+hayır 
+Etiket url bilgisi. 
+ 
+Response = integer eklenenEtiketId 
+Örnek kullanım;    
+ 
+6.2 - SelectEtiket 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            Etiket etiket = new Etiket 
+            { 
+                ID = 0,//0 girilir ise yeni kayıt oluşturulur, 0 dan büyük girilirse girilen idli 
+kayıt güncellenir. 
+                Resim = "", // etiket resmi - boş gönderilebilir. 
+                SeoAnahtarKelime = "giysi giyim", // SEO optimizasyonu için kullanılan kelimeler 
+                SeoSayfaAciklama = "Açıklama", // SEO optimizasyonu için kullanılan açıklama 
+                SeoSayfaBaslik = "Başlık", // SEO optimizasyonu için kullanılan sayfa başlığı 
+                Tanim ="etiket adı", 
+                Url="etiket url" // boş gönderilebilir. 
+ 
+            }; 
+            int eklenenEtiketId=  urunServisClient.SaveEtiket(uyeKodu, etiket); 
+56 
+ 
+EtiketId 
+integer 
+ evet 
+Getirilmek istenen etiketin id değeri. 
+ 
+ Response = List<Etiket> 
+Etiket 
+ Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Etiket id. 
+Resim 
+string 
+Etiket resmi. 
+SeoAnahtarKelime string 
+Seo optimizasyonunda kullanılacak kelimeler. 
+SeoSayfaAciklama 
+string 
+Seo optimizasyonunda kullanılacak açıklama. 
+SeoSayfaBaslik 
+string 
+Seo optimizasyonunda kullanılacak başlık. 
+Tanim 
+string 
+Etiket adı  
+Url 
+string 
+Etiket url bilgisi. 
+ 
+Örnek kullanım;     
+ 
+7.1 - SelectVaryasyon 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+VaryasyonFiltre 
+VaryasyonFiltre 
+ evet 
+Varyasyonu filtrelerini içeren VaryasyonFiltre sınıfı. 
+Urunsayfalama 
+UrunSayfalama 
+evet 
+Ürünün sayfalama ve siralama değerlerini içeren 
+UrunSayfalama sınııfı. 
+ 
+VaryasyonFiltre 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+  List<Etiket> etiketListe =  urunServisClient.SelectEtiket(uyeKodu, 1); 
+57 
+ 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+Aktif 
+integer 
+hayır 
+Varyasyon aktiflik durumu 0=false, 1= true, –
+1=hepsi. 
+Barkod 
+string 
+hayır 
+Varyasyon barkod değeri  
+StokGuncellemeTarihiBas datetime 
+hayır 
+Stok güncelleme başlangıç tarihi. 
+StokGuncellemeTarihiSon datetime 
+hayır 
+Stok güncelleme bitiş tarihi. 
+StokKodu 
+string 
+hayır 
+Stok kodu değeri.  
+UrunID 
+integer 
+hayır 
+Ürün id değeri. 
+UrunKartiID 
+integer 
+hayır 
+Ürün karti id değeri.  
+ 
+Response = List<Varyasyon> 
+Varyasyon  
+ Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Varyasyon id  
+AlisFiyati 
+double 
+Varyasyona ait alis fiyatı değeri.  
+Barkod 
+string 
+Varyasyon barkod değeri. 
+Desi 
+double 
+Varyasyon desi değeri. 
+KargoUcreti 
+double 
+Varyasyon kargo ücreti değeri. 
+KdvDahil 
+bool 
+Kdv dahil olma durumu. 
+KdvOrani 
+integer 
+Varyasyon kdv orani değeri. 
+Ozellikler 
+List<VaryasyonOzellik> Varyasyonun özellikleri. 
+ParaBirimiID 
+integer 
+Varyasyon para birimi  
+Resimler 
+List<string> 
+Varyasyon resimleri. 
+SatisFiyati 
+double 
+Satış fiyati değeri.  
+StokAdedi 
+double 
+Stok adedi değeri.  
+58 
+ 
+StokKodu 
+string 
+Varyasyon stok kodu . 
+Aktif 
+bool 
+Varyasyonun aktif olma durumu.  
+DuzenleyenKullanici integer 
+Düzenleyen kullanıcı id değeri.  
+EkleyenKullanici 
+integer 
+Ekleyen kullanıcı id değeri. 
+EksiStokAdedi 
+double 
+Ayrılacak olan stok adedi. 
+İndirimliFiyati 
+double 
+Varyasyon indirimli fiyat değeri.  
+ParaBirimi 
+string 
+Eğer para birimiId girildiyse boş gönderilebilir. 
+ParaBirimiKodu 
+string 
+Eğer para birimiId girildiyse boş gönderilebilir. 
+TedarikciKodu 
+string 
+Tedarikçi koduna göre güncelle true ise zorunlu 
+UyeTipiFiyat1 
+double 
+Üye tipi 1 e özel fiyat değeri.  
+UyeTipiFiyat2 
+double 
+Üye tipi 2 ye özel fiyat değeri.  
+UyeTipiFiyat3 
+double 
+Üye tipi 3 e özel fiyat değeri.  
+UyeTipiFiyat4 
+double 
+Üye tipi 4 e özel fiyat değeri.  
+UyeTipiFiyat5 
+double 
+Üye tipi 5 e özel fiyat değeri.  
+ 
+VaryasyonOzellik 
+ Adı 
+ Tipi 
+ Açıklama 
+Tanım 
+ string 
+Varyasyon  özellik tanımı. Örn= “Renk” 
+Deger 
+ string 
+Varyasyon özellik Değer,. Örn=”Mavi”  
+ 
+59 
+ 
+Örnek kullanım; 
+    
+7.2 – SelectVaryasyonCount 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+VaryasyonFiltre 
+VaryasyonFiltre 
+ evet 
+Varyasyonu filtrelerini içeren VaryasyonFiltre sınıfı. 
+ 
+VaryasyonFiltre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+Aktif 
+integer 
+hayır 
+Varyasyon aktiflik durumu 0=false, 1= true, –
+1=hepsi. 
+Barkod 
+string 
+hayır 
+Varyasyon barkod değeri  
+StokGuncellemeTarihiBas datetime 
+hayır 
+Stok güncelleme başlangıç tarihi. 
+StokGuncellemeTarihiSon datetime 
+hayır 
+Stok güncelleme bitiş tarihi. 
+StokKodu 
+string 
+hayır 
+Stok kodu değeri.  
+            List<Varyasyon> varyasyonListe = urunServisClient.SelectVaryasyon(uyeKodu, 
+varyasyonFiltre, urunSayfalama); 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+            VaryasyonFiltre varyasyonFiltre = new VaryasyonFiltre 
+            { 
+                Aktif = -1, 
+                Barkod = "", // boş gönderilebilir 
+// StokGuncellemeTarihiBas ve StokGuncellemeTarihiSon değerleri girilirse bu iki tarih arasında 
+stokları güncellenen varyasyonlar getirilir. 
+      //StokGuncellemeTarihiBas = DateTime.Now, // filtrede kullanılmak istenmiyor ise yazılmamalı.  
+      //StokGuncellemeTarihiSon = DateTime.Now, // filtrede kullanılmak istenmiyor ise yazılmamalı. 
+                StokKodu = "",// boş gönderilebilir 
+                UrunID=-1, // -1 gönderilir ise bu alana göre filtleme yapılmaz 
+                UrunKartiID=-1 // -1 gönderilir ise bu alana göre filtreleme yapılmaz. 
+            };             
+            UrunSayfalama urunSayfalama = new UrunSayfalama 
+            { 
+                BaslangicIndex=0, // bulunan kayıtların baslangıç index i  - zorunlu değil  
+                KayitSayisi =100, // kaç kayıt getireleceği bilgisi, - zorunlu değil girilmez ise 
+bulunan tüm kayıtlar gösterilir. 
+                SiralamaDegeri="id", // kayıtların hangi alana göre sıralanacağı - zorunlu değil  
+                SiralamaYonu="Desc" // zorunlu değil  
+            }; 
+List<Varyasyon> varyasyonListe = urunServisClient.SelectVaryasyon(uyeKodu, varyasyonFiltre2, 
+urunSayfalama); 
+60 
+ 
+UrunID 
+integer 
+hayır 
+Ürün id değeri. 
+UrunKartiID 
+integer 
+hayır 
+Ürün karti id değeri.  
+ 
+Response = integer filtrelereGoreVaryasyonSayisi 
+Örnek kullanım;       
+ 
+7.3 – VaryasyonGuncelle 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Varyasyon 
+Varyasyon 
+ evet 
+Varyasyonun bilgilerini içeren Varyasyon sınıfı. 
+VaryasyonAyar 
+VaryasyonAyar evet 
+Hangi alanlarının güncelleneceği bilgisinin gönderildiği  
+ VaryasyonAyar sınıfı 
+ 
+Varyasyon  
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+ID 
+integer 
+evet 
+0 gönderilir ise yeni varyasyon eklenir 0 dan büyük 
+gönderilir 
+ise 
+gönderilen 
+id 
+li 
+varyasyon 
+güncellenir 
+AlisFiyati 
+double 
+hayır 
+Varyasyona ait alis fiyatı değeri.  
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            VaryasyonFiltre varyasyonFiltre = new VaryasyonFiltre 
+            { 
+                Aktif = -1, // -1 gönderilir ise bu alana göre filtleme yapılmaz  
+                Barkod = "", // boş gönderilebilir       
+                StokKodu = "", // boş gönderilebilir 
+                UrunID = -1, // -1 gönderilir ise bu alana göre filtleme yapılmaz 
+                UrunKartiID = -1 // -1 gönderilir ise bu alana göre filtreleme yapılmaz. 
+            }; 
+int filtrelereGoreVaryasyonSayisi = urunServisClient.SelectVaryasyonCount(uyeKodu, varyasyonFiltre); 
+61 
+ 
+Barkod 
+string 
+hayır 
+Varyasyon barkod değeri. 
+Desi 
+double 
+hayır 
+Varyasyon desi değeri. 
+KargoUcreti 
+double 
+hayır 
+Varyasyon kargo ücreti değeri. 
+KdvDahil 
+bool 
+hayır 
+Kdv dahil olma durumu. 
+KdvOrani 
+integer 
+hayır 
+Varyasyon kdv orani değeri. 
+Ozellikler 
+List<VaryasyonOzellik> hayır 
+Varyasyonun özellikleri. 
+ParaBirimiID 
+integer 
+evet 
+Varyasyon para birimi (sitede yer alan para 
+birimlerinden biri girilmelidir). 
+Resimler 
+List<string> 
+hayır 
+Varyasyon resimleri. 
+SatisFiyati 
+double 
+evet 
+Satış fiyati değeri.  
+StokAdedi 
+double 
+hayır 
+Stok adedi değeri.  
+StokKodu 
+string 
+hayır 
+Varyasyon stok kodu . 
+Aktif 
+bool 
+hayır 
+Varyasyonun aktif olma durumu.  
+DuzenleyenKullanici integer 
+hayır 
+Düzenleyen kullanıcı id değeri.  
+EkleyenKullanici 
+integer 
+hayır 
+Ekleyen kullanıcı id değeri. 
+EksiStokAdedi 
+double 
+hayır 
+Ayrılacak olan stok adedi. 
+İndirimliFiyati 
+double 
+hayır 
+Varyasyon indirimli fiyat değeri.  
+ParaBirimi 
+string 
+hayır 
+Eğer para birimiId girildiyse boş gönderilebilir. 
+ParaBirimiKodu 
+string 
+hayır 
+Eğer para birimiId girildiyse boş gönderilebilir. 
+TedarikciKodu 
+string 
+hayır 
+Tedarikçi koduna göre güncelle true ise zorunlu 
+UyeTipiFiyat1 
+double 
+hayır 
+Üye tipi 1 e özel fiyat değeri.  
+UyeTipiFiyat2 
+double 
+hayır 
+Üye tipi 2 ye özel fiyat değeri.  
+UyeTipiFiyat3 
+double 
+hayır 
+Üye tipi 3 e özel fiyat değeri.  
+UyeTipiFiyat4 
+double 
+hayır 
+Üye tipi 4 e özel fiyat değeri.  
+UyeTipiFiyat5 
+double 
+hayır 
+Üye tipi 5 e özel fiyat değeri.  
+ 
+62 
+ 
+VaryasyonOzellik 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+Tanım 
+ string 
+ evet 
+Varyasyon  özellik tanımı. Örn= “Renk” 
+Deger 
+ string 
+ evet 
+Varyasyon özellik Değer,. Örn=”Mavi”  
+ 
+VaryasyonAyar 
+ Adı 
+ Tipi 
+Zorunlu 
+ Açıklama 
+AktifGuncelle 
+bool 
+hayır 
+Aktiflik  güncelleme durumu. 
+AlisFiyatiGuncelle 
+bool 
+hayır 
+Alış fiyatı güncelleme durumu. 
+BarkodGuncelle 
+bool 
+hayır 
+Barkod güncelleme durumu. 
+IndirimliFiyatiGuncelle 
+bool 
+hayır 
+Indirimli fiyat güncelleme durumu. 
+KargoUcretiGuncelle 
+bool 
+hayır 
+Kargo ücreti güncelleme durumu. 
+KargoAgirligiGuncelle 
+bool 
+hayır 
+Kargo ağırlığı güncelleme durumu. 
+ParaBirimiGuncelle 
+bool 
+hayır 
+Para birimi güncelleme durumu. 
+PiyasaFiyatiGuncelle 
+bool 
+hayır 
+Piyasa fiyatı güncelleme durumu. 
+SatisFiyatiGuncelle 
+bool 
+hayır 
+Satış fiyatı güncelleme durumu. 
+StokAdediGuncelle 
+bool 
+hayır 
+Stok adedi güncelleme durumu. 
+UyeTipiFiyat1Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  1 güncelleme durumu. 
+UyeTipiFiyat2Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  2 güncelleme durumu. 
+UyeTipiFiyat3Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  3 güncelleme durumu. 
+UyeTipiFiyat4Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  4 güncelleme durumu. 
+UyeTipiFiyat5Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  5 güncelleme durumu. 
+EksiStokAdediGuncelle 
+bool 
+hayır 
+Eksi stok adedi güncelleme durumu. 
+KdvDahilGuncelle 
+bool 
+hayır 
+Kdv dahil güncelleme durumu. 
+KdvOraniGuncelle 
+bool 
+hayır 
+Kdv oranı güncelleme durumu. 
+63 
+ 
+OncekiResimleriSil 
+bool 
+hayır 
+Önceki resimlerin silinmesi  durumu. 
+ResimOlmayanlaraResimEkle bool 
+hayır 
+Resmi olmayanlara resim eklenmesi durumu. 
+StokKoduGuncelle 
+bool 
+hayır 
+Stok kodu güncelleme  durumu. 
+UrunResimGuncelle 
+bool 
+hayır 
+Ürün resmi güncelleme durumu. 
+ 
+Örnek kullanım; 
+ 
+7.4 – SaveVaryasyon 
+Parametre 
+Adı  
+Tipi 
+Zorunlu 
+Açıklama 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            Varyasyon varyasyon = new Varyasyon 
+            { 
+                // burada varyasyonun id sini ve bilgilerini giriyoruz. Alttaki değerler örnek 
+olarak girilimiştir id dışında hiçbir değer zorunlu değildir.diğer özellikler de değiştirilmek 
+istenildiği şekilde girilebilir.  
+ 
+                ID = 3, // güncelleme yapılacak varyasyona ait id                  
+                AlisFiyati = 10, 
+                Aktif = false, 
+                Barkod = "4545645565486", 
+                Desi = 1, 
+                TedarikciKodu = "tedarikçi kodu", 
+                StokAdedi = 1285, 
+                EksiStokAdedi = 5, 
+                IndirimliFiyati = 12.10, 
+                  KargoUcreti = 4, 
+                KdvDahil = true, 
+                SatisFiyati = 15, 
+                Resimler = new List<string> { "resim url", "resim url 2" } 
+            }; 
+ 
+               VaryasyonAyar varyasyonAyar = new VaryasyonAyar 
+                { 
+                    // varyasyonda hangi ayarların güncellenip hangilerinin güncellenmeyeceği 
+bilgisi verilir. Hiç yazılmayan değer de false olarak kabul edilir ve güncellenmez. 
+                    StokAdediGuncelle = true, 
+                    KonsinyeUrunStokAdediGuncelle = true, 
+                    TahminiTeslimSuresiTarihGuncelle=true, 
+ 
+                }; 
+ 
+ 
+                urunServisClient.VaryasyonGuncelle("üyekodu", varyasyon, varyasyonAyar); 
+64 
+ 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Varyasyonlar 
+List<Varyasyon> 
+evet 
+Varyasyonları içeren varyasyon sınıfı listesi 
+Ayar 
+VaryasyonAyar 
+evet 
+Varyasyon ayar sınıfı 
+ 
+Varyasyon  
+ Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Varyasyon id  
+AlisFiyati 
+double 
+Varyasyona ait alis fiyatı değeri.  
+Barkod 
+string 
+Varyasyon barkod değeri. 
+Desi 
+double 
+Varyasyon desi değeri. 
+KargoUcreti 
+double 
+Varyasyon kargo ücreti değeri. 
+KdvDahil 
+bool 
+Kdv dahil olma durumu. 
+KdvOrani 
+integer 
+Varyasyon kdv orani değeri. 
+Ozellikler 
+List<VaryasyonOzellik> Varyasyonun özellikleri. 
+ParaBirimiID 
+integer 
+Varyasyon para birimi  
+Resimler 
+List<string> 
+Varyasyon resimleri. 
+SatisFiyati 
+double 
+Satış fiyati değeri.  
+StokAdedi 
+double 
+Stok adedi değeri.  
+StokKodu 
+string 
+Varyasyon stok kodu . 
+Aktif 
+bool 
+Varyasyonun aktif olma durumu.  
+DuzenleyenKullanici integer 
+Düzenleyen kullanıcı id değeri.  
+EkleyenKullanici 
+integer 
+Ekleyen kullanıcı id değeri. 
+EksiStokAdedi 
+double 
+Ayrılacak olan stok adedi. 
+İndirimliFiyati 
+double 
+Varyasyon indirimli fiyat değeri.  
+ParaBirimi 
+string 
+Eğer para birimiId girildiyse boş gönderilebilir. 
+65 
+ 
+ParaBirimiKodu 
+string 
+Eğer para birimiId girildiyse boş gönderilebilir. 
+TedarikciKodu 
+string 
+Tedarikçi koduna göre güncelle true ise zorunlu 
+UyeTipiFiyat1 
+double 
+Üye tipi 1 e özel fiyat değeri.  
+UyeTipiFiyat2 
+double 
+Üye tipi 2 ye özel fiyat değeri.  
+UyeTipiFiyat3 
+double 
+Üye tipi 3 e özel fiyat değeri.  
+UyeTipiFiyat4 
+double 
+Üye tipi 4 e özel fiyat değeri.  
+UyeTipiFiyat5 
+double 
+Üye tipi 5 e özel fiyat değeri.  
+ 
+VaryasyonAyar 
+ Adı 
+ Tipi 
+Zorunlu 
+ Açıklama 
+AktifGuncelle 
+bool 
+hayır 
+Aktiflik  güncelleme durumu. 
+AlisFiyatiGuncelle 
+bool 
+hayır 
+Alış fiyatı güncelleme durumu. 
+BarkodGuncelle 
+bool 
+hayır 
+Barkod güncelleme durumu. 
+IndirimliFiyatiGuncelle 
+bool 
+hayır 
+Indirimli fiyat güncelleme durumu. 
+KargoUcretiGuncelle 
+bool 
+hayır 
+Kargo ücreti güncelleme durumu. 
+KargoAgirligiGuncelle 
+bool 
+hayır 
+Kargo ağırlığı güncelleme durumu. 
+ParaBirimiGuncelle 
+bool 
+hayır 
+Para birimi güncelleme durumu. 
+PiyasaFiyatiGuncelle 
+bool 
+hayır 
+Piyasa fiyatı güncelleme durumu. 
+SatisFiyatiGuncelle 
+bool 
+hayır 
+Satış fiyatı güncelleme durumu. 
+StokAdediGuncelle 
+bool 
+hayır 
+Stok adedi güncelleme durumu. 
+UyeTipiFiyat1Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  1 güncelleme durumu. 
+UyeTipiFiyat2Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  2 güncelleme durumu. 
+UyeTipiFiyat3Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  3 güncelleme durumu. 
+UyeTipiFiyat4Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  4 güncelleme durumu. 
+UyeTipiFiyat5Guncelle 
+bool 
+hayır 
+Uye tipi fiyat  5 güncelleme durumu. 
+66 
+ 
+EksiStokAdediGuncelle 
+bool 
+hayır 
+Eksi stok adedi güncelleme durumu. 
+KdvDahilGuncelle 
+bool 
+hayır 
+Kdv dahil güncelleme durumu. 
+KdvOraniGuncelle 
+bool 
+hayır 
+Kdv oranı güncelleme durumu. 
+OncekiResimleriSil 
+bool 
+hayır 
+Önceki resimlerin silinmesi  durumu. 
+ResimOlmayanlaraResimEkle bool 
+hayır 
+Resmi olmayanlara resim eklenmesi durumu. 
+StokKoduGuncelle 
+bool 
+hayır 
+Stok kodu güncelleme  durumu. 
+UrunResimGuncelle 
+bool 
+hayır 
+Ürün resmi güncelleme durumu. 
+ 
+Response = İnteger (1= başarılı ,  0=başarısız) 
+67 
+ 
+Örnek kullanım 
+ 
+8.1 – SaveAsortiGrup 
+Parametre 
+                AktifGuncelle = true, 
+                AlisFiyatiGuncelle = false, 
+                BarkodGuncelle = true, 
+                StokAdediGuncelle = true, 
+                KargoAgirligiGuncelle = false, 
+                EksiStokAdediGuncelle = true, 
+                PiyasaFiyatiGuncelle = true, 
+                ResimOlmayanlaraResimEkle = true 
+            }; 
+            urunServisClient.VaryasyonGuncelle(uyeKodu, varyasyon, varyasyonAyar); 
+  UrunServisClient urunServisClient = new UrunServisClient(); 
+            try 
+            { 
+                List<Varyasyon> varyasyonListe = new List<Varyasyon>(); 
+                Varyasyon varyasyon = new Varyasyon 
+                { 
+                    // burada varyasyonun id sini ve bilgilerini giriyoruz. Alttaki değerler örnek 
+olarak girilimiştir id dışında hiçbir değer zorunlu değildir.diğer özellikler de değiştirilmek 
+istenildiği şekilde girilebilir.  
+ 
+                    ID = 19382, // güncelleme yapılacak varyasyona ait id                  
+                    AlisFiyati = 10, 
+                    Aktif = false, 
+                    Barkod = "4545645565486", 
+                    Desi = 1, 
+                    TedarikciKodu = "tedarikçi kodu", 
+                    StokAdedi = 10, 
+                    EksiStokAdedi = 5, 
+                    IndirimliFiyati = 12.10, 
+                    KargoUcreti = 4, 
+                    KdvDahil = true, 
+                    SatisFiyati = 15, 
+                    Resimler = new List<string> { "resim url", "resim url 2" }, 
+                    IscilikAgirlik = 12, 
+                    IscilikParaBirimiId = 3, 
+                    UpdateKey = "", 
+                    TahminiTeslimSuresiTarih = new DateTime(2020, 09, 18), 
+ 
+                }; 
+                varyasyonListe.Add(varyasyon); 
+ 
+                VaryasyonAyar varyasyonAyar = new VaryasyonAyar 
+                { 
+                    // varyasyonda hangi ayarların güncellenip hangilerinin güncellenmeyeceği 
+bilgisi verilir. Hiç yazılmayan değer de false olarak kabul edilir ve güncellenmez. 
+                    StokAdediGuncelle = true, 
+                    KonsinyeUrunStokAdediGuncelle = true, 
+                    TahminiTeslimSuresiTarihGuncelle = true, 
+                    AktifGuncelle = false, 
+                    AlisFiyatiGuncelle = true, 
+                    EksiStokAdediGuncelle=false, 
+                    BarkodGuncelle=false, 
+                    EkSecenekGuncelle=true 
+ 
+                }; 
+ 
+                int response = urunServisClient.SaveVaryasyon("üyekodu", varyasyonListe, 
+varyasyonAyar); 
+68 
+ 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+AsortiGrup 
+AsortiGrup 
+ evet 
+Eklenecek olan asorti grup bilgilerini içeren AsortiGrup sınıfı. 
+ 
+AsortiGrup 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+ID 
+integer 
+evet 
+0 girilir ise yeni kayıt eklenir. 0 dan büyük girilir ise girilen id li kayıt 
+güncellenir. 
+EkSecenekTipi 
+string 
+evet 
+Kayıtlı olan eksecenek tipi tanım değeri. 
+Tanim 
+string 
+evet 
+Asorti grup adı 
+ 
+Response = SaveResponse 
+SaveResponse 
+ Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlemde hata mesajı 
+IsError 
+bool 
+false = başarılı işlem, true = başarısız işlem  
+ItemID 
+integer 
+Eklenen kayıt id değeri.  
+ 
+Örnek kullanım;        
+ 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            AsortiGrup asortiGrup = new AsortiGrup 
+            { 
+                ID= 0, //0 girilir ise yeni kayıt oluşturulur, 0 dan büyük girilirse girilen idli 
+kayıt güncellenir. 
+               EkSecenekTipi="Renk", //Zorunlu --   eksecenek tipi tanımı.Girilen tanım ile 
+eksecenek tipi tablosunda bir kayıt yoksa asortigrup eklenmez.  
+               Tanim="asorti grup adı" 
+            }; 
+ 
+        // gelen cevapte işlemin ne şekilde sonuçlandığına dair bilgi verilmektedir.  
+ SaveResponse saveAsortiGrupCevap = urunServisClient.SaveAsortiGrup(uyeKodu, asortiGrup); 
+69 
+ 
+8.2 – SaveAsortiMiktar 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+AsortiMiktar 
+AsortiMiktar 
+ evet 
+Asorti miktar bilgilerini içeren AsortiMiktar sınıfı. 
+ 
+AsortiMiktar 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+ID 
+integer 
+evet 
+0 girilir ise yeni kayıt eklenir. 0 dan büyük girilir ise girilen id li kayıt 
+güncellenir. 
+EkSecenekTanım 
+string 
+evet 
+Kayıtlı olan eksecenek  tanım değeri. 
+Adet 
+integer 
+evet 
+Adet değeri. 
+GrupID 
+integer 
+evet 
+Kayıtlı olan Asorti Grup id 
+ 
+Response = SaveResponse 
+SaveResponse 
+ Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlemde hata mesajı 
+IsError 
+bool 
+false = başarılı işlem, true = başarısız işlem  
+ItemID 
+integer 
+Eklenen kayıt id değeri.  
+ 
+70 
+ 
+Örnek kullanım;           
+ 
+8.3 – SelectAsortiGrup 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+AsortiGrupId 
+integer 
+ evet 
+Getirilmek istenen asorti grup a ait id değeri. 
+ 
+Response = List<AsortiGrup> 
+AsortiGrup 
+ Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Asorti grup id  
+EkSecenekTipi 
+string 
+Kayıtlı olan eksecenek tipi tanım değeri. 
+Tanim 
+string 
+Asorti grup adı 
+ 
+Örnek kullanım;            
+ 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            AsortiMiktar asortiMiktar = new AsortiMiktar 
+            { 
+                ID = 0, //0 girilir ise yeni kayıt oluşturulur, 0 dan büyük girilirse girilen idli 
+kayıt güncellenir. 
+                Adet = 1, 
+                EkSecenekTanim = "kırmızı", //  eksecenek  tanımı. Eksecenek tablosunda girilen 
+tanımlı bir eksecenek yok ise asorti miktar eklenmez.  
+                GrupID = 3, // asorti grup ıd 
+            }; 
+ 
+   // gelen cevapte işlemin ne şekilde sonuçlandığına dair bilgi verilmektedir. 
+  SaveResponse SaveAsortiMiktarCevap = urunServisClient.SaveAsortiMiktar(uyeKodu, asortiMiktar); 
+  UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+  List<AsortiGrup> asortiGrupListe = urunServisClient.SelectAsortiGrup(uyeKodu, 5); 
+71 
+ 
+8.4 – SelectAsortiMiktar 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+AsortiMiktarId 
+integer 
+ evet 
+Getirilmek istenen asorti miktar a ait id değeri. 
+ 
+Response = List<AsortiMiktar> 
+AsortiMiktar 
+ Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Asorti miktar id  
+EkSecenekTanım 
+string 
+Kayıtlı olan eksecenek  tanım değeri. 
+Adet 
+integer 
+Adet değeri. 
+GrupID 
+integer 
+Kayıtlı olan Asorti Grup id 
+ 
+Örnek kullanım;     
+ 
+9.1 – SelectEkSecenekDeger 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+EksecenekGroupID integer 
+ evet 
+Getirilmek istenen ek seçeneğe ait id değeri. 
+Dil 
+string 
+hayır 
+Dil değeri. 
+ 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+List<AsortiMiktar> asortiMiktarListe = urunServisClient.SelectAsortiMiktar(uyeKodu, 4); 
+72 
+ 
+Response = List<EkSecenekDeger> 
+EkSecenekDeger 
+ Adı 
+ Tipi 
+ Açıklama 
+GrupID 
+integer 
+Grup id değeri. 
+GrupTanım 
+string 
+Grup tanımı. 
+ID 
+integer 
+Id değeri . 
+Tanim 
+string 
+Ekseçenek tanımı. 
+ 
+Örnek Kullanım;       
+ 
+9.2 – SelectEkSecenekGrup 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Dil 
+string 
+hayır 
+Dil değeri. 
+ 
+Response = List<EkSecenekGrup> 
+EkSecenekGrup 
+ Adı 
+ Tipi 
+ Açıklama 
+Degerler 
+List<EkSecenekDeger> 
+EksecenekDeger listesi. 
+Tanim 
+string 
+Grup tanımı. 
+ID 
+integer 
+Id değeri . 
+Tur 
+BLEnumsVaryasyonTuru 
+Ekseçenek tanımı. 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+List<EkSecenekDeger> ekSecenekDegerListe = urunServisClient.SelectEkSecenekDeger(uyeKodu, 9, ""); 
+73 
+ 
+ 
+BLEnumsVaryasyonTuru 
+ Adı 
+ Değer 
+Diger 
+0 
+Renk 
+1 
+Beden 
+2 
+Cinsiyet 
+3 
+Malzeme 
+4 
+Desen 
+5 
+Durum 
+6 
+Sezon 
+7 
+ 
+EkSecenekDeger 
+ Adı 
+ Tipi 
+ Açıklama 
+GrupID 
+integer 
+Grup id değeri. 
+GrupTanım 
+string 
+Grup tanımı. 
+ID 
+integer 
+Id değeri . 
+Tanim 
+string 
+Ekseçenek tanımı. 
+ 
+Örnek Kullanım;            
+ 
+9.3 – UpdateEkSecenekDegerDil 
+Parametre 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+List<EkSecenekGrup> ekSecenekGrupListe = urunServisClient.SelectEkSecenekGrup(uyeKodu, ""); 
+74 
+ 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+UpdateEkSecenekD
+egerDilRequest 
+UpdeteEkSecenek
+DegerDilRequest 
+evet 
+Güncelleme 
+bilgilerini 
+içeren 
+UpdateEkSecenekDegerDilRequest sınıfı 
+ 
+UpdeteEkSecenekDegerDilRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Dil 
+string 
+evet 
+Dil kodu örn = “en” 
+Liste 
+List<EkSecenekDe
+gerDil> 
+evet 
+Güncellenecek olan ek seçenek değerleri içeren 
+EkSecenekDegerDil sınıfı listesi   
+ 
+EkSecenekDegerDil 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+ID 
+integer 
+evet 
+Ek seçenek değer id  
+Tanim 
+string 
+evet 
+Güncellenecek ek seçenek değer tanım  
+ 
+Response = List<WebServisResponse> 
+WebServisResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+75 
+ 
+Örnek kullanım;   
+ 
+9.4 – UpdateEkSecenekGrupDil 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+ string  
+ evet 
+ Servis sağlayıcısı tarafından verilen şifre 
+UpdateEkSecenekG
+rupDilRequest 
+UpdeteEkSecenek
+GrupDilRequest 
+evet 
+Güncelleme 
+bilgilerini 
+içeren 
+UpdateEkSecenekGrupDilRequest sınıfı 
+ 
+UpdeteEkSecenekGrupDilRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Dil 
+string 
+evet 
+Dil kodu örn = “en” 
+Liste 
+List<EkSecenekGr
+upDil> 
+evet 
+Güncellenecek olan ek seçenek grupları içeren 
+EkSecenekGrupDil sınıfı listesi   
+ 
+EkSecenekGrupDil 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+ID 
+integer 
+evet 
+Ek seçenek grup  id  
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            List<EkSecenekDegerDil> ekSecenekDegerDilListe = new List<EkSecenekDegerDil>(); 
+            EkSecenekDegerDil ekSecenekDegerDil = new EkSecenekDegerDil 
+            { 
+                ID=1, 
+                Tanim="tanım ingilizce" 
+            }; 
+            ekSecenekDegerDilListe.Add(ekSecenekDegerDil); 
+ 
+            UpdateEkSecenekDegerDilRequest updateEkSecenekDegerDilRequest = new 
+UpdateEkSecenekDegerDilRequest 
+            { 
+                Dil = "en", // dil kodu  
+                Liste = ekSecenekDegerDilListe 
+            }; 
+            UrunServis.WebServisResponse webServisResponse = 
+urunServisClient.UpdateEkSecenekDegerDil(uyeKodu, updateEkSecenekDegerDilRequest); 
+76 
+ 
+Tanim 
+string 
+evet 
+Güncellenecek ek seçenek grup tanım  
+ 
+Response = List<WebServisResponse> 
+WebServisResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+Örnek kullanım;   
+ 
+10.1 – SaveParaBirimi 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Parabirimi 
+ParaBirimi 
+ evet 
+Para birimi bilgilerini içeren ParaBirimi sınıfı. 
+ 
+ParaBirimi 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            List<EkSecenekGrupDil> ekSecenekGrupDilListe = new List<EkSecenekGrupDil>(); 
+            EkSecenekGrupDil ekSecenekGrupDil = new EkSecenekGrupDil 
+            { 
+                ID=5, 
+                Tanim="tanım ingilizce" 
+            }; 
+            ekSecenekGrupDilListe.Add(ekSecenekGrupDil); 
+            UpdateEkSecenekGrupDilRequest updateEkSecenekGrupDilRequest = new 
+UpdateEkSecenekGrupDilRequest 
+            { 
+                Dil="en", // dil kodu 
+                Liste=ekSecenekGrupDilListe  
+            }; 
+           UrunServis.WebServisResponse webServisResponse= 
+urunServisClient.UpdateEkSecenekGrupDil(uyeKodu, updateEkSecenekGrupDilRequest); 
+77 
+ 
+ID 
+integer 
+evet 
+0 girilir ise yeni kayıt eklenir. 0 dan büyük girilir ise girilen id li kayıt 
+güncellenir. 
+Kur 
+double 
+evet 
+Kur değeri. Örn: 5.60 
+DovizKodu 
+string 
+evet 
+Döviz kodu. Örn =”USD” 
+Tanim 
+string 
+evet 
+Para birimi adı. Örn = “Dolar” 
+Aktif 
+bool 
+hayır 
+Aktiflik durumu. 
+GuncellemeTarihi 
+datetime 
+hayır 
+Güncelleme tarihi. 
+ 
+Response = integer eklenenParaBirimiId 
+Örnek kullanım;         
+ 
+10.2 – SelectParaBirimi 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+ParabirimiId 
+integer 
+ evet 
+Getirilmek istenen para birimine ait id değeri.  
+ 
+Response = List<ParaBirimi> 
+ParaBirimi 
+ Adı 
+ Tipi 
+ Açıklama 
+  UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            ParaBirimi paraBirimi = new ParaBirimi 
+            { 
+                ID = 0,//0 girilir ise yeni kayıt oluşturulur, 0 dan büyük girilirse girilen idli 
+kayıt güncellenir. 
+                Kur =5.60,  
+                DovizKodu="USD", 
+                Tanim="Dolar", 
+                Aktif=true, // aktiflik durumu eğer göndermezsek default olarak false değerini alır  
+                GuncellemeTarihi=DateTime.Now 
+            }; 
+             int eklenenParaBirimiId= urunServisClient.SaveParaBirimi(uyeKodu, paraBirimi); 
+78 
+ 
+ID 
+integer 
+Para birimi id. 
+Kur 
+double 
+Kur değeri. Örn: 5.60 
+DovizKodu 
+string 
+Döviz kodu. Örn =”USD” 
+Tanim 
+string 
+Para birimi adı. Örn = “Dolar” 
+Aktif 
+bool 
+Aktiflik durumu. 
+GuncellemeTarihi 
+datetime 
+Güncelleme tarihi. 
+ 
+Örnek kullanım; 
+11.1 - GetProductStatus 
+Response = List<SiparisUrunDurumlari> 
+SiparisUrunDurumlari 
+ Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Id değeri.  
+Tanim 
+string 
+Siparis ürün Durum Tanımı 
+Aktif 
+bool 
+Aktiflik durumu. 
+İslem 
+integer 
+İşlem değeri. 
+ 
+Örnek kullanım; 
+ 
+11.2 - UpdateUrl 
+Parametre 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+        
+// Sipariş durumları listesini getirir. Parametre göndermeye gerek yoktur.  
+List<SiparisUrunDurumlari> siparisUrunDurumlariList = urunServisClient.GetProductStatus(); 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+List<ParaBirimi> paraBirimiList = urunServisClient.SelectParaBirimi(uyeKodu, 9); 
+79 
+ 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+UpdateUrlReques UpdateUrlRequest 
+ evet 
+Değişecek olan veriyi içeren UpdateUrlRequest sınıfı. 
+ 
+UpdateUrlRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+ID 
+integer 
+evet 
+Id değeri.  
+Dil 
+string 
+hayır 
+Dil değeri. 
+Url 
+string 
+evet 
+Url değeri. 
+Tip 
+UrlType 
+evet 
+Url I güncellenecek nesne tipi.  
+ 
+UrlType 
+ Adı 
+ Değer 
+Kategori 
+0 
+Marka 
+1 
+Urun 
+2 
+Tedarikci 
+3 
+ 
+Response = UpadteUrlResponse 
+UpadteUrlResponse 
+ Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+80 
+ 
+Örnek kullanım;        
+ 
+11.3 - GetTaksitSecenekleri 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Tutar 
+double 
+evet 
+Tutar  
+MaksimumTaksitSayısı integer 
+evet 
+Maksimum taksit sayısı  
+DovizKuru 
+string 
+evet 
+Döviz kuru  
+ 
+Response =List<OdemeSecenekBanka>  
+OdemeSecenekBanka 
+ Adı 
+ Tipi 
+ Açıklama 
+BankaAdi 
+string 
+Banka adı 
+BankaID 
+integer 
+Banka id  
+Taksitler 
+UrunOdemeSecen
+ekTaksitler 
+Taksit bilgilerini içeren UrunOdemeSecenekTaksitler sınıfı Listesi 
+ 
+UrunOdemeSecenekTaksitler 
+ Adı 
+ Tipi 
+ Açıklama 
+BankaID 
+integer 
+Banka Id  
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+UpdateUrlRequest updateUrlRequest = new UpdateUrlRequest(); 
+updateUrlRequest.Tip = UrlType.Kategori; // hangi tipte url i güncellenecekse onu giriyoruz. 
+updateUrlRequest.ID = 5; 
+updateUrlRequest.Dil = "en"; // dil değeri boş gönderilir ise türkçe olarak kaydolur.  
+updateUrlRequest.Url = "/Giyim"; //  url değeri 
+ 
+UpdateUrlResponse updateUrlResponse = urunServisClient.UpdateUrl(uyeKodu, updateUrlRequest); 
+81 
+ 
+TaksitSayisi 
+integer 
+Taksit sayısı 
+TaksitTanim 
+string 
+Taksit tanımı  
+TaksitTutari 
+double 
+Taksit tutarı 
+TaksitTutariStr 
+string 
+Taksit tutarı string 
+ToplamTutar 
+double 
+Toplam tutar  
+ToplamTutarStr 
+string 
+Toplam tutar string  
+ 
+Örnek kullanım;        
+ 
+11.4 - SelectMagazaStok 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SelectMagazaStokRe
+quest 
+SelectMagaza
+StokRequest 
+evet 
+Filtre bilgilerini içeren SelectMagazaStokRequest sınıfı 
+ 
+SelectMagazaStokRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+MagazaKodu 
+string 
+evet 
+Stok bilgileri getirilmek istenen mağaza kodu  
+ 
+Response =List<SelectMagazaStokResponse>  
+SelectMagazaStokResponse 
+ Adı 
+ Tipi 
+ Açıklama 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+           List<UrunOdemeSecenekBanka> taksitSecenekListe =  
+urunServisClient.GetTaksitSecenekleri(uyeKodu, 100, 4, "TRY"); 
+82 
+ 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsError 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+MagazaStokList 
+WebMagazaStok 
+Magaza stok bilgilerini içeren WebMagazaStok sınıfı listesi 
+ 
+WebMagazaStok 
+ Adı 
+ Tipi 
+ Açıklama 
+EksiStokAdedi 
+double 
+Eksi stok adedi  
+MagazaKodu 
+string 
+Mağaza kodu  
+StokAdedi 
+double 
+Stok adedi  
+TedarikciKodu 
+string 
+Tedarikçi kodu  
+UrunID 
+integer 
+Ürün id  
+UrunKartiID 
+Integer 
+Ürün kartı id  
+ 
+11.5 - StokAdediGuncelle 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string  
+ evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Urunler 
+List<Varyasyon> evet 
+Stok 
+adedi 
+güncellenecek 
+varyasyonları 
+içeren 
+Varyasyon sınıfı listesi  
+ 
+Varyasyon 
+ID ve StokAdedi alanları girilmesi yeterlidir. 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+ID 
+integer 
+evet 
+Varyasyon id  
+StokAdedi 
+integer 
+evet 
+Güncellenecek stok adedi  
+ 
+83 
+ 
+Örnek kullanım;        
+ 
+ 
+Ticimax Bilişim Teknolojileri A.Ş servislerde değişiklik yapma hakkını saklı tutar 
+ 
+UrunServis.UrunServisClient urunServisClient = new UrunServis.UrunServisClient(); 
+ 
+            List<Varyasyon> urunListe = new List<Varyasyon>(); 
+ 
+            // id ve stok adedi göndermek yeterlidir.  
+            Varyasyon varyasyon = new Varyasyon 
+            { 
+                ID= 3, 
+                StokAdedi= 30 
+            }; 
+            urunListe.Add(varyasyon); 
+ 
+            urunServisClient.StokAdediGuncelle(uyeKodu, urunListe); 

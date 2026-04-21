@@ -1,0 +1,9 @@
+zeep
+pydantic
+python-dotenv
+google-generativeai
+pandas
+openpyxl
+requests
+PyQt6
+pyinstaller

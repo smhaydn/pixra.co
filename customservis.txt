@@ -1,0 +1,2473 @@
+1 
+ 
+TİCİMAX  CUSTOM   SERVİS   
+DÖKÜMANTASYONU 
+ 
+Servis Ekleme; 
+ 
+ 
+.Net uygulamalarda .config dosyasında servisin binding bölümüne < security mode= “Transport” /> 
+eklenmelidir. 
+Ekran görüntüsü: http://prntscr.com/un0z7j 
+Servis Adresi: https://www.alanadiniz.com/Servis/CustomServis.svc 
+1- Ürün 
+             1-  Favori Ürün Eklemek(AddFavoriUrun) 
+2-  Ürüne Fiyat Uyarısı Eklemek(AddFiyatAlarmUrun)  
+2 
+ 
+3- Ürüne Stok Uyarısı Eklemek(AddStokAlarmUrun) 
+4- Favori Ürünleri Getirmek(GetFavoriUrunler) 
+5- Fiyat Alarmlı Ürünleri Getirmek(GetFiyatAlarmUrunler) 
+6- Stok Alarmlı Ürünleri Getirmek(GetStokAlarmUrunler) 
+7- Favori Ürün Silmek(RemoveFavoriUrun) 
+8- Fiyat Alarmlı Ürün Silmek(RemoveFiyatAlarmUrun) 
+9- Stok Alarmlı Ürün Silmek(RemoveStokAlarmUrun) 
+2- Entegrasyon 
+1- Entegrasyon Silmek(DeleteEntegrasyonId) 
+2- Entegrasyon Eklemek(SaveEntegrasyonId) 
+3- Entegrasyonları Getirmek(SelectEntegrasyon) 
+4- Entegrasyon Değer Bilgisini Getirmek(SelectEntegrasyonId)  
+3- Kargo 
+1- Kargo Desi Fiyat Bilgisi Güncellemek(GuncelleKargoDesiFiyat) 
+2- Kargo Desi Fiyat Bilgisi Getirmek(SelectKargoDesiFiyat) 
+3- Kargo Firmaları Getirmek(SelectKargoFirmalari)    
+4- İade 
+1-Iade Talebi Getirmek(SelectIadeTalebi) 
+2-Iade Talebi Güncellemek(UpdateIadeTalebi) 
+3-Iade Ödeme Listesi Getirmek(SelectIadeOdemeListesi) 
+ 
+5-  Menü 
+1- Yeni Menü Eklemek(SaveMenu) 
+2- Menü Silmek(DeleteMenu) 
+3- Menü Listesini Getirmek(GetMenu) 
+ 
+6- Diğer Metodlar  
+1- Taksit Seçeneklerini Getirmek(GetTaksitSecenek) 
+2- İlçeleri Getirmek(SelectIlceler) 
+3 
+ 
+3- İlleri Getirmek(SelectIller) 
+4- Mail Listesini Getirmek(SelectMailList) 
+5- Ülkeleri Getirmek(SelectUlkeler) 
+ 
+METOD KULLANIMLARI(CustomServis) 
+1.1 - AddFavoriUrun 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+AddFavoriUrunRe
+quest 
+AddFavoriUrunR
+equest 
+evet 
+Favori 
+ürüne 
+ekleme 
+bilgilerini 
+içeren 
+AddFavoriUrunRequest sınıfı 
+ 
+AddFavoriUrunRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+Adet 
+double  
+evet 
+Eklenecek ürün adedi  
+UrunKartiID  
+integer 
+evet 
+Ürün kartı id   
+UyeID 
+integer 
+evet 
+Üye id değeri  
+ 
+Response = AddFavoriUrunResponse 
+AddFavoriUrunResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+4 
+ 
+Örnek kullanım; 
+ 
+1.2 - AddFiyatAlarmUrun 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+AddFavoriUrunRe
+quest 
+AddFiyatAlarmUr
+unRequest 
+evet 
+Fiyat alarm bilgilerini içeren AddFiyatAlarmUrunRequest 
+sınıfı 
+ 
+AddFiyatAlarmUrunRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+Fiyat 
+double  
+evet 
+Fiyat bilgisi  
+UrunKartiID  
+integer 
+evet 
+Ürün kartı id   
+UyeID 
+integer 
+evet 
+Üye id değeri  
+ 
+Response = AddFiyatAlarmUrunResponse 
+AddFiyatAlarmUrunResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+  CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            AddFavoriUrunRequest addFavoriUrunRequest = new AddFavoriUrunRequest 
+            { 
+               Adet=1,  
+               UrunKartiID=1, 
+               UyeID=5 
+            }; 
+            AddFavoriUrunResponse addFavoriUrunResponse =  customServisClient.AddFavoriUrun(uyeKodu, 
+addFavoriUrunRequest); 
+5 
+ 
+Örnek kullanım; 
+ 
+1.3 - AddStokAlarmUrun 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+AddFavoriUrunRe
+quest 
+AddStokAlarmUr
+unRequest 
+evet 
+Stok alarm bilgilerini içeren AddStokAlarmUrunRequest 
+sınıfı 
+ 
+AddStokAlarmUrunRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+Fiyat 
+double  
+hayır 
+Bu metod için gönderilmesi gerekmez.  
+UrunKartiID  
+integer 
+evet 
+Ürün kartı id   
+UyeID 
+integer 
+evet 
+Üye id değeri  
+ 
+Response = AddStokAlarmUrunResponse 
+AddStokAlarmUrunResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+ string 
+ Başarısız işlem hata mesajı 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+ 
+            AddFiyatAlarmUrunRequest addFiyatAlarmUrunRequest = new AddFiyatAlarmUrunRequest 
+            { 
+                Fiyat = 12, 
+                UyeID = 374, 
+                UrunKartiID = 6 
+            }; 
+ 
+AddFiyatAlarmUrunResponse addFiyatAlarmUrunResponse = customServisClient.AddFiyatAlarmUrun(uyeKodu, 
+addFiyatAlarmUrunRequest); 
+6 
+ 
+IsErros 
+ bool 
+false= işlem başarılı  , true = işlem başarısız  
+ 
+Örnek kullanım; 
+ 
+1.4 - GetFavoriUrunler 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+GetFavoriUrunler
+Request 
+GetFavoriUrunler
+Request 
+evet 
+Sorgu değerlerini içeren GetFavoriUrunlerRequest 
+ 
+GetFavoriUrunlerRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeID 
+integer  
+evet 
+Favori ürünleri getirilmek istenen üye id değeri.   
+ 
+Response = GetFavoriUrunlerResponse 
+GetFavoriUrunlerResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+Urunler 
+List<WebFavoriUrunler> 
+Favori ürünleri içeren WebFavoriUrunler sınıfı listesi 
+  CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            AddStokAlarmUrunRequest addStokAlarmUrunRequest = new AddStokAlarmUrunRequest 
+            { 
+                UrunKartiID = 6, 
+                UyeID = 1 
+            }; 
+ 
+AddStokAlarmUrunResponse addStokAlarmUrunResponse = customServisClient.AddStokAlarmUrun(uyeKodu, 
+addStokAlarmUrunRequest); 
+7 
+ 
+ 
+WebFavoriUrunler 
+Adı 
+ Tipi 
+ Açıklama 
+EklemeTarihi 
+datetime 
+Ekleme tarihi  
+FavoriUrunID 
+Integer 
+Ürünün id değeri  
+ParaBirimi 
+string 
+Para birimi  
+ResimUrl 
+string 
+Ürün resim url  
+StokKodu 
+string 
+Stok kodu  
+ToplamStokAdedi 
+double 
+Ürünün toplam stok adedi 
+UrunAdi 
+string 
+Ürün adı  
+UrunFiyati 
+double 
+Ürün fiyatı 
+UrunFiyatiKdv 
+double  
+Ürün fiyatı kdv değeri  
+UrunKartiID 
+integer 
+Ürün  kartı id  
+UrunSayisi 
+double 
+Ürün sayısı 
+UrunUrl 
+string 
+Ürün url değeri 
+UyeID 
+integer 
+Üye id değeri  
+VaryasyonSayisi 
+integer 
+Varyasyon sayısı 
+ 
+Örnek kullanım; 
+ 
+1.5 - GetFiyatAlarmUrunler 
+  CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+     GetFavoriUrunlerRequest getFavoriUrunlerRequest = new GetFavoriUrunlerRequest  
+{ 
+  
+ 
+UyeID = 2 
+  
+}; 
+      
+GetFavoriUrunlerResponse getFavoriUrunlerResponse = customServisClient.GetFavoriUrunler(uyeKodu, 
+getFavoriUrunlerRequest); 
+8 
+ 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+GetFavoriUrunler
+Request 
+GetFiyatAlarmUr
+unlerRequest 
+evet 
+Sorgu değerlerini içeren GetFiyatAlarmUrunlerRequest 
+sınıfı 
+ 
+GetFiyatAlarmUrunlerRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeID 
+integer  
+evet 
+Fiyat alarmlı ürünleri getirilmek istenen üye id değeri.   
+ 
+Response = GetFiyatAlarmUrunlerResponse 
+GetFiyatAlarmUrunlerResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+Urunler 
+List<WebFiyatAlarm
+Urunler> 
+Fiyat alarmlı ürünleri içeren WebFiyatAlarmUrunler sınıfı listesi 
+ 
+WebFiyatAlarmUrunler 
+Adı 
+ Tipi 
+ Açıklama 
+EklemeTarihi 
+datetime 
+Ekleme tarihi  
+EklenenFiyat 
+Integer 
+Fiyat alarm için eklenen fiyat   
+FiyatAlarmUrunID 
+integer 
+Fiyat alarm id değeri. 
+ParaBirimi 
+string 
+Para birimi  
+ResimUrl 
+string 
+Ürün resim url  
+StokKodu 
+string 
+Stok kodu  
+9 
+ 
+ToplamStokAdedi 
+double 
+Ürünün toplam stok adedi 
+UrunAdi 
+string 
+Ürün adı  
+UrunFiyati 
+double 
+Ürün fiyatı 
+UrunFiyatiKdv 
+double  
+Ürün fiyatı kdv değeri  
+UrunKartiID 
+integer 
+Ürün  kartı id  
+UrunUrl 
+string 
+Ürün url değeri 
+UyeID 
+integer 
+Üye id değeri  
+VaryasyonSayisi 
+integer 
+Varyasyon sayısı 
+ 
+Örnek kullanım; 
+ 
+1.6 - GetStokAlarmUrunler 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+GetFavoriUrunler
+Request 
+GetStokAlarmUr
+unlerRequest 
+evet 
+Sorgu değerlerini içeren GetStokAlarmUrunlerRequest 
+ 
+GetStokAlarmUrunlerRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeID 
+integer  
+evet 
+Stok alarmlı ürünleri getirilmek istenen üye id değeri.   
+ 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+       GetFiyatAlarmUrunlerRequest getFiyatAlarmUrunlerRequest = new GetFiyatAlarmUrunlerRequest 
+            { 
+                UyeID=2 
+            }; 
+GetFiyatAlarmUrunlerResponse getFiyatAlarmUrunlerResponse =.GetFiyatAlarmUrunler(uyeKodu, 
+getFiyatAlarmUrunlerRequest); 
+10 
+ 
+Response = GetStokAlarmUrunlerResponse 
+GetStokAlarmUrunlerResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+Urunler 
+List<WebStokAlarm
+Urunler> 
+Stok alarmlı ürünleri içeren WebStokAlarmUrunler sınıfı listesi 
+ 
+WebStokAlarmUrunler 
+Adı 
+ Tipi 
+ Açıklama 
+EklemeTarihi 
+datetime 
+Ekleme tarihi  
+StokAlarmUrunId 
+Integer 
+Stok alarm ürün id değeri  
+ParaBirimi 
+string 
+Para birimi  
+ResimUrl 
+string 
+Ürün resim url  
+StokKodu 
+string 
+Stok kodu  
+ToplamStokAdedi 
+double 
+Ürünün toplam stok adedi 
+UrunAdi 
+string 
+Ürün adı  
+UrunFiyati 
+double 
+Ürün fiyatı 
+UrunFiyatiKdv 
+double  
+Ürün fiyatı kdv değeri  
+UrunKartiID 
+integer 
+Ürün  kartı id  
+UrunUrl 
+string 
+Ürün url değeri 
+UyeID 
+integer 
+Üye id değeri  
+VaryasyonSayisi 
+integer 
+Varyasyon sayısı 
+ 
+11 
+ 
+Örnek kullanım; 
+ 
+1.7 - RemoveFavoriUrun 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+RemoveFavoriUru
+nRequest 
+RemoveFavoriUr
+unRequest 
+evet 
+Silinecek 
+favori 
+ürün 
+bilgilerini 
+içeren 
+RemoveFavoriUrunRequest sınıfı 
+ 
+RemoveFavoriUrunRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeID 
+integer  
+evet 
+Silinmek istenen favori ürünün üye id değeri   
+FavoriUrunID 
+integer 
+evet 
+Silinmek istenen favori ürünün id değeri 
+ 
+Response = RemoveFavoriUrunResponse 
+RemoveFavoriUrunResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+ 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+            GetStokAlarmUrunlerRequest getStokAlarmUrunlerRequest = new GetStokAlarmUrunlerRequest 
+            { 
+                UyeID=2 
+            }; 
+GetStokAlarmUrunlerResponse getStokAlarmUrunlerResponse= 
+customServisClient.GetStokAlarmUrunler(uyeKodu, getStokAlarmUrunlerRequest); 
+12 
+ 
+Örnek kullanım; 
+ 
+1.8 - RemoveFiyatAlarmUrun 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+RemoveFiyatAlar
+mUrunRequest 
+RemoveFiyatAlar
+mUrunRequest 
+evet 
+Silinecek 
+Fiyat 
+alarm 
+ürün 
+bilgilerini 
+içeren 
+RemoveFavoriUrunRequest sınıfı 
+ 
+RemoveFiyatAlarmUrunRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeID 
+integer  
+evet 
+Silinmek istenen fiyat alarmlı ürünün üye id değeri   
+FiyatAlarmUrunID 
+integer 
+evet 
+Silinmek istenen fiyat alarmlı ürünün id değeri 
+ 
+Response = RemoveFiyatAlarmUrunResponse 
+RemoveFiyatAlarmUrunResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+ 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            RemoveFavoriUrunRequest removeFavoriUrunRequest = new RemoveFavoriUrunRequest 
+            { 
+                FavoriUrunID=2, 
+                UyeID=29 
+            }; 
+ 
+RemoveFavoriUrunResponse removeFavoriUrunResponse = customServisClient.RemoveFavoriUrun(uyeKodu, 
+removeFavoriUrunRequest); 
+13 
+ 
+Örnek kullanım; 
+ 
+1.9 - RemoveStokAlarmUrun 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+RemoveStokAlar
+mUrunRequest 
+RemoveStokAlar
+mUrunRequest 
+evet 
+Silinecek 
+stok 
+alarm 
+ürün 
+bilgilerini 
+içeren 
+RemoveStokAlarmUrunRequest sınıfı 
+ 
+RemoveStokAlarmUrunRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeID 
+integer  
+evet 
+Silinmek istenen stok alarmlı ürünün üye id değeri   
+StokAlarmUrunID 
+integer 
+evet 
+Silinmek istenen stok alarmlı ürünün id değeri 
+ 
+Response = RemoveStokAlarmUrunResponse 
+RemoveStokAlarmUrunResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+ 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+           RemoveFiyatAlarmUrunRequest removeFiyatAlarmUrunRequest = new RemoveFiyatAlarmUrunRequest 
+            { 
+                FiyatAlarmUrunID=1, 
+                UyeID=0 
+            }; 
+ 
+RemoveFiyatAlarmUrunResponse removeFiyatAlarmUrunResponse =.RemoveFiyatAlarmUrun(uyeKodu, 
+removeFiyatAlarmUrunRequest); 
+14 
+ 
+Örnek kullanım; 
+ 
+2.1 - DeleteEntegrasyonId 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Entegrasyon 
+Entegrasyon 
+evet 
+Silinecek Entegrasyon bilgilerini içeren Entegrasyon sınıfı 
+ 
+Entegrasyon 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+EntegrasyonKodu 
+string 
+evet 
+Entegrasyon kodu 
+TabloAlan 
+string 
+evet 
+Tablo alan  
+AlanDeger 
+string 
+evet 
+Alan değer  
+Tanim 
+string 
+evet 
+Tanım  
+Deger 
+string 
+hayır 
+Değer 
+EklemeTarihi 
+datetime 
+hayır 
+Ekleme tarihi  
+ 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            RemoveStokAlarmUrunRequest removeStokAlarmUrunRequest = new RemoveStokAlarmUrunRequest 
+            { 
+                StokAlarmUrunID=5, 
+                UyeID=4 
+            }; 
+ 
+RemoveStokAlarmUrunResponse removeStokAlarmUrunResponse= 
+customServisClient.RemoveStokAlarmUrun(uyeKodu, removeStokAlarmUrunRequest); 
+15 
+ 
+Örnek kullanım; 
+ 
+2.2 - SaveEntegrasyonId 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Entegrasyon 
+Entegrasyon 
+evet 
+Eklenecek olan entegrayon bilgilerini içeren Entegrasyon 
+sınıfı 
+ 
+Entegrasyon 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+EntegrasyonKodu 
+string 
+evet 
+Entegrasyon kodu 
+TabloAlan 
+string 
+evet 
+Tablo alan  
+AlanDeger 
+string 
+evet 
+Alan değer  
+Tanim 
+string 
+evet 
+Tanım  
+Deger 
+string 
+hayır 
+Değer 
+EklemeTarihi 
+datetime 
+hayır 
+Ekleme tarihi  
+ 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            Entegrasyon entegrasyon = new Entegrasyon 
+            { 
+                EntegrasyonKodu= "entegrasyonkod", 
+                TabloAlan= "tablo alan ", 
+                AlanDeger= "alan değer ", 
+                Tanim= "tanım", 
+                //Deger = "", 
+                //EklemeTarihi= new DateTime(2018,9,12) 
+            }; 
+ 
+            customServisClient.DeleteEntegrasyonId(uyeKodu, entegrasyon); 
+16 
+ 
+Örnek kullanım; 
+ 
+2.3 - SelectEntegrasyon 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+EntegrasyonKodu 
+string 
+evet 
+Entegrasyon kodu değeri  
+KayitSayisi 
+integer 
+evet 
+Getirilecek maksimum kayıt sayısı 
+ 
+Response = List<Entegrasyon>  
+Entegrasyon 
+ Adı 
+ Tipi 
+ Açıklama 
+EntegrasyonKodu 
+string 
+Entegrasyon kodu 
+TabloAlan 
+string 
+Tablo alan  
+AlanDeger 
+string 
+Alan değer  
+Tanim 
+string 
+Tanım  
+Deger 
+string 
+Değer 
+EklemeTarihi 
+datetime 
+Ekleme tarihi  
+ 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            Entegrasyon entegrasyon = new Entegrasyon 
+            { 
+                AlanDeger = "entegrasyon Alan değer", 
+                Deger = "değer", 
+                EntegrasyonKodu = "entregrasyon kodu", 
+                TabloAlan = "tablo alan", 
+                Tanim = "tanım" 
+            }; 
+ 
+            customServisClient.SaveEntegrasyonId(uyeKodu, entegrasyon); 
+17 
+ 
+Örnek kullanım; 
+ 
+2.4 - SelectEntegrasyonId 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Entegrasyon 
+Entegrasyon 
+evet 
+Değer I getirilmek istenen entegrasyon bilgilerini içeren 
+Entegrasyon sınıfı  
+ 
+Entegrasyon 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+EntegrasyonKodu 
+string 
+evet 
+Entegrasyon kodu 
+TabloAlan 
+string 
+evet 
+Tablo alan  
+AlanDeger 
+string 
+evet 
+Alan değer  
+Tanim 
+string 
+evet 
+Tanım  
+Deger 
+string 
+hayır 
+Değer 
+EklemeTarihi 
+datetime 
+hayır 
+Ekleme tarihi  
+ 
+Response = string entegrasyonDeger  
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+List<Entegrasyon> entegrasyonlar =  customServisClient.SelectEntegrasyon(uyeKodu, "entregrasyon 
+kodu",2); 
+18 
+ 
+Örnek kullanım; 
+ 
+3.1 - GuncelleKargoDesiFiyat 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+KargoDesiFiyatGu
+ncelleRequest 
+KargoDesiFiyatG
+uncelleRequest 
+evet 
+Güncelleme 
+bilgilerini 
+içeren 
+KargoDesiFiyatGuncelleRequest sınıfı 
+ 
+KargoDesiFiyatGuncelleRequest 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+KargoDesiFiyatBilgi
+si 
+KargoDesiFiyatB
+ilgisi 
+hayır 
+Kargo desi fiyat bilgilerini içerene KargoDesiFiyatBilgisi 
+sınıfı  
+SadeceSehirIcineG
+önderim 
+bool 
+hayır 
+Sadece şehir içine gönderim durumu  
+KargoKapsami 
+integer 
+hayır 
+Kargo kapsamı  
+UlkeBelirle 
+bool 
+hayır 
+Ülke belirleme durumu  
+UlkeID 
+integer 
+hayır 
+Ülke id değeri  
+ 
+KargoDesiFiyatBilgisi 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+DesiBas 
+double 
+hayır 
+Desi başlangıç değeri  
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+            Entegrasyon entegrasyon = new Entegrasyon 
+            { 
+                AlanDeger = "entegrasyon Alan değer",                 
+                EntegrasyonKodu = "entregrasyon kodu", 
+                TabloAlan = "tablo alan", 
+                Tanim = "tanım" 
+            }; 
+ string entegrasyonDeger = customServisClient.SelectEntegrasyonId(uyeKodu, entegrasyon); 
+19 
+ 
+DesiSon 
+double 
+hayır 
+Desi bitiş değeri  
+Fiyat 
+double 
+hayır 
+Fiyat  
+ID 
+integer 
+evet 
+ID 
+KargoID 
+integer 
+hayır 
+Kargo id  
+SehirID 
+integer 
+Hayır 
+Şehir id  
+SehirIci 
+bool 
+hayır 
+Şehir içi durumu  
+UlkeID 
+integer 
+hayır 
+Ülke id  
+ 
+Response = KargoDesiFiyatSelectResponse  
+KargoDesiFiyatSelectResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+KargoDesiFiyat
+Listesi 
+List<KargoDesiFiyat
+> 
+Filtrelere göre dönen listeyi içeren KargoDesiFiyat listesi 
+ 
+KargoDesiFiyat 
+Adı 
+ Tipi 
+ Açıklama 
+DesiBas 
+double 
+Desi başlangıç değeri  
+DesiSon 
+double 
+Desi son değeri  
+Fiyat 
+double 
+Fiyat  
+ID 
+integer 
+Id  
+KargoID 
+integer 
+Kargo id  
+SehirAdi 
+string 
+Şehir adı 
+SehirID 
+integer 
+Şehir id  
+20 
+ 
+SehirIci 
+bool 
+Şehir içi durumu 
+UlkeAdi 
+string 
+Ülke adı  
+UlkeID 
+integer 
+Ülke id  
+ 
+Örnek kullanım; 
+ 
+3.2  - SelectKargoDesiFiyat 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+KargoDesiFiyatSel
+ectRequest 
+KargoDesiFiyatSe
+lectRequest 
+evet 
+Filtre değerlerini içeren KargoDesiFiyatSelectRequest 
+sınıfı 
+ 
+                CustomServis.CustomServisClient customServisClient = new 
+CustomServis.CustomServisClient(); 
+ 
+            KargoDesiFiyatBilgisi kargoDesiFiyatBilgisi = new KargoDesiFiyatBilgisi 
+            { 
+                DesiBas = 3, 
+                DesiSon = 7, 
+                ID = 10403, 
+                SehirIci = true, 
+         Fiyat=8, 
+                KargoID=2, // kayıtlı kargo id  
+                SehirID=1, // kayıtlı şehir id  
+                UlkeID=1   // kayıtlı ülke id  
+            }; 
+ 
+            KargoDesiFiyatGuncelleRequest kargoDesiFiyatGuncelleRequest = new 
+KargoDesiFiyatGuncelleRequest 
+            { 
+                KargoDesiFiyatBilgisi = kargoDesiFiyatBilgisi, 
+                //SadeceSehirIcineGonderim = true, 
+                //KargoKapsami=1, 
+                //UlkeBelirle=true, 
+                //UlkeID=1 
+            }; 
+ 
+            KargoDesiFiyatSelectResponse kargoDesiFiyatSelectResponse2 = 
+customServisClient.GuncelleKargoDesiFiyat(uyeKodu, kargoDesiFiyatGuncelleRequest); 
+21 
+ 
+KargoDesiFiyatSelectRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+FiltreKargoID 
+integer 
+hayır 
+Filtredeki kargo id değeri  
+FiltreSehirID 
+integer 
+hayır 
+Filtredeki şehir id değeri  
+FiltreUlkeID 
+integer 
+hayır 
+Filtredeki ülke id değeri 
+ 
+Response = KargoDesiFiyatSelectResponse  
+KargoDesiFiyatSelectResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+KargoDesiFiyat
+Listesi 
+List<KargoDesiFiyat
+> 
+Filtrelere göre dönen listeyi içeren KargoDesiFiyat listesi 
+ 
+KargoDesiFiyat 
+Adı 
+ Tipi 
+ Açıklama 
+DesiBas 
+double 
+Desi başlangıç değeri  
+DesiSon 
+double 
+Desi son değeri  
+Fiyat 
+double 
+Fiyat  
+ID 
+integer 
+Id  
+KargoID 
+integer 
+Kargo id  
+SehirAdi 
+string 
+Şehir adı 
+SehirID 
+integer 
+Şehir id  
+SehirIci 
+bool 
+Şehir içi durumu 
+UlkeAdi 
+string 
+Ülke adı  
+22 
+ 
+UlkeID 
+integer 
+Ülke id  
+ 
+Örnek kullanım; 
+ 
+3.3  - SelectKargoFirmalari 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+ 
+Response = List<KargoFirma>  
+KargoFirma 
+Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Kargo firma id  
+Tanim 
+string 
+Kargo firma adı 
+ 
+Örnek kullanım; 
+ 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            // tüm parametreler boş gönderilir ise filtre olmadan tüm kayıtlar döner. 
+            //parametreler tek veya ikili olarak da kullanılabilir örnek olarak sadece FiltreKargoID 
+gönderilip girilen FiltreKargoID li tüm kayıtlar getirilebilir.  
+            KargoDesiFiyatSelectRequest kargoDesiFiyatSelectRequest = new 
+KargoDesiFiyatSelectRequest 
+            { 
+                FiltreKargoID=3, 
+                FiltreSehirID= 2910, 
+                FiltreUlkeID = 82 
+            }; 
+             KargoDesiFiyatSelectResponse kargoDesiFiyatSelectResponse= 
+customServisClient.SelectKargoDesiFiyat(uyeKodu, kargoDesiFiyatSelectRequest); 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+List<KargoFirma> kargoFirmalari=  customServisClient.SelectKargoFirmalari(uyeKodu); 
+23 
+ 
+4.1  - SelectIadeTalebi 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+WebIadeTalepSel
+ectRequest 
+WebIadeTalepSel
+ectRequest 
+evet 
+Filtre bilgilerini içeren WebIadeTalepSelectRequest sınıfı 
+ 
+WebIadeTalepSelectRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Filtre 
+IadeTalepFiltre 
+evet 
+Filtre bilgilerini içeren IadeTalepFiltre sınıfı 
+ 
+IadeTalepFiltre 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+DurumID 
+integer 
+hayır 
+Durum id değeri. 
+ParaIadeTipi 
+integer 
+hayır 
+Para iade tipi 
+SiparisID 
+integer 
+hayır 
+Sipariş id değeri 
+UyeID 
+integer 
+hayır 
+Uye id değeri  
+ID 
+integer 
+hayır 
+Id  
+EklemeTarihi1 
+datetime 
+hayır 
+Filtre ekleme tarihi başlangıç 
+EklemeTarihi2 
+datetime 
+hayır 
+Filtre ekleme tarihi bitiş 
+UyeAdi 
+string 
+hayır 
+Üye adı  
+ 
+Response = WebIadeTalepResponse 
+WebIadeTalepResponse 
+Adı 
+ Tipi 
+ Açıklama 
+24 
+ 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+IadeTalepList 
+List<IadeTalep> 
+Filtrelere göre dönen listeyi içeren IadeTalep  listesi 
+ 
+IadeTalep 
+Adı 
+ Tipi 
+ Açıklama 
+Cevap 
+string 
+İade talep cevabı  
+CevapTarihi 
+datetime 
+Cevap tarihi  
+Cevaplayan 
+string 
+Cevaplayan 
+CevaplayanID 
+integer 
+Cevaplayan id  
+Durum 
+string 
+Durum  
+DurumID 
+integer 
+Durum id  
+EklemeTarihi 
+datetime 
+Ekleme tarihi  
+ID 
+integer 
+Id  
+Notlar 
+string 
+Notlar  
+ParaIadeTipi 
+integer 
+Para iade tipi  
+SiparisID 
+integer 
+Sipariş id  
+UyeAdi 
+string 
+Üye adı 
+UyeID 
+integer 
+Üye id  
+ 
+25 
+ 
+Örnek kullanım; 
+4.2  - UpdateIadeTalebi 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+WebIadeTalepGu
+ncelleRequest 
+WebIadeTalepGu
+ncelleRequest 
+evet 
+Güncelleme 
+bilgilerini 
+içeren 
+WebIadeTalepGuncelleRequest sınıfı 
+ 
+WebIadeTalepGuncelleRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Talep 
+IadeTalep 
+evet 
+Iade Talep bilgisini içeren IadeTalep sınıfı  
+MailGonder 
+bool 
+hayır 
+Mail ile bilgilendirme durumu 
+ 
+IadeTalep 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            // integer alanlar -1 gönderilir ise filtre yapılmaz  
+            IadeTalepFiltre iadeTalepFiltre = new IadeTalepFiltre 
+            { 
+                DurumID = -1, 
+                ParaIadeTipi = 1, 
+                SiparisID = -1, 
+                UyeID = 2, 
+                ID = -1, 
+                EklemeTarihi1 = new DateTime(2016, 10, 10), 
+                EklemeTarihi2 = new DateTime(2018, 10, 10), 
+                UyeAdi = "" 
+            }; 
+            WebIadeTalepSelectRequest webIadeTalepSelectRequest = new WebIadeTalepSelectRequest 
+            { 
+                Filtre = iadeTalepFiltre 
+            }; 
+ 
+            WebIadeTalepResponse webIadeTalepResponse = customServisClient.SelectIadeTalebi(uyeKodu, 
+webIadeTalepSelectRequest); 
+26 
+ 
+ID 
+integer 
+evet 
+0 girilir ise yeni kayıt eklenir 0 dan büyük girilir ise girilen 
+id li kayıt güncellenir. 
+Cevap 
+string 
+hayır 
+Cavap  
+Cevaplayan 
+string 
+hayır 
+Cevaplayan adı  
+CevaplayanID 
+Integer 
+hayır 
+Cevaplayan id  
+Durum 
+string 
+hayır 
+Durum  
+DurumID 
+integer 
+hayır 
+Kayıtlı durum id  
+SiparisID 
+integer 
+evet 
+ID 0 olduğu durumda  sipariş id değeri zorunlu. 
+UyeID 
+integer 
+hayır 
+Üye id  
+ParaIadeTipi 
+integer 
+hayır 
+Para iade tipi 
+CevapTarihi 
+datetime 
+hayır 
+Cevap tarihi 
+EklemeTarihi 
+datetime 
+hayır 
+Ekleme tarihi  
+Notlar 
+string 
+hayır 
+Notlar 
+UyeAdi 
+string 
+hayır 
+Üye adı  
+ 
+Response = WebIadeTalepResponse 
+WebIadeTalepResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+IadeTalepList 
+List<IadeTalep> 
+Filtrelere göre dönen listeyi içeren IadeTalep  listesi 
+ 
+IadeTalep 
+Adı 
+ Tipi 
+ Açıklama 
+Cevap 
+string 
+İade talep cevabı  
+27 
+ 
+CevapTarihi 
+datetime 
+Cevap tarihi  
+Cevaplayan 
+string 
+Cevaplayan 
+CevaplayanID 
+integer 
+Cevaplayan id  
+Durum 
+string 
+Durum  
+DurumID 
+integer 
+Durum id  
+EklemeTarihi 
+datetime 
+Ekleme tarihi  
+ID 
+integer 
+Id  
+Notlar 
+string 
+Notlar  
+ParaIadeTipi 
+integer 
+Para iade tipi  
+SiparisID 
+integer 
+Sipariş id  
+UyeAdi 
+string 
+Üye adı 
+UyeID 
+integer 
+Üye id  
+ 
+Örnek kullanım ; 
+ 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            IadeTalep iadeTalep = new IadeTalep 
+            { 
+                ID = 0, 
+                Cevap = "cevap", 
+                Cevaplayan = "cevaplayan ismi", 
+                CevaplayanID = 1, 
+                Durum = "durum", 
+                DurumID = 1, 
+                SiparisID = 7, 
+                UyeID = 1, 
+                ParaIadeTipi = 2, 
+            }; 
+ 
+          WebIadeTalepGuncelleRequest webIadeTalepGuncelleRequest = new WebIadeTalepGuncelleRequest 
+            { 
+                Talep = iadeTalep, 
+                MailGonder = false, 
+            }; 
+ 
+WebIadeTalepResponse 
+webIadeTalepResponsee 
+= 
+customServisClient.UpdateIadeTalebi(uyeKodu, 
+webIadeTalepGuncelleRequest); 
+28 
+ 
+4.3  - SelectIadeOdemeListesi 
+ 
+Filtredeki tüm alanlar nullable null gelmeyen tüm değerler filtreye dahil edilir. Filtreye dahil olması istenmeyen 
+alanlar hiç gönderilmemelidir. Sayfalama boş gönderilir ise filtreye uyan tüm kayıtlar tek seferde dönecektir fazla 
+data çekilecekse sayfalama yapılması önerilir. 
+ 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre 
+SelectIadeOdemeLis
+tesiRequest 
+ 
+SelectIadeOdemeListe
+siRequest 
+ 
+evet 
+Filtre 
+WebServisSayfalama WebServisSayfalama 
+evet 
+Sayfalama 
+ 
+ 
+SelectIadeOdemeListesiRequest 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+OdemeDurumu 
+WebIadeOdemeDurum 
+evet 
+İade ödeme durumlarını içeren enum 
+SiparisID 
+int 
+hayır 
+Sipariş ID 
+OdemeTipi 
+int 
+hayır 
+Ödeme Tipi 
+KullaniciID 
+int 
+hayır 
+Kullanıcı ID 
+UyeID 
+int 
+hayır 
+Üye ID 
+TarihBaslangic 
+DateTime 
+hayır 
+Tarih aralığı başlangıcı 
+TarihBitis 
+DateTime 
+hayır 
+Tarih aralığı bitişi 
+ 
+ 
+ 
+29 
+ 
+WebIadeOdemeDurum (Enum) 
+EnumMember 
+ 
+Tumu 
+-1 
+Odenmedi 
+0 
+Odendi 
+1 
+ 
+WebServisSayfalama 
+ Adı 
+ Tipi 
+ Zorunlu   Açıklama 
+BaslangicIndex 
+integer 
+hayır 
+Sayfalama başlangıç değeri.  
+KayitSayisi 
+integer 
+hayır 
+Getirilecek kayıt sayısı. 
+SiralamaDeger 
+string 
+hayır 
+Sıralama değeri. Örn: “Id” 
+SiralamaYonu 
+string 
+hayır 
+Sıralama yönü. Artan için “ASC” azalan için “DESC” 
+ 
+ 
+Response = SelectIadeOdemeListesiResponse  
+SelectIadeOdemeListesiResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+WebIadeOdeme 
+List<WebIadeOdeme> Filtrelere göre dönen listeyi içeren WebIadeOdeme listesi 
+ 
+ 
+ 
+ 
+ 
+ 
+30 
+ 
+WebIadeOdeme 
+Adı 
+ Tipi 
+Açıklama 
+ID 
+int 
+Ödeme ID 
+SiparisID 
+int 
+Sipariş ID 
+KullaniciID 
+int 
+Kullanıcı ID  
+KullaniciAdi 
+string 
+Kullanıcı adı 
+OdemeTipi 
+int 
+Siparişin ödeme tipi durumu 
+Tutar 
+double 
+Ödenecek tutar 
+UyeAdi 
+string 
+Üye adı 
+IbanAdiSoyadi 
+string 
+İade Iban adı soyadı 
+IBAN 
+string 
+İade Iban 
+Tarih 
+DateTime 
+İade talebi oluşturulan tarih 
+OdemeDurumu 
+WebIadeOdemeDurum 
+Ödeme durumu (Tumu , Odenmedi , Odendi) 
+ 
+ 
+Örnek kullanım;
+ 
+    
+CustomServisClient customServisClient = new CustomServisClient(); 
+ 
+                SelectIadeOdemeListesiRequest selectIadeOdemeListesiRequest = new 
+SelectIadeOdemeListesiRequest 
+                { 
+                    OdemeDurumu = WebIadeOdemeDurum.Tumu, 
+                    //SiparisID = 1, 
+                    //OdemeTipi = 1, 
+                    //KullaniciID = 1, 
+                    //UyeID = 1, 
+                    //TarihBaslangic = new DateTime(2020, 01, 01), 
+                    //TarihBitis = new DateTime(2022, 01, 01) 
+                }; 
+ 
+                SelectIadeOdemeListesiResponse response = 
+customServisClient.SelectIadeOdemeListesi("uyekodu", selectIadeOdemeListesiRequest, new 
+WebServisSayfalama()); 
+31 
+ 
+5.1  - SaveMenu 
+Parametre 
+ Adı 
+ Tipi 
+ 
+Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SaveMenuRequest 
+SaveMenuRequest 
+evet 
+Menu bilgilerini içeren SaveManuRequest sınıfı  
+ 
+SaveMenuRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Dil 
+string 
+hayır 
+Menü dili  
+Menuler 
+List<WebMenu> 
+evet 
+Eklenecek olan menuleri içeren WebMenu listesi. 
+ 
+ 
+ 
+ 
+WebMenu 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Aktif 
+bool 
+hayır 
+Menü aktiflik durumu  
+Baslik 
+string 
+evet 
+Menü başlığı  
+BitisTarihi 
+datetime 
+evet 
+Bitiş tarihi 
+Icerik 
+string 
+evet 
+Menü içerik değeri  
+ID 
+integer 
+evet 
+Menü id  
+PID 
+integer 
+hayır 
+Üst menu id  
+Resim 
+string 
+hayır 
+Resim bilgisi  
+ResimTargetUrl 
+string 
+hayır 
+Resim target url 
+32 
+ 
+ResimYolu 
+string 
+hayır 
+Resim url  
+Sira 
+integer 
+hayır 
+Sira  
+Target 
+string 
+hayır 
+Target değeri  
+Tip 
+integer 
+hayır 
+Menü tipi  
+Url 
+string 
+hayır 
+Menü url  
+ 
+Response = List<SaveMenuResponse>  
+SaveMenuResponse 
+Adı 
+ Tipi 
+ Açıklama 
+IsError 
+integer 
+false= işlem başarılı  , true = işlem başarısız 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı  
+ 
+ 
+ 
+ 
+33 
+ 
+Örnek kullanım; 
+ 
+5.2  - DeleteMenu 
+Parametre 
+ Adı 
+ Tipi 
+ 
+Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+DeleteMenuReque
+st 
+DeleteMenuReque
+st 
+evet 
+Silinecek menü bilgilerini içeren DeleteMenuRequest 
+sınıfı  
+ 
+DeleteMenuRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Menuler 
+List<WebMenu> 
+evet 
+Silinecek olan  menülerin idlerini içeren WebMenu 
+listesi. 
+ 
+  List<WebMenu> webMenus = new List<WebMenu>(); 
+            WebMenu webMenu = new WebMenu 
+            { 
+                Aktif = true,  
+                Baslik = "Menu Başlık", 
+                BitisTarihi = DateTime.Now.AddYears(1), 
+                Icerik = "Menü İçerik", 
+                ID = 0, // 0 gönderilir ise yeni menu eklenir 0 dan büyük gönderilirse gönderilen id 
+li ürün güncellenir.  
+                PID = 0, // üst menü id  
+                Resim = "",  
+                ResimTargetUrl = "",  
+                ResimYolu = "", 
+                Sira = 1, 
+                Target = "", 
+                Tip = 1, 
+                Url = "" 
+            }; 
+            webMenus.Add(webMenu); 
+            SaveMenuRequest saveMenuRequest = new SaveMenuRequest 
+            { 
+                Dil = "tr", 
+                Menuler = webMenus 
+            }; 
+            SaveMenuResponse saveMenuResponse = 
+StaticVariables.customServisClient.SaveMenu(StaticVariables.uyeKodu, saveMenuRequest); 
+            return saveMenuResponse; 
+34 
+ 
+WebMenu 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Aktif 
+bool 
+hayır 
+Menü aktiflik durumu  
+Baslik 
+string 
+hayır 
+Menü başlığı  
+BitisTarihi 
+datetime 
+hayır 
+Bitiş tarihi 
+Icerik 
+string 
+hayır 
+Menü içerik değeri  
+ID 
+integer 
+evet 
+Menü id   
+PID 
+integer 
+hayır 
+Üst menu id  
+Resim 
+string 
+hayır 
+Resim bilgisi  
+ResimTargetUrl 
+string 
+hayır 
+Resim target url 
+ResimYolu 
+string 
+hayır 
+Resim url  
+Sira 
+integer 
+hayır 
+Sira  
+Target 
+string 
+hayır 
+Target değeri  
+Tip 
+integer 
+hayır 
+Menü tipi  
+Url 
+string 
+hayır 
+Menü url  
+ 
+Response = List<DeleteMenuResponse>  
+DeleteMenuResponse 
+Adı 
+ Tipi 
+ Açıklama 
+IsError 
+integer 
+false= işlem başarılı  , true = işlem başarısız 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı  
+ 
+35 
+ 
+Örnek kullanım; 
+ 
+5.3  - GetMenu 
+Parametre 
+ Adı 
+ Tipi 
+ 
+Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+GetMenuRequest 
+GetMenuRequest 
+evet 
+Sorgu bilgilerini içeren  GetMenuRequest sınıfı 
+ 
+GetMenuRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+Aktif  
+integer 
+hayır 
+Menü aktiflik durumu  
+Dil 
+string 
+hayır 
+Menü dili  
+MenuID 
+integer 
+hayır 
+Menü id değeri  
+ 
+Response = List<GetMenuResponse>  
+GetMenuResponse 
+Adı 
+ Tipi 
+ Açıklama 
+IsError 
+integer 
+false= işlem başarılı  , true = işlem başarısız 
+  public static DeleteMenuResponse DeleteMenu() 
+        { 
+            List<WebMenu> webMenus = new List<WebMenu>(); 
+            webMenus.Add(new WebMenu { ID = 1  }); // id değerleri dikkate alınarak silinir.  
+            DeleteMenuRequest deleteMenuRequest = new DeleteMenuRequest 
+            { 
+                Menuler = webMenus 
+            }; 
+            DeleteMenuResponse deleteMenuResponse = 
+StaticVariables.customServisClient.DeleteMenu(StaticVariables.uyeKodu, deleteMenuRequest); 
+            return deleteMenuResponse;        
+ } 
+36 
+ 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı  
+Menuler  
+List<WebMenu> 
+Filtrelere göre dönen menüleri içeren liste  
+ 
+WebMenu 
+Adı 
+ Tipi 
+ Açıklama 
+Aktif 
+bool 
+Menü aktiflik durumu  
+Baslik 
+string 
+Menü başlığı  
+BitisTarihi 
+datetime 
+Bitiş tarihi 
+Icerik 
+string 
+Menü içerik değeri  
+ID 
+integer 
+Menü id   
+PID 
+integer 
+Üst menu id  
+Resim 
+string 
+Resim bilgisi  
+ResimTargetUrl 
+string 
+Resim target url 
+ResimYolu 
+string 
+Resim url  
+Sira 
+integer 
+Sira  
+Target 
+string 
+Target değeri  
+Tip 
+integer 
+Menü tipi  
+Url 
+string 
+Menü url  
+ 
+37 
+ 
+Örnek kullanım; 
+ 
+6.1  - GetTaksitSecenek 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+WebTaksitSecene
+kRequest 
+WebTaksitSecene
+kRequest 
+evet 
+Filtre bilgilerini içeren WebTaksitSecenekRequest sınıfı 
+ 
+WebTaksitSecenekRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+MaksTaksitSayisi 
+integer 
+evet 
+Maksimum taksit sayısı  
+Tutar 
+double 
+evet 
+Tutar 
+ 
+Response = WebTaksitSecenekResponse 
+WebTaksitSecenekResponse 
+Adı 
+ Tipi 
+ Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı  , true = işlem başarısız 
+  GetMenuRequest getMenuRequest = new GetMenuRequest 
+            { 
+                Aktif = -1, // -1 gönderilir ise filtreye dahil olmaz hem aktif olanlar hem 
+olmayanları kapsar.  
+                Dil = "", // dil parametresi zorunlu değil 
+                MenuID = 0 // id girilirse girilen idli menu gelir girilmez ise tüm menuleri 
+getirir. 
+            }; 
+ 
+            GetMenuResponse getMenuResponse = 
+StaticVariables.customServisClient.GetMenu(StaticVariables.uyeKodu, getMenuRequest); 
+            StaticFunctions.CevapListele(getMenuResponse.Menuler.Cast<object>().ToList(), 
+"Menüler"); 
+ 
+38 
+ 
+TaksitSecenekl
+eri 
+List<WebTaksitBank
+a> 
+Taksit seçeneklerini içeren WebTaksitBanka sınıfı listesi 
+ 
+WebTaksitBanka 
+Adı 
+ Tipi 
+ Açıklama 
+BankaAdi 
+string 
+Banka adı  
+BankaId 
+integer 
+Banka id  
+Taksitler 
+WebTaksitSecenek 
+Taksit bilgilerini içeren WebTaksitSecenek sınıfı  
+ 
+ 
+WebTaksitSecenek 
+Adı 
+ Tipi 
+ Açıklama 
+TaksitSayisi 
+integer 
+Taksit sayısı  
+TaksitTanim 
+string 
+Taksit tanımı  
+TaksitTutari 
+double 
+Taksit tutarı 
+ToplamTutar 
+double 
+Toplam tutar 
+ 
+Örnek kullanım; 
+ 
+6.2  - SelectIlceler 
+Parametre 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            WebTaksitSecenekRequest webTaksitSecenekRequest = new WebTaksitSecenekRequest 
+            { 
+                MaksTaksitSayisi = 1, 
+                Tutar = 0 
+            }; 
+ 
+WebTaksitSecenekResponse webTaksitSecenekResponse = customServisClient.GetTaksitSecenek(uyeKodu, 
+webTaksitSecenekRequest); 
+39 
+ 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SelectIlceRequest 
+SelectIlceRequest evet 
+Filtre bilgilerini içeren SelectIlceRequest sınıfı 
+ 
+SelectIlceRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+FiltreIlceID 
+integer 
+hayır 
+Filtre ilçe id değeri  
+FiltreIlID 
+integer 
+hayır 
+Filtre il id değeri  
+ 
+Response =List<KargoIlce>  
+KargoIlce 
+Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Kargo ilçe id değeri  
+IlID 
+integer 
+Kargo ilçe il id değeri  
+Tanim 
+string 
+Kargo ilçe adı  
+ 
+Örnek kullanım; 
+ 
+6.3  - SelectIller 
+Parametre 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            // -1 gönderilen alanda filtreleme yapılmaz. alttaki kullanımda FiltreIlID=1 olan tüm 
+ilçeler getirilir 
+            SelectIlceRequest selectIlceRequest = new SelectIlceRequest 
+            { 
+                FiltreIlceID = -1, 
+                FiltreIlID = 1 
+            }; 
+            List<KargoIlce> ilceler = customServisClient.SelectIlceler(uyeKodu, selectIlceRequest); 
+40 
+ 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SelectIlRequest 
+SelectIlRequest 
+evet 
+Filtre bilgilerini içeren SelectIlRequest sınıfı 
+ 
+SelectIlRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+FiltreIlID 
+integer 
+hayır 
+Filtre il id değeri  
+FiltreUlkeID 
+integer 
+hayır 
+Filtre üke id değeri  
+ 
+Response = List<KargoIl>  
+KargoIl 
+Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Kargo il id değeri  
+UlkeID 
+integer 
+Kargo il ülke id değeri  
+Tanim 
+string 
+Kargo il  adı  
+ 
+Örnek kullanım; 
+ 
+6.4  - SelectMailList 
+Parametre 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient();           
+ 
+            // -1 gönderilen alanda filtreleme yapılmaz. alttaki kullanımda FiltreUlkeID=1 olan tüm 
+iller getirilir 
+            SelectIlRequest selectIlRequest = new SelectIlRequest 
+            { 
+                FiltreIlID = -1, 
+                FiltreUlkeID = 1 
+            }; 
+ 
+            List<KargoIl> iller = customServisClient.SelectIller(uyeKodu, selectIlRequest); 
+41 
+ 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+BaslangicTarihi 
+datetime 
+evet 
+Filtre başlangıç tarihi 
+BitisTarihi 
+datetime 
+evet 
+Filtre bitiş tarihi 
+ 
+Response = List<MailList>  
+MailList 
+Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Kargo il id değeri  
+EklemeTarihi 
+datetime 
+Ekleme tarihi 
+Mail 
+string 
+Mail içeriği  
+ 
+Örnek kullanım; 
+ 
+6.5  - SelectUlkeler 
+Parametre 
+ Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SelectUlkeReques
+t 
+SelectUlkeReque
+st 
+evet 
+Filtre bilgilerini içeren SelectUlkeRequest sınıfı 
+ 
+SelectUlkeRequest 
+Adı 
+ Tipi 
+ Zorunlu  
+ Açıklama 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+List<MailList> mailler = customServisClient.SelectMailList(uyeKodu,new DateTime(2015,1,1),new 
+DateTime(2018,11,20)); 
+42 
+ 
+FiltreUlkeKodu 
+integer 
+hayır 
+Filtre ülke kodu değeri  
+FiltreUlkeID 
+integer 
+hayır 
+Filtre üke id değeri  
+ 
+Response = List<KargoUlke>  
+KargoUlke 
+Adı 
+ Tipi 
+ Açıklama 
+ID 
+integer 
+Kargo ülke id değeri  
+Tanim 
+string 
+Kargo ülke adı 
+ 
+Örnek kullanım; 
+ 
+ 
+ 
+Ticimax Bilişim Teknolojileri A.Ş servislerde değişiklik yapma hakkını saklı tutar 
+ 
+CustomServis.CustomServisClient customServisClient = new CustomServis.CustomServisClient(); 
+ 
+            // parametreler gönderilmez ise tüm kayıtlar gelir 
+            // FiltreUlkeKodu  veya FiltreUlkeID parametreleri tek gönderilerek de cevap alınabilir 
+            SelectUlkeRequest selectUlkeRequest = new SelectUlkeRequest 
+            { 
+                FiltreUlkeID=1, 
+                FiltreUlkeKodu="TR" 
+            }; 
+             List<KargoUlke> ulkeler= customServisClient.SelectUlkeler(uyeKodu, selectUlkeRequest); 

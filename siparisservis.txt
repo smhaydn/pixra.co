@@ -1,0 +1,2822 @@
+1 
+ 
+TİCİMAX SİPARİŞ SERVİS 
+DÖKÜMANTASYONU 
+Servis Ekleme; 
+ 
+ 
+ 
+ 
+.Net uygulamalarda .config dosyasında servisin binding bölümüne < security mode= 
+“Transport” /> eklenmelidir. 
+Ekran görüntüsü: http://prntscr.com/un0z7j 
+ 
+Servis Adresi: https://www.alanadiniz.com/Servis/SiparisServis.svc 
+ 
+1-  Sipariş Eklemek(SaveSiparis) 
+ 
+2-  Siparişe Kargo Paket Eklemek(SaveSiparisKargoPaket) 
+ 
+3-  Sipariş Kargo Paketine Takip Numarasi Eklemek(SaveSiparisKargoPaketKargoTakipNo) 
+ 
+4-  Siparişleri Getirmek(SelectSiparis) 
+ 
+5-  Siparişin Kargo Paketlerini Getirmek(SelectSiparisKargoPaket) 
+2 
+ 
+6-  Siparişe Ait Ödemeleri Getirmek(SelectSiparisOdeme) 
+ 
+7-  Siparişe Ait Ürünleri Getirmek(SelectSiparisUrun) 
+ 
+8-  Sipariş Ürün Durumlarını Getirmek(SelectSiparisUrunDurumlari) 
+ 
+9-  Sipariş Aktarıldı Yapmak(SetSiparisAktarildi) 
+ 
+10- Sipariş Aktarıldı İptal Etmek(SetSiparisAktarildiIptal) 
+ 
+11- Sipariş Durumu Eklemek(SetSiparisDurum) 
+ 
+12- Siparişi Kargoya Verildi Durumuna Getirmek(SetSiparisKargoyaVerildi) 
+ 
+13- Sipariş Teslim Edildi Durumuna Getirmek(SetSiparisTeslimEdildi) 
+ 
+14- Kargo Seçeneklerini Getirmek(GetKargoSecenek) 
+ 
+15- Siparişe Kargo Takip No Eklemek ve Kargo İşlemlerini Yapmak(SaveKargoTakipNo) 
+ 
+16- Ödeme Tiplerini Getirmek(GetOdemeTipleri) 
+ 
+17- Sepet Bilgisini Getirmek(GetSepet) 
+ 
+18- Cari Ödemeleri Getirmek(SelectCariOdeme) 
+ 
+19- Sepetleri Getirmek(SelectSepet) 
+ 
+20- Sepetleri Getirmek(SelectWebSepet) 
+ 
+21- Siparişe Fatura Numarası Eklemek(SetFaturaNo) 
+ 
+22- Sipariş Ürün Durumu Eklemek(SetSiparisUrunDurum) 
+ 
+METOD KULLANIMLARI(SiparisServis) 
+ 
+Ödeme Durumu Değişkenleri 
+ 
+Adı 
+Değer 
+Onay bekliyor 
+0 
+Onaylandı 
+1 
+Hatalı 
+2 
+İade edilmiş 
+3 
+3 
+ 
+İptal edilmiş 
+4 
+ 
+ 
+Ödeme Tipi Değişkenleri 
+ 
+Adı 
+Değer 
+Kredi kartı 
+0 
+Havale 
+1 
+Kapıda ödeme nakit 
+2 
+Kapıda ödeme kredi kartı 
+3 
+Mobil ödeme 
+4 
+Bkm express 
+5 
+Paypal 
+6 
+Cari 
+7 
+Mail order 
+8 
+Ipara 
+9 
+Nakit 
+10 
+Payuoneclick 
+11 
+Cari kredi 
+12 
+Garantipay 
+13 
+PayuBkmexpress 
+14 
+Nestpay 
+15 
+Paycell 
+16 
+Iyzipay 
+17 
+Hopi 
+18 
+Paybyme 
+19 
+Hediye çeki 
+20 
+4 
+ 
+Paygurumobil 
+21 
+Paynet 
+22 
+Telr 
+23 
+Compay 
+24 
+Paytr 
+25 
+Maximum mobil 
+26 
+Magazada öde 
+27 
+ 
+ 
+Sipariş Durumu Değişkenleri 
+ 
+Adı 
+Değer 
+Ön sipariş 
+0 
+Onay bekliyor 
+1 
+Onaylandı 
+2 
+Ödeme bekliyor 
+3 
+Paketleniyor 
+4 
+Tedarik ediliyor 
+5 
+Kargoya verildi 
+6 
+Teslim edildi 
+7 
+Iptal edildi 
+8 
+Iade edildi 
+9 
+Silinmiş 
+10 
+Iade talebi alındı 
+11 
+Iade ulaştu ödeme yapılacak 
+12 
+Iade ödemesi yapıldı 
+13 
+Teslimat öncesi iptal talebi 
+14 
+5 
+ 
+Iptal talebi 
+15 
+Kısmi iade talebi 
+16 
+Kısmi iade yapıldı 
+17 
+ 
+ 
+ 
+1 – SaveSiparis 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu 
+Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Siparis 
+WebSiparisSa
+ve Request 
+evet 
+Sipariş bilgilerini içeren WebSiparisSaveRequest 
+sınıfı. 
+ 
+Siparis 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+FaturaAdresId 
+integer 
+evet 
+Kayıtlı fatura adres id. 
+IndirimTutari 
+double 
+hayır 
+İndirim tutar değeri. 
+KargoAdresId 
+integer 
+evet 
+Kayıtlı kargo adres id. 
+KargoFirmaId 
+integer 
+evet 
+Kayıtlı kargo firma id. 
+KargoTutari 
+double 
+hayır 
+Kargo tutarı. 
+Odeme 
+WebSiparisSaveOdeme 
+evet 
+Ödeme sınıfı. 
+ParaBirimi 
+string 
+hayır 
+Para birimi değeri. 
+SiparisKaynagi 
+string 
+hayır 
+Sipariş kaynağı değeri. 
+SiparisNotu 
+string 
+hayır 
+Sipariş notu. 
+Urunler 
+List<WebSiparisSaveUru
+n> 
+evet 
+Sipariş içerisindeki ürünlerin listesi. 
+UrunTutari 
+double 
+evet 
+Tutar. 
+UrunTutariKdv 
+double 
+hayır 
+Kdv değeri. 
+6 
+ 
+UyeId 
+integer 
+evet 
+Siparişi veren üyenin id değeri. 
+ 
+ 
+WebSiparisSaveOdeme 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+BankaKomisyonu 
+double 
+hayır 
+Banka komisyon değeri. 
+HavaleHesapID 
+integer 
+hayır 
+Kayıtlı havale hesap id 
+KapidaOdemeTutar
+i 
+double 
+hayır 
+Kapıda ödeme tutarı. 
+OdemeDurumu 
+integer 
+evet 
+Ödeme Durumu Değişkenleri 
+OdemeIndirimi 
+double 
+hayır 
+Ödeme indirim. 
+OdemeNotu 
+string 
+hayır 
+Ödeme notu. 
+OdemeSecenekID 
+integer 
+evet 
+Tanımlı olan ödeme seçenek id değeri. 
+OdemeTipi 
+integer 
+evet 
+Ödeme Tipi Değişkenleri 
+TaksitSayisi 
+integer 
+hayır 
+Taksit sayısı. 
+Tarih 
+datetime 
+hayır 
+Tarih değeri. 
+Tutar 
+double 
+evet 
+Tutar. 
+ 
+WebSiparisSaveUrun 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+Adet 
+double 
+evet 
+Sipariş edilen ürün adedi. 
+KdvOrani 
+integer 
+hayır 
+Kdv oranı . 
+KdvTutari 
+double 
+hayır 
+Kdv tutarı değeri 
+Maliyet 
+double 
+hayır 
+Maliyet değeri. 
+Tutar 
+double 
+evet 
+Ürün tutarı. 
+UrunID 
+integer 
+evet 
+Ürün id değeri. 
+ 
+Response = WebSiparisSaveResponse 
+7 
+ 
+Adı 
+Tipi 
+Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsError 
+bool 
+false= işlem başarılı , true = işlem başarısız 
+ 
+ 
+Örnek kullanım; 
+//  siparişin  ödeme  bilgisi 
+WebSiparisSaveOdeme  odeme  =  new  WebSiparisSaveOdeme 
+{ 
+BankaKomisyonu  =  4.1, 
+HavaleHesapID  =  2, 
+KapidaOdemeTutari  =  5.15, 
+OdemeDurumu  =  1, 
+OdemeIndirimi  =  15,  //  indirim  yüzdesi 
+OdemeNotu  =  "ödeme  notu", 
+OdemeSecenekID  =  8,  //  tanımlı  olan  ödeme  seçenek  id  si 
+OdemeTipi  =  2, 
+TaksitSayisi  =  5, 
+Tarih  =  DateTime.Now, 
+Tutar  =  50 
+}; 
+//Siparişin  içerisindeki  urunlerin  bilgisi 
+List<WebSiparisSaveUrun>  urunListe  =  new  List<WebSiparisSaveUrun> 
+{ 
+new  WebSiparisSaveUrun 
+{ 
+Adet=1, 
+KdvOrani=8, 
+KdvTutari=5.12, 
+Maliyet=30, 
+Tutar=50, 
+UrunID=7 
+} 
+}; 
+WebSiparisSaveRequest  siparis  =  new  WebSiparisSaveRequest 
+{ 
+FaturaAdresId  =  1, //  SaveUyeAdres  metodu  ile  üyenin  adresi  kayıt  edilip  dönen  id 
+numarası  bu  kısma  yazılabilir  . 
+IndirimTutari  =  10,  //  indirim  yüzdesi 
+KargoAdresId  =  1,  //  SaveUyeAdres  metodu  ile  üyenin  adresi  kayıt  edilip  dönen  id 
+numarası  bu  kısma  yazılabilir. 
+//  Fatura  ve  teslimat  adresi  aynı  ise  kargo  adres  id  ve  fatura  adres  id  aynı 
+olabilir. 
+KargoFirmaId  =  2,  //  Ticimax  site  yönetim  panelindenki  kargo  yönetiminden  kargo 
+id’sini  öğrenebilirsiniz. 
+KargoTutari  =  0, 
+Odeme  =  odeme, 
+ParaBirimi  =  "TL", 
+SiparisKaynagi  =  "Web", 
+SiparisNotu  =  "not", 
+Urunler  =  urunListe, 
+UrunTutari  =  50, 
+UrunTutariKdv  =  5.12, 
+UyeId  =  1, //  Sipariş  veren  kullanıcının  üye  id’si.  Üyenin  maili  ile  SelectUyeler 
+metodundan  uye  id  si  bulunabilir. 
+ 
+TeslimatSaati  =  "12.15", 
+8 
+ 
+TeslimatTarihi  =  new  DateTime(2018,  11,  13) 
+}; 
+WebSiparisSaveResponse  siparisEklemeCevap  =  siparisServisClient.SaveSiparis(uyeKodu,  siparis); 
+ 
+ 
+ 
+2 – SaveSiparisKargoPaket 
+Parametre 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SiparisId 
+integer 
+evet 
+Paketlenecek siparişe ait id değeri . 
+SiparisUrunDurumId 
+integer 
+evet 
+Tanımlı sipariş ürün durum id değeri. 
+KargoEntegrasyonId 
+integer 
+evet 
+Tanımlı kargo entegrasyon id değeri 
+Urunler 
+List<int> 
+evet 
+Siparişteki ürün idlerini içeren List<int> tipinde liste. 
+KargoTakipNo 
+string 
+evet 
+Kargo takip numarası değeri 
+KontrolEtme 
+bool 
+evet 
+Sipariş paketlenme durumunu kontrol parametresi. 
+True gönderilirse aynı sipariş için birden fazla paket 
+oluşturulabilir.   
+MailGonder 
+bool 
+evet 
+Paket oluştuğunda mail gönderilmesi için true 
+gönderilmelidir.  
+SmsGonder 
+bool 
+evet 
+Paket oluştuğunda sms gönderilmesi için true 
+gönderilmelidir.  
+BarkodBilgisi 
+string 
+evet  
+Sipariş için kargo tarafında eşleştirilecek barkod 
+bilgisi. Boş gönderilir ise otomatik oluşur. 
+KargoTakipLink 
+string 
+evet 
+Siparişin kargo takip link değeri. Link yoksa boş 
+gönderilebilir. 
+KargoTakipLinkGoster 
+bool 
+evet 
+Kargo takip link girildi ise kullanılma durumunu 
+belirleyen parametre. True gönderilir ise ve 
+KargoTakipLink dolu ise Hesabım > Siparişlerim ve 
+siparistakip.aspx sayfalarında kargom nerede butonuna 
+tıklandığında takip linkteki adres yeni sekmede açılır. 
+ 
+ 
+Response = string 
+SaveSiparisKargoPaketCevap 
+ Örnek Kullanım; 
+ 
+ 
+9 
+ 
+SiparisServisClient siparisServisClient = new SiparisServisClient(); 
+                // siparişin içerisindeki ürünleri alıyoruz.  
+List<WebSiparisUrun> webSiparisUrunListe =siparisServisClient.SelectSiparisUrun("uyekodu", 1, false); 
+ 
+   // webSiparisUrunListe içerisindeki ürünlerin id değerlerini integer bir listeye dolduruyoruz.  
+                List<int> urunidList = webSiparisUrunListe.Select(x => x.ID).ToList(); 
+ 
+                //kontrol etme siparişe kargo paketi eklenip eklenmediğini kontrol eder. Eğer kontroletme 
+değerini true gönderirsek kontrol edilmez ve aynı sipariş bir çok kez kaydedilebilir. False gönderilir ise bir 
+sipariş ile bir kayıt oluşturulabilir eğer o sipariş id ile oluşmuş başka bir siparisKargoPaket bulunuyorsa yeni 
+kayıt oluşturmaz. 
+ 
+string SaveSiparisKargoPaketCevap = siparisServisClient.SaveSiparisKargoPaket("uyekodu", 1, 1, 2, urunidList, 
+"takipno", true, true, true, "", 1, "takiplink",false); 
+ 
+ 
+3 – SaveSiparisKargoPaketKargoTakipNo 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SiparisId 
+integer 
+evet 
+Sipariş kargo paket tablosundaki Sipariş id değeri. 
+PaketId 
+integer 
+evet 
+Sipariş kargo paket tablosundaki id değeri. 
+KargoTakipNo 
+string 
+evet 
+Eklenmek istenen kargo takip numarası. 
+KargoTakipLink 
+string 
+evet 
+Siparişin kargo takip link değeri. Link yoksa boş 
+gönderilebilir. 
+KargoTakipLinkGoster 
+bool 
+evet 
+Kargo takip link girildi ise kullanılma durumunu 
+belirleyen parametre. True gönderilir ise ve 
+KargoTakipLink dolu ise Hesabım > Siparişlerim ve 
+siparistakip.aspx sayfalarında kargom nerede butonuna 
+tıklandığında takip linkteki adres yeni sekmede açılır. 
+ 
+ 
+Response = 
+SaveSiparisKargoPaketKargoTakipNoResponse 
+Adı 
+Tipi 
+Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsErros 
+bool 
+false= işlem başarılı , true = işlem başarısız 
+ 
+ 
+10 
+ 
+SiparisServisClient siparisServisClient = new SiparisServisClient(); 
+               // kargoPaketCevap ta işlemin ne şekilde sonuçlandığına dair bilgi döndürülüyor. 
+                SaveSiparisKargoPaketKargoTakipNoResponse 
+SaveSiparisKargoPaketKargoTakipNoResponse = 
+siparisServisClient.SaveSiparisKargoPaketKargoTakipNo("uyekodu", 5648, 0, "takipno", 
+"takiplink",false); 
+Örnek kullanım; 
+ 
+ 
+ 
+4 – SelectSiparis 
+Parametre 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+WebSiparisFiltre 
+WebSipariFiltre 
+evet 
+Filtre bilgilerini içeren WebSiparisFiltre sınıfı. 
+WebSiparisSayfalam
+a 
+WebSiparisSayfala
+ma 
+evet 
+Sayfalama 
+değerlerini
+ 
+içeren 
+WebSiparisSayfalama sınıfı 
+ 
+WebSipariFiltre 
+ 
+Adı 
+Tipi 
+Zorunlu 
+Açıklama 
+EntegrasyonAktarild
+i 
+integer 
+hayır 
+Entegrasyon aktarılma durumu. 
+EntegrasyonParams WebSiparisEntegrasy
+on 
+evet 
+Siparişin entegrasyon parametreleri. 
+IptalEdilmisUrunler bool 
+hayır 
+İptal edilmiş ürünlerin getirilme 
+durumu. 
+FaturaNo 
+string 
+hayır 
+Fatura numarası. 
+OdemeDurumu 
+Ödeme Durumu 
+Değişkenleri 
+hayır 
+Ödeme durumu. 
+OdemeTipi 
+Ödeme Tipi 
+Değişkenleri 
+hayır 
+Ödeme tipi. 
+SiparisDurumu 
+Sipariş Durumu 
+Değişkenleri 
+hayır 
+Sipariş durumu. 
+SiparisID 
+İnt 
+hayır 
+Sipariş id değeri. 
+SiparisKaynagi 
+string 
+hayır 
+Sipariş kaynağı. 
+11 
+ 
+SiparisKodu 
+string 
+hayır 
+Sipariş kodu. 
+SiparisTarihiBas 
+datetime 
+hayır 
+Filtreleme sipariş başlangıç tarihi 
+SiparisTarihiSon 
+datetime 
+hayır 
+Filtreleme sipariş bitiş tarihi 
+StrSiparisDurumu 
+string 
+hayır 
+Sipariş durumu string değeri. 
+TedarikciID 
+integer 
+hayır 
+Tedarikçi id değeri. 
+UyeID 
+integer 
+hayır 
+Üye id değeri. 
+SiparisNo 
+string 
+hayır 
+Sipariş numarası. 
+UyeTelefon 
+string 
+hayır 
+Üye telefon. 
+ 
+ 
+WebSiparisEntegrasyon 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+AlanDeger 
+string 
+hayır 
+Alan değer. 
+Deger 
+string 
+hayır 
+Değer. 
+EntegrasyonKodu 
+string 
+hayır 
+Enyegrasyon kodu. 
+EntegrasyonParamsAkti
+f 
+bool 
+hayır 
+Entegryon parametreleri aktiflik durumu. 
+TabloAlan 
+string 
+hayır 
+Tablo alan. 
+Tanim 
+string 
+hayır 
+Tanım. 
+ 
+WebSiparisSayfalama 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+BaşlangicIndex 
+integer 
+hayır 
+Sayfalama başlangıç değeri. 
+KayitSayisi 
+integer 
+hayır 
+Getirilecek kayıt sayısı. 
+SiralamaDeger 
+string 
+hayır 
+Sıralama değeri. Örn: “Id” 
+SiralamaYonu 
+string 
+hayır 
+Sıralama yönü. Artan için “ASC” azalan için “DESC” 
+ 
+ 
+Response = 
+12 
+ 
+List<WebSiparis> 
+WebSiparis 
+Adı 
+Tipi 
+Açıklama 
+AdiSoyadi 
+string 
+Ad soyad bilgisi. 
+Durum 
+integer 
+Durum bilgisi. 
+EntegrasyonAktarildi 
+bool 
+Entegrasyon aktarıldı durumu bilgisi 
+FaturaAdresId 
+integer 
+Fatura adres id değeri. 
+FaturaAdresi 
+FaturaAdres 
+Fatura adres detaylarıni içeren FaturaAdres sınıfı 
+FaturaNo 
+string 
+Fatura numarası. 
+FaturaTarihi 
+datetime 
+Fatura tarihi. 
+HediyeCeki 
+string 
+Hediye çeki değeri. 
+HediyeCekiTutari 
+double 
+Hediye çeki tutarı. 
+HadiyePaketiNotu 
+string 
+Hediye paketi notu. 
+HediyePaketiTutari 
+double 
+Hediye paketi tutarı. 
+HediyePaketiVar 
+bool 
+Hediye paketi bulunma durumu. 
+ID 
+integer 
+Id değeri. 
+IPAdresi 
+string 
+Siparis verilen ip adresi. 
+IndirimTutari 
+double 
+Indirim tutar değeri. 
+KargoAdresID 
+integer 
+Kargo adreslerindeki id. 
+KargoEntegrasyonID 
+integer 
+Kargo entegrasyonlarındaki id. 
+KargoEntegrasyonTakipN
+o 
+string 
+Kargo entegrasyon takip numarası. 
+KargoFirmaId 
+integer 
+Kargo firma id değeri. 
+KargoTakipNo 
+string 
+Kargo takip numarası. 
+KargoTutari 
+double 
+Kargo tutarı. 
+Kaynak 
+integer 
+Kaynak,. 
+13 
+ 
+Kur 
+double 
+Kur. 
+Mail 
+string 
+Mail adresi. 
+Maliyet 
+double 
+Maliyet. 
+Odemeler 
+List<WebSiparisOdem
+e> 
+Odeme listesi. 
+ParaBirimi 
+string 
+Para birimi . 
+Referer 
+string 
+Referer değeri. 
+ReklamKaynagi 
+string 
+Reklam kaynağı. 
+SepetKampanyasiIndirimi double 
+Sepet kampanyası indirimi değeri. 
+SiparisDurumu 
+string 
+Sipariş durumu. 
+SiparisKaynagi 
+string 
+Sipariş kaynağı. 
+SiparisNotu 
+string 
+Sipariş notu. 
+SiparisTarihi 
+datetime 
+Sipariş tarihi. 
+SiparisToplamTutari 
+double 
+Sipariş toplam tutarı. 
+StokDustu 
+bool 
+Stok dan düşme durumu. 
+TeslimatAdresi 
+TeslimatAdres 
+Teslimat adresi bilgilerini içeren TeslimatAdres 
+sınıfı 
+TeslimatGunu 
+datetime 
+Teslimat günü 
+TeslimatSaati 
+string 
+Teslimat saati 
+ToplamKdv 
+double 
+Toplam kdv 
+ToplamTutar 
+double 
+Toplma tutar 
+Tutar 
+double 
+Tutar 
+Urunler 
+List<WebSiparisUrun> Ürünler listesi 
+UyeAdi 
+string 
+Üye adi 
+UyeID 
+integer 
+Üye id değeri 
+UyeMusteriKodu 
+string 
+Üye müşteri kodu 
+UyeSoyadi 
+string 
+Üye soyadı 
+14 
+ 
+ 
+ 
+FaturaAdres 
+ 
+Adı 
+Tipi 
+Açıklama 
+Adres 
+string 
+Adres bilgisi 
+AliciTelefon 
+string 
+Alici telefon numarası 
+EntegrasyonId 
+string 
+Entegrasyon id bilgisi 
+FirmaAdi 
+string 
+Firma adı 
+ID 
+integer 
+Id değeri 
+Il 
+string 
+İl bilgisi 
+IlId 
+integer 
+İl id 
+IlKodu 
+string 
+İl kodu 
+Ilce 
+string 
+İlce bilgisi 
+IlceId 
+integer 
+İlçe id 
+IlceKodu 
+string 
+İlçe kodu 
+Ulke 
+WebUlke 
+Ülke bilgisini içeren WebUlke sınıfı 
+VergiDairesi 
+string 
+Vergi dairesi 
+VergiNo 
+string 
+Vergi numarası 
+isKurumsal 
+bool 
+Kurumsallık durumu 
+WebUlke 
+ 
+Adı 
+Tipi 
+Açıklama 
+Alpha2Code 
+string 
+Alpha2Code örn =”TR” 
+Alpha3Code 
+string 
+Alpha3Code örn = “TUR” 
+ 
+ 
+WebSiparisOdeme 
+ 
+Adı 
+Tipi 
+Açıklama 
+15 
+ 
+BankaKomisyonu 
+double 
+Banka komisyon değeri 
+CheckSum 
+string 
+Check sum değeri. 
+HavaleBankaID 
+integer 
+Havale banka id 
+HavaleHesapID 
+integer 
+Havale hesap id 
+ID 
+integer 
+Id 
+KKOdemeBankaID 
+integer 
+Kredi karti ödeme bankası id 
+KapidaOdemeTutari 
+double 
+Kapıda ödeme tutarı 
+OdemeIndirimi 
+double 
+Ödeme indirimi 
+OdemeNotu 
+string 
+Ödeme notu 
+OdemeSecenekID 
+integer 
+Ödeme seçenek id 
+OdemeTipi 
+integer 
+Ödeme tipi 
+Onaylandi 
+integer 
+Onaylandi durumu 
+PosReferansID 
+string 
+Pos referans id değeri. 
+SiparisID 
+integer 
+Siparis id. 
+TaksitSayisi 
+integer 
+Taksit sayısı 
+Tarih 
+datetime 
+Tarih 
+Tutar 
+double 
+Tutar 
+UyeID 
+integer 
+Üye id 
+ 
+TeslimatAdres 
+ 
+Adı 
+Tipi 
+Açıklama 
+Adres 
+string 
+Adres bilgisi 
+AdresTarifi 
+string 
+Adres tarifi 
+AliciAdi 
+string 
+Alıcı adı 
+AliciTelefon 
+string 
+Alıcı telefon 
+16 
+ 
+ID 
+integer 
+Id değeri 
+Il 
+string 
+İl 
+IlId 
+integer 
+İl id değeri 
+IlKodu 
+string 
+İl kodu 
+Ilce 
+string 
+İlçe 
+IlceId 
+integer 
+İlçe id değeri 
+IlceKodu 
+string 
+İlçe kodu 
+PostaKodu 
+string 
+Posta kodu 
+Ulke 
+WebUlke 
+Ülke bilgisini içeren WebUlke sınıfı 
+ 
+ 
+WebSiparisUrun 
+ 
+Adı 
+Tipi 
+Açıklama 
+Adet 
+double 
+Ürün Adedi 
+Barkod 
+string 
+Barkod 
+Durum 
+integer 
+Durum 
+DurumAd 
+string 
+Durum adı 
+ID 
+integer 
+Id değeri 
+IslemAd 
+string 
+İşlem adı 
+IslemID 
+integer 
+İşlem id değeri 
+KampanyaID 
+integer 
+Kampanya id değeri 
+KampanyaIndirimTutari 
+double 
+Kampanya indirim tutarı 
+KdvOrani 
+integer 
+Kdv oranı 
+KdvTutari 
+double 
+Kdv tutarı 
+MagazaAtamaTarihi 
+datetime 
+Mağaza atama tarihi 
+MagazaDurum 
+integer 
+Mağaza durum 
+17 
+ 
+SiparisServis.SiparisServisClient  siparisServisClient  =  new  SiparisServis.SiparisServisClient(); 
+//  Tüm  integer  alanlar  için  -1  gönderildiğinde  o  alana  filtreleme  yapılmaz.  Hiçbir  alan 
+zorunlu  değil  filtrelemek  istenilen  bilgilere  göre  doldurulabilir. 
+WebSiparisFiltre  webSiparisFiltre  =  new  WebSiparisFiltre 
+{ 
+EntegrasyonAktarildi  =  -1,  //  sipariş  aktarılma  durumu  0  =  aktarılmayanlar, 
+1  = 
+aktarılanlar,  -1  =  hepsi 
+EntegrasyonParams  =  new  WebSiparisEntegrasyon 
+{ 
+AlanDeger  =  "", 
+Deger  =  "", 
+EntegrasyonKodu  =  "", 
+EntegrasyonParamsAktif  =  true, 
+TabloAlan  =  "", 
+Tanim  =  "" 
+}, 
+IptalEdilmisUrunler  =  true,  //  iptal  edilmiş  siparişlerin  kontrolü 
+FaturaNo  =  "", 
+OdemeDurumu  =  -1, 
+OdemeTipi  =  -1,  //  siparisin  ödeme  tipi  durumu 
+SiparisDurumu  =  -1, 
+SiparisID  =  -1, 
+SiparisKaynagi  =  "", 
+SiparisKodu  =  "", 
+SiparisTarihiBas  =  new  DateTime(2017,  10,  15),  //filtrede  kullanılacak  sipariş  başlangıç 
+tarihi 
+MagazaGonderimTarihi 
+datetime 
+Mağaza gönderim tarihi 
+MagazaID 
+integer 
+Mağaza id 
+MagazaKodu 
+string 
+Mağaza kodu 
+Maliyet 
+double 
+Maliyet 
+SiparisId 
+Integer 
+Sipariş id 
+StokKodu 
+string 
+Stok kodu 
+TedarikciID 
+integer 
+Tedarikçi id 
+TedarikciKodu 
+string 
+Tedarikçi kodu 
+TedarikciKodu2 
+string 
+Redarikçi kodu 2 
+Tutar 
+double 
+Tutar 
+UrunAdi 
+string 
+Ürün adı 
+UrunID 
+integer 
+Ürün id değeri 
+UrunKartiID 
+integer 
+Ürün karti id değeri 
+Örnek Kullanım 
+ 
+ 
+18 
+ 
+SiparisTarihiSon  =  new  DateTime(2018,  11,  15),  //  filtrede  kullanılacak  sipariş  bitiş 
+tarihi 
+StrSiparisDurumu  =  "", 
+TedarikciID  =  -1, 
+UyeID  =  -1, 
+SiparisNo  =  "", 
+UyeTelefon  =  "" 
+}; 
+WebSiparisSayfalama  webSiparisSayfalama  =  new  WebSiparisSayfalama 
+{ 
+BaslangicIndex  =  0,  //  bulunan  kayıtların  baslangıç  index  i 
+-  zorunlu  değil 
+KayitSayisi  =  100, 
+SiralamaDegeri  =  "id",  //  kayıtların  hangi  alana  göre  sıralanacağı  -  zorunlu  değil 
+SiralamaYonu  =  "Desc"  //  zorunlu  değil 
+}; 
+List<WebSiparis>  siparisListe  =  siparisServisClient.SelectSiparis(uyeKodu,  webSiparisFiltre, 
+webSiparisSayfalama); 
+ 
+ 
+ 
+5 – SelectSiparisKargoPaket 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Filtre 
+WebSiparisKargoFilt
+re 
+evet 
+Filtre bilgilerini içeren 
+WebSiparisKargoFiltreSınıfı 
+ 
+WebSiparisKargoFiltre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+KargoEntegrasyonID integer 
+hayır 
+Kayıtlı kargo entegrasyon id değeri 
+KargoTakipNoDuru
+m 
+integer 
+hayır 
+Karga takip no durum 
+PaketlemeTarihiBas datetime 
+hayır 
+Paketleme tarihi başlangıç değeri 
+PakelemeTarihiBit 
+datetime 
+hayır 
+Paketleme tarihi bitiş değeri 
+SiparisID 
+integer 
+hayır 
+Sipariş ıd 
+SiparisKargoPaketID integer 
+hayır 
+Sipariş kargo paket id değeri 
+ 
+ 
+Response = 
+19 
+ 
+WebKargoPaket 
+Adı 
+Tipi 
+Açıklama 
+EklenmeTarihi 
+Datetime 
+Eklenme tarihi 
+ID 
+integer 
+Id değeri 
+KargoEntegrasyonId 
+integer 
+Kargo entegrasyon id 
+KargoEntegrasyonTani
+m 
+string 
+Kargo entegrasyon adı 
+KargoTakipNumarasi 
+string 
+Kargo takip numarası 
+SiparisDurum 
+integer 
+Sipariş durum bilgisi 
+SiparisID 
+integer 
+Sipariş id 
+SiparisUrunDurumID 
+integer 
+Sipariş ürün durum id 
+SiparisUrunDurumTani
+m 
+string 
+Sipariş ürün durum tanımı 
+Urun_Liste 
+List<SiparisKargo
+PaketUrun> 
+Ürünleri içeren SiparisKargoPaketUrun sınıfı listesi 
+Urunler 
+List<integer> 
+Ürünlerin id değerleri listesi 
+KargoTakipLink 
+string 
+Siparişin kargo takip link değeri. Link yoksa boş 
+gönderilebilir.  
+BarkodBilgisi 
+string 
+Sipariş için kargo tarafında eşleştirilecek barkod bilgisi. 
+Boş gönderilir ise otomatik oluşur.  
+KargoTakipLinkGoster 
+bool 
+Kargo takip link girildi ise kullanılma durumunu belirleyen 
+parametre. True gönderilir ise ve KargoTakipLink dolu ise 
+Hesabım > Siparişlerim ve siparistakip.aspx sayfalarında 
+kargom nerede butonuna tıklandığında takip linkteki adres 
+yeni sekmede açılır.  
+ 
+SiparisKargoPaketUrun 
+ 
+Adı 
+Tipi 
+Açıklama 
+Adet 
+double 
+Adet 
+ID 
+integer 
+Id değeri 
+UrunAdi 
+string 
+Ürün adı 
+UrunID 
+integer 
+Ürün id 
+UrunKartiID 
+integer 
+Ürün kartı id 
+20 
+ 
+SiparisServis.SiparisServisClient  siparisServisClient  =  new  SiparisServis.SiparisServisClient(); 
+//  hiç  bir  alanın  girilmesi  zorunlu  değildir. 
+//  integer  alanlar  -1  olarak  gönderilirse  filtreleme  yapılmaz 
+WebSiparisKargoPaketFiltre  webSiparisKargoPaketFiltre  =  new  WebSiparisKargoPaketFiltre 
+{ 
+KargoEntegrasyonID=-1,  //  kayıtlı  kargo  entegrasyon  id  değeri 
+KargoTakipNoDurum=1,  //  kargo  takip  numarası  olanları  getirmek  için  bu  alana  1 
+değeri  verilmeli.  0  verilirse  kargo  takip  numarası  olmayanları  filtreler 
+PaketlenmeTarihBas=new  DateTime(2016,10,10), 
+PaketlenmeTarihBit=new  DateTime(2018,12,10), 
+SiparisID=-1, 
+SiparisKargoPaketID=-1 
+}; 
+List<WebKargoPaket>  kargoPaketListe  = 
+siparisServisClient.SelectSiparisKargoPaket(uyeKodu, 
+webSiparisKargoPaketFiltre); 
+UrunResmi 
+string 
+Ürün resmi 
+ 
+ 
+Örnek kullanım; 
+ 
+ 
+ 
+6 – SelectSiparisOdeme 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SiparisId 
+integer 
+evet 
+Ödemesi getirilmek istenen siparişin id değeri 
+OdemeId 
+integer 
+hayır 
+0 gönderilebilir. 
+ 
+Response = 
+List<WebsiparisOdeme> 
+WebSiparisOdeme 
+Adı 
+Tipi 
+Açıklama 
+BankaKomisyonu 
+double 
+Banka komisyon değeri 
+CheckSum 
+string 
+Check sum değeri. 
+HavaleBankaID 
+integer 
+Havale banka id 
+21 
+ 
+SiparisServis.SiparisServisClient  siparisServisClient  =  new  SiparisServis.SiparisServisClient(); 
+//  Ödeme  id  0  gönderilerek  siparişin  odeme  bilgisi  alınabilir. 
+List<WebSiparisOdeme>  odemeListe  = 
+siparisServisClient.SelectSiparisOdeme(uyeKodu,  588,  0); 
+HavaleHesapID 
+integer 
+Havale hesap id 
+ID 
+integer 
+Id 
+KKOdemeBankaID 
+integer 
+Kredi karti ödeme bankası id 
+KapidaOdemeTutari 
+double 
+Kapıda ödeme tutarı 
+OdemeIndirimi 
+double 
+Ödeme indirimi 
+OdemeNotu 
+string 
+Ödeme notu 
+OdemeSecenekID 
+integer 
+Ödeme seçenek id 
+OdemeTipi 
+integer 
+Ödeme tipi 
+Onaylandi 
+integer 
+Onaylandi durumu 
+PosReferansID 
+string 
+Pos referans id değeri. 
+SiparisID 
+integer 
+Siparis id. 
+TaksitSayisi 
+integer 
+Taksit sayısı 
+Tarih 
+datetime 
+Tarih 
+Tutar 
+double 
+Tutar 
+UyeID 
+integer 
+Üye id 
+Örnek kullanım; 
+ 
+ 
+ 
+7 – SelectSiparisUrun 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SiparisId 
+integer 
+evet 
+Ürünleri getirilmek istenen siparişin id si. 
+IptalEdilmisUrunler bool 
+evet 
+İptal edilen ürünlerin getirilip getirilmeyeceği bilgisi 
+22 
+ 
+ 
+Response = 
+List<WebSiparisUrun> 
+WebSiparisUrun 
+Adı 
+Tipi 
+Açıklama 
+Adet 
+double 
+Ürün Adedi 
+Barkod 
+string 
+Barkod 
+Durum 
+integer 
+Durum 
+DurumAd 
+string 
+Durum adı 
+ID 
+integer 
+Id değeri 
+IslemAd 
+string 
+İşlem adı 
+IslemID 
+integer 
+İşlem id değeri 
+KampanyaID 
+integer 
+Kampanya id değeri 
+KampanyaIndirimTutari 
+double 
+Kampanya indirim tutarı 
+KdvOrani 
+integer 
+Kdv oranı 
+KdvTutari 
+double 
+Kdv tutarı 
+MagazaAtamaTarihi 
+datetime Mağaza atama tarihi 
+MagazaDurum 
+integer 
+Mağaza durum 
+MagazaGonderimTarihi 
+datetime Mağaza gönderim tarihi 
+MagazaID 
+integer 
+Mağaza id 
+MagazaKodu 
+string 
+Mağaza kodu 
+Maliyet 
+double 
+Maliyet 
+SiparisId 
+Integer 
+Sipariş id 
+StokKodu 
+string 
+Stok kodu 
+TedarikciID 
+integer 
+Tedarikçi id 
+23 
+ 
+SiparisServis.SiparisServisClient  siparisServisClient  =  new  SiparisServis.SiparisServisClient(); 
+//  İptalEdilmisUrunler  değeri  false  gönderilirse  iptal  edilen  ürünler  getirilmez. 
+List<WebSiparisUrun>  urunListe  = 
+siparisServisClient.SelectSiparisUrun(uyeKodu,  588,  false); 
+TedarikciKodu 
+string 
+Tedarikçi kodu 
+TedarikciKodu2 
+string 
+Redarikçi kodu 2 
+Tutar 
+double 
+Tutar 
+UrunAdi 
+string 
+Ürün adı 
+UrunID 
+integer 
+Ürün id değeri 
+UrunKartiID 
+integer 
+Ürün karti id değeri 
+ 
+ 
+Örnek kullanım; 
+ 
+ 
+ 
+8 – SelectSiparisUrunDurumlari 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SiparisDurumId 
+integer 
+evet 
+Kayıtlı sipariş durum id değeri. 
+İslem 
+integer 
+evet 
+Getirilmek istemen işlem numarası. 
+Aktif 
+integer 
+evet 
+Aktiflik durumu 1 = aktif , 0 = aktif olmayan , -1 = 
+hepsi 
+ 
+Response = 
+List<SiparisUrunDurumlari> 
+SiparisUrunDurumlari 
+Adı 
+Tipi 
+Açıklama 
+ID 
+integer 
+Id değeri. 
+Tanim 
+string 
+Siparis ürün Durum Tanımı 
+24 
+ 
+SiparisServis.SiparisServisClient  siparisServisClient  =  new  SiparisServis.SiparisServisClient(); 
+//  gönderilecek  parametrelerde  integer  olanlar  -1  gönderilir  ise  o  alanlara  filtreleme 
+yapılmaz.  Yani  tüm  integer  alanlar  -1  gönderilir  ise  tüm  kayıtlar  döner. 
+List<SiparisServis.SiparisUrunDurumlari>  siparisUrunDurumlariListe  = 
+siparisServisClient.SelectSiparisUrunDurumlari(uyeKodu,  -1,  -1,  -1); 
+SiparisServis.SiparisServisClient  siparisServisClient  =  new  SiparisServis.SiparisServisClient(); 
+siparisServisClient.SetSiparisAktarildi(uyeKodu,  588); 
+SiparisServis.SiparisServisClient  siparisServisClient  =  new  SiparisServis.SiparisServisClient(); 
+siparisServisClient.SetSiparisAktarildiIptal(uyeKodu,  588); 
+Aktif 
+bool 
+Aktiflik durumu. 
+İslem 
+integer 
+İşlem değeri. 
+ 
+ 
+Örnek kullanım; 
+ 
+ 
+ 
+9 – SetSiparisAktarildi 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SiparisId 
+integer 
+evet 
+Aktarılmak istenen siparişe ait id değeri. 
+ 
+Örnek kullanım; 
+ 
+ 
+10 – SetSiparisAktarildiIptal 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SiparisId 
+integer 
+evet 
+Aktarımı iptal edilmek istenen siparişe ait id değeri. 
+ 
+Örnek kullanım; 
+ 
+ 
+25 
+ 
+ 
+11 - SetSiparisDurum 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunl
+u 
+Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen 
+şifre. 
+SetSiparisDurumReques
+t 
+SiparisUrunDurumRequ
+est 
+evet 
+Sipariş ve durum bilgilerini içeren sınıf. 
+ 
+SiparisUrunDurumRequest 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+Durum 
+WebSiparisDuruml
+ari 
+evet 
+Sipariş durumu 
+KargoTakipNo 
+string 
+hayır 
+Kargo takip numarası 
+MailBilgilendir 
+bool 
+hayır 
+Mail ile bilgilendirme durumu 
+SiparisID 
+integer 
+evet 
+Sipariş id 
+ 
+ 
+WebSiparisDurumlari 
+ 
+ 
+Adı 
+Değer 
+Ön sipariş 
+0 
+Onay bekliyor 
+1 
+Onaylandı 
+2 
+Ödeme bekliyor 
+3 
+Paketleniyor 
+4 
+Tedarik ediliyor 
+5 
+Kargoya verildi 
+6 
+Teslim edildi 
+7 
+Iptal 
+8 
+26 
+ 
+Iade 
+9 
+Silinmis 
+10 
+IadeTalepAlindi 
+11 
+IadeUlastiOdemeYapilacak 
+12 
+IadeOdemeYapildi 
+13 
+TeslimOncesiIptal 
+14 
+IptalTalebi 
+15 
+ 
+ 
+Response = 
+SetSiparisDurumResponse 
+SetSiparisDurumResponse 
+Adı 
+Tipi 
+Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+IsErros 
+bool 
+false= işlem başarılı , true = işlem başarısız 
+ 
+ 
+Örnek kullanım; 
+ 
+ 
+ 
+ 
+ 
+12 – SetSiparisKargoyaVerildi 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+27 
+ 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SiparisId 
+integer 
+evet 
+Kargoya verildi yapılmak istenen siparişe ait id 
+değeri. 
+ 
+Örnek kullanım; 
+ 
+ 
+ 
+ 
+13 – SetSiparisTeslimEdildi 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SiparisId 
+integer 
+evet 
+Teslim edildi yapılmak istenen siparişe ait id değeri. 
+ 
+Örnek kullanım; 
+ 
+14 – GetKargoSecenek 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu 
+Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen 
+şifre. 
+GetKargoSecenekReques
+t 
+GetKargoSecenekReque
+st 
+evet 
+Sorgu 
+bilgilerini
+ 
+içeren 
+GetKargoSecenekReques sınıfı. 
+ 
+ 
+GetKargoSecenekRequest 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+ParaBirimi 
+string 
+evet 
+Para birimi değeri 
+28 
+ 
+SehirId 
+integer 
+evet 
+Iller tablosundaki id değeri. Örn: 1 = Adana 
+Sepet 
+ServisSepet 
+evet 
+Yeni bir ServisSepet nesnesi oluşturulup 
+gönderilebilir. 
+ 
+ 
+Response = 
+List<WebKargoFirma> 
+WebKargoFirma 
+Adı 
+Tipi 
+Açıklama 
+ID 
+integer 
+Id değeri. 
+KapidaOdeme 
+bool 
+Kapıda ödeme durumu 
+KapidaOdemeFiyati 
+double 
+Kapıda ödeme fiyatı 
+KapidaOdemeKK 
+bool 
+Kapıda kredi kartı ödeme durumu 
+KapidaOdemeKKFiyati double 
+Kapıda kredi kartı ödeme fiyatı 
+Tanim 
+string 
+Kargo firma adı 
+ 
+ 
+Örnek kullanım; 
+ 
+ 
+ 
+ 
+15 - SaveKargoTakipNo 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+29 
+ 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SiparisId 
+integer 
+evet 
+Kargo takip numarası eklenmek istenen sipariş id 
+değeri. 
+KargoKodu 
+string 
+evet 
+Boş gönderilebilir 
+KargoTakipNo 
+string 
+evet 
+Kaydedilmek istenen kargo takip numarası değeri 
+KargoTakipLink 
+string 
+evet 
+Siparişin kargo takip link değeri. Link yoksa boş 
+gönderilebilir.  
+BarkodBilgisi 
+string  
+evet 
+Sipariş için kargo tarafında eşleştirilecek barkod 
+bilgisi. Boş gönderilir ise otomatik oluşur.  
+KargoTakipLinkGoster 
+bool 
+evet 
+Kargo takip link girildi ise kullanılma durumunu belirleyen 
+parametre. True gönderilir ise ve KargoTakipLink dolu ise 
+Hesabım > Siparişlerim ve siparistakip.aspx sayfalarında 
+kargom nerede butonuna tıklandığında takip linkteki 
+adres yeni sekmede açılır.  
+ 
+ 
+Response = string 
+saveKargoTakipSonuc 
+ Örnek kullanım; 
+ 
+ 
+16 - GetOdemeTipleri 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+ 
+Response = 
+List<SiparisOdemeTipleri> 
+SiparisOdemeTipleri 
+Adı 
+Tipi 
+Açıklama 
+ID 
+integer 
+Sipariş ödeme tipi id 
+30 
+ 
+Tanim 
+String 
+Sipariş ödeme tipi adı 
+ 
+ 
+Örnek kullanım; 
+ 
+ 
+ 
+ 
+17 - GetSepet 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu 
+Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+GetSepetRequest GetSepetReques
+t 
+evet 
+Sorgu bilgilerini içeren GetSepetRequest sınıfı 
+ 
+ 
+GetSepetRequest 
+ 
+Adı 
+Tipi 
+Zorunlu 
+Açıklama 
+KampanyaID integer hayır 
+Kampanya ID değeri 
+SepetID 
+integer evet 
+Sepet id değeri(Uye id girildiyse gönderilmeyebilir) 
+UyeID 
+integer evet 
+Uye id değeri(SepetID girildiyse gönderilmeyebilir) 
+ 
+ 
+Response = 
+List<ServisSepet> 
+ServisSepet 
+Adı 
+Tipi 
+Açıklama 
+GenelKDVToplam 
+double 
+Genel toplam kdv değeri 
+GenelToplam 
+double 
+Genel toplam 
+HediyeCekiKodu 
+string 
+Hediye çeki kodu 
+31 
+ 
+HediyeCekiTutari 
+double 
+Hediye çeki tutarı 
+HediyeCekiZubizuKampanyaI
+d 
+integer 
+Hediye çeki zubizu kampanya id değeri 
+HediyePaketiTutari 
+double 
+Hediye paketi tutarı 
+HopiIndirimi 
+double 
+Hopi indirimi 
+HopiParacikKullanimi 
+double 
+Hopi paracık kullanımı 
+IndirimlerToplami 
+double 
+Indirimler toplamı 
+KampanyaID 
+integer 
+Kampanya id 
+KampanyaIndirimKDV 
+double 
+Kampanya indirim kdv 
+KampanyaIndirimTutari 
+double 
+Kampanya indirim tutarı 
+KampanyasizUrunlerToplami double 
+Kampanyasız ürünler toplamı 
+OverrateSahipID 
+integer 
+Overrate sahip id 
+SahipID 
+string 
+Sahip id 
+SepetID 
+integer 
+Sepet id 
+SepetParaBirimiDilKodu 
+string 
+Sepet para birimi dil kodu 
+ToplamKDV 
+double 
+Toplam kdv 
+ToplamTutar 
+double 
+Toplam tutar 
+ToplamUrunAdedi 
+integer 
+Toplam ürün adedi 
+UrunOzellestirmeFiyatlari 
+double 
+Ürün özelleştirme fiyatları 
+Urunler 
+List<ServisSepetUru
+n> 
+Sepetteki ürünlerin listesini içeren liste 
+ 
+ 
+ServisSepetUrun 
+ 
+Adı 
+Tipi 
+Açıklama 
+AsortiUrunKartiId 
+integer 
+Asorti ürün kartı id 
+Adet 
+double 
+Adet 
+Desi 
+float 
+Desi 
+32 
+ 
+EkSecenekOzellik 
+string 
+Ek seçenek özellik 
+EtiketId 
+integer 
+Etiket id 
+Fiyati 
+double 
+Fiyat 
+FormId 
+integer 
+Form id 
+FormIdList 
+List<integer
+> 
+Form id listesi 
+ID 
+integer 
+Id 
+IndirimTutari 
+double 
+Indirim tutarı 
+KDVOrani 
+integer 
+Kdv oranı 
+KDVTutari 
+double 
+Kdv tutarı 
+KampanyaBagliUrunId 
+integer 
+Kampanya bağlı ürün id 
+KampanyaID 
+integer 
+Kampanya id 
+KampanyaIleEklendi 
+bool 
+Kampanya elle eklendi 
+KampanyaKaynakliIndirimTuta
+ri 
+double 
+Kampanya kaynak indirim tutar 
+KampanyaTanimlari 
+List<string> Kampanya tanımları 
+KargoIndirimi 
+double 
+Kargo indirimi 
+KargoUcreti 
+double 
+Kargo ücreti 
+Kategoriler 
+List<integer
+> 
+Kategori id lerini içeren liste 
+MaksTaksitSayisi 
+integer 
+Maksimum taksit sayısı 
+Marka 
+string 
+Marka 
+MarkaID 
+integer 
+Marka id 
+OzellestirmeTutari 
+double 
+Özelleştirme tutarı 
+ParaBirimi 
+string 
+Para birimi 
+ParaBirimiDilKodu 
+string 
+Para birimi dil kodu 
+SanalUrun 
+bool 
+Sanal ürün 
+SepetAlimMaks 
+double 
+Sepette maksimum alım adedi 
+33 
+ 
+SepetAlimMin 
+double 
+Seteppe minimum alım adedi 
+SpotResim 
+string 
+Spot resim 
+StokKodu 
+string 
+Stok kodu 
+ToplamIndirimTutari 
+double 
+Toplam indirim tutarı 
+ToplamKDVTutari 
+double 
+Toplam kdv tutarı 
+ToplamSatisFiyati 
+double 
+Toplam satış fiyatı 
+ToplamUrunSepetFiyati 
+double 
+Toplam ürün sepet fiyatı 
+ToplamUrunSepetFiyatiKDVli 
+double 
+Toplam ürün sepet fiyatı(kdv dahil) 
+Url 
+string 
+Url değeri 
+UrunAdediKademeDeger 
+double 
+Ürün adedi kademe değer 
+UrunAdediMinimumDeger 
+double 
+Ürün adedi minimum değer 
+UrunAdediOndalikliSayiGirilebi
+lir 
+bool 
+Ürün adedi ondalıklı sayı girilebilir 
+UrunAdi 
+string 
+Ürün adı 
+UrunID 
+integer 
+Ürün id 
+UrunKampanyaliEklendi 
+bool 
+Kampanyalı eklenme durumu 
+UrunKartiID 
+integer 
+Ürün kartı id 
+UrunKategoriId 
+integer 
+Ürün kategori id 
+UrunNotu 
+string 
+Ürün notu 
+UrunSatisFiyati 
+double 
+Ürün satış fiyatı 
+UrunSatisFiyatiKDV 
+double 
+Ürün satış fiyatı kdv 
+UrunSepetFiyati 
+double 
+Ürün sepet fiyatı 
+UrunSepetFiyatiKDV 
+double 
+Ürün sepet fiyatı kdv 
+UrunSepetFiyatiKDVli 
+double 
+Ürün sepet fiyatı(kdv dahil) 
+IsSepetUcretsizKargo 
+bool 
+Sepet ücretsiz kargo olma durumu 
+IsUcretsizKargo 
+bool 
+Ücretsiz kargo durumu 
+ 
+34 
+ 
+ 
+Örnek kullanım; 
+ 
+ 
+ 
+ 
+18 - SelectCariOdeme 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunl
+u 
+Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+WebSiparisOdemeFiltr
+e 
+WebSiparisOdemeFilt
+re 
+evet 
+Ödeme 
+filtre 
+bilgilerini
+ 
+içeren 
+WebSiparisOdemeFiltre sınıfı. 
+ 
+ 
+WebSiparisOdemeFiltre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+OdemeDurumu 
+integer 
+hayır 
+Ödeme durumu değeri 
+OdemeID 
+integer 
+hayır 
+Ödeme id 
+OdemeTarihiBas 
+datetime 
+hayır 
+Filtre ödeme tarihi başlangıç 
+OdemeTarihiSon 
+datetime 
+hayır 
+Filtre ödeme tarihi bitiş 
+OdemeTipi 
+integer 
+hayır 
+Ödeme tipi 
+SiparisID 
+integer 
+hayır 
+Sipariş id değeri 
+UyeID 
+integer 
+hayır 
+Uye id değeri 
+ 
+ 
+Response = 
+List<WebSiparisOdeme> 
+35 
+ 
+WebSiparisOdeme 
+Adı 
+Tipi 
+Açıklama 
+BankaKomisyonu 
+double 
+Banka komisyon değeri 
+CheckSum 
+string 
+Check sum değeri. 
+HavaleBankaID 
+integer 
+Havale banka id 
+HavaleHesapID 
+integer 
+Havale hesap id 
+ID 
+integer 
+Id 
+KKOdemeBankaID 
+integer 
+Kredi karti ödeme bankası id 
+KapidaOdemeTutari 
+double 
+Kapıda ödeme tutarı 
+OdemeIndirimi 
+double 
+Ödeme indirimi 
+OdemeNotu 
+string 
+Ödeme notu 
+OdemeSecenekID 
+integer 
+Ödeme seçenek id 
+OdemeTipi 
+integer 
+Ödeme tipi 
+Onaylandi 
+integer 
+Onaylandi durumu 
+PosReferansID 
+string 
+Pos referans id değeri. 
+SiparisID 
+integer 
+Siparis id. 
+TaksitSayisi 
+integer 
+Taksit sayısı 
+Tarih 
+datetime 
+Tarih 
+Tutar 
+double 
+Tutar 
+UyeID 
+integer 
+Üye id 
+ 
+ 
+Örnek kullanım; 
+36 
+ 
+ 
+ 
+ 
+19- SelectSepet 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SepetId 
+integer 
+evet 
+Sepet id değeri 
+UyeId 
+integer 
+evet 
+Uye id 
+BaslangicTarihi 
+datetime 
+evet 
+Başlangıç tarihi 
+BitisTarihi 
+datetime 
+evet 
+Bitiş tarihi 
+ 
+ 
+Response = 
+List<WebSepet> 
+WebSepet 
+Adı 
+Tipi 
+Açıklama 
+ID 
+integer 
+Id değeri 
+SepetTarihi 
+datetime 
+Sepet tarihi 
+Urunler 
+List<WebSepetUru
+n> 
+Sepetteki ürünlerin listesi 
+UyeAdi 
+string 
+Üye adı 
+SiparisServis.SiparisServisClient  siparisServisClient  =  new  SiparisServis.SiparisServisClient(); 
+//  integer  alanlarda  -1  gönderilir  ise  o  alanda  filtreleme  yapılmaz. 
+WebSiparisOdemeFiltre  webSiparisOdemeFiltre  =  new  WebSiparisOdemeFiltre 
+{ 
+OdemeDurumu  =  -1, 
+OdemeID  =  -1, 
+OdemeTarihiBas  =  new  DateTime(2005,  10,  10), 
+OdemeTarihiSon  =  new  DateTime(2018,  10,  10), 
+OdemeTipi  =  -1, 
+SiparisID  =  -1, 
+UyeID  =  -1 
+}; 
+List<WebSiparisOdeme>   siparisOdemeListe   =   siparisServisClient.SelectCariOdeme(uyeKodu, 
+webSiparisOdemeFiltre); 
+37 
+ 
+SiparisServis.SiparisServisClient  siparisServisClient  =  new  SiparisServis.SiparisServisClient(); 
+List<WebSepet> 
+webSepetListe 
+= 
+siparisServisClient.SelectSepet(uyeKodu, 
+83, 
+1, 
+new 
+DateTime(2016,  10,  10),  new  DateTime(2018,  10,  10)); 
+UyeID 
+integer 
+Üye Id 
+UyeMail 
+string 
+Üye mail 
+ 
+ 
+WebSepetUrun 
+ 
+Adı 
+Tipi 
+Açıklama 
+Adet 
+double 
+Adet 
+Desi 
+double 
+Desi 
+Fiyati 
+double 
+Fiyat 
+ID 
+integer 
+Id 
+KDVOrani 
+integer 
+Kdv oranı 
+KDVTutari 
+double 
+Kdv tutarı 
+KargoUcreti 
+double 
+Kargo ücreti 
+ParaBirimi 
+string 
+Para birimi 
+ParaBirimiDilKodu 
+string 
+Para birimi dil kodu 
+SepetID 
+integer 
+Sepet id 
+SpotResim 
+string 
+Spot resim 
+StokKodu 
+string 
+Stok kodu 
+UcretsizKargo 
+bool 
+Ücretsiz kargo durumu 
+UrunAdi 
+string 
+Ürün adı 
+UrunID 
+integer 
+Ürün id 
+UrunKartiID 
+integer 
+Ürün kartı id 
+UrunSepetFiyati 
+double 
+Ürün sepet fiyatı 
+UrunSepetFiyatiKDV double 
+Ürün sepet fiyatı kdv 
+Örnek kullanım; 
+ 
+38 
+ 
+ 
+ 
+20- SelectWebSepet 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu 
+Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SelectWebSepetRequest SelectWebSepetReque
+st 
+evet 
+Sorgu 
+için 
+gerekli 
+bilgileri
+ 
+içeren SelectWebSepetRequest 
+sınıfı. 
+ 
+ 
+SelectWebSepetRequest 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+Dil 
+string 
+hayır 
+Dil değeri boş gönderilir ise “TR” kabul edilir 
+ParaBirimi 
+string 
+hayır 
+Para birimi 
+SepetId 
+integer 
+hayır 
+Kayıtlı sepet id 
+UyeId 
+integer 
+hayır 
+Kayıtlı uye id 
+ 
+ 
+Response = 
+List<WebSepet> 
+WebSepet 
+Adı 
+Tipi 
+Açıklama 
+ID 
+integer 
+Id değeri 
+SepetTarihi 
+datetime 
+Sepet tarihi 
+Urunler 
+List<WebSepetUru
+n> 
+Sepetteki ürünlerin listesi 
+UyeAdi 
+string 
+Üye adı 
+UyeID 
+integer 
+Üye Id 
+39 
+ 
+UyeMail 
+string 
+Üye mail 
+ 
+ 
+WebSepetUrun 
+ 
+Adı 
+Tipi 
+Açıklama 
+Adet 
+double 
+Adet 
+Desi 
+double 
+Desi 
+Fiyati 
+double 
+Fiyat 
+ID 
+integer 
+Id 
+KDVOrani 
+integer 
+Kdv oranı 
+KDVTutari 
+double 
+Kdv tutarı 
+KargoUcreti 
+double 
+Kargo ücreti 
+ParaBirimi 
+string 
+Para birimi 
+ParaBirimiDilKodu 
+string 
+Para birimi dil kodu 
+SepetID 
+integer 
+Sepet id 
+SpotResim 
+string 
+Spot resim 
+StokKodu 
+string 
+Stok kodu 
+UcretsizKargo 
+bool 
+Ücretsiz kargo durumu 
+UrunAdi 
+string 
+Ürün adı 
+UrunID 
+integer 
+Ürün id 
+UrunKartiID 
+integer 
+Ürün kartı id 
+UrunSepetFiyati 
+double 
+Ürün sepet fiyatı 
+UrunSepetFiyatiKDV double 
+Ürün sepet fiyatı kdv 
+ 
+ 
+ 
+ 
+ 
+ 
+40 
+ 
+SiparisServis.SiparisServisClient  siparisServisClient  =  new  SiparisServis.SiparisServisClient(); 
+SelectWebSepetRequest  selectWebSepetRequest  =  new  SelectWebSepetRequest 
+{ 
+Dil  =  "", 
+ParaBirimi  =  "TL", 
+SepetId  =  73, 
+UyeId  =  1 
+}; 
+List<WebSepet> 
+selectWebSepetRequest); 
+webSepetListesi 
+= 
+siparisServisClient.SelectWebSepet(uyeKodu, 
+Örnek kullanım; 
+ 
+ 
+ 
+21- SetFaturaNo 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+SiparisId 
+integer 
+evet 
+Fatura numarası eklenecek sipariş id değeri. 
+FaturaNo 
+string 
+evet 
+Eklenecek fatura numarası 
+ 
+ 
+Örnek kullanım; 
+ 
+ 
+ 
+22- SetSiparisUrunDurum 
+İşlem id 
+ 
+Adı 
+Değer 
+Beklemede 
+0 
+Islemde 
+1 
+IptalEdildi 
+2 
+KargoyaVerildi 
+3 
+ 
+41 
+ 
+Parametre 
+ 
+Adı 
+Tipi 
+Zorunl
+u 
+Açıklama 
+UyeKodu 
+string 
+evet 
+Servis sağlayıcısı tarafından verilen şifre. 
+Request 
+SetSiparisUrunDurumRequ
+est 
+evet 
+İşlem 
+için 
+gerekli 
+bilgileri
+ 
+içeren 
+SetSiparisUrunDurumRequest Sınıfı 
+ 
+ 
+SetSiparisUrunDurumRequest 
+ 
+Adı 
+Tipi 
+Zorunlu Açıklama 
+SiparisID 
+integer 
+Evet 
+Siparis id değeri 
+SiparisUrunID 
+integer 
+Evet 
+Sipariş ürün id değeri. 
+DurumId 
+integer 
+Evet 
+Siparis ürün durum id değeri 
+Islem 
+integer 
+Evet 
+İşlem id 
+Adet 
+integer 
+Hayır 
+Gönerilen ürün id li kaç ürünün durumu değişeceğini 
+belirten parametre 
+IadeNedenID 
+integer 
+Hayır 
+İade nedeni id değeri 
+ 
+ 
+Response = SetSiparisUrunDurumResponse 
+ 
+Adı 
+Tipi 
+Açıklama 
+ErrorMessage 
+string 
+Başarısız işlem hata mesajı 
+ErrorCode 
+integer 
+Başarısız işlem hata kodu 
+IsError 
+bool 
+false= işlem başarılı , true = işlem başarısız 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+42 
+ 
+Örnek kullanım; 
+ 
+ 
+ 
+ 
+Ticimax Bilişim Teknolojileri A.Ş servislerde değişiklik yapma hakkını 
+saklı tutar 
+SetSiparisUrunDurumRequest  setSiparisUrunDurumRequest  =  new  SetSiparisUrunDurumRequest 
+{ 
+SiparisID  =  1, 
+SiparisUrunID  =  1, //  sipariş  ürün  id  değeri 
+DurumID  =  1,  //  kayıtlı  durum  id 
+Islem  =  1,  //  kayıtlı  durumun  işlem 
+değeri 
+//Adet=1,  //  durumu  değişecek  ürün  adedi.  Gönderilmez  ise  tümünün  durumu  değişir 
+//IadeNedenID=  1  //  iade  nedeni  id  değeri 
+}; 
+SiparisServisClient  siparisServisClient  =  new  SiparisServisClient(); 
+SetSiparisUrunDurumResponse 
+setSiparisUrunDurumResponse 
+= 
+siparisServisClient.SetSiparisUrunDurum(uyeKodu,  setSiparisUrunDurumRequest); 
