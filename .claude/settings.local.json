@@ -82,7 +82,8 @@
       "Bash(vercel login *)",
       "mcp__8d43e23d-4a69-43f3-8909-ceaf49f8f656__get_deployment_build_logs",
       "mcp__8d43e23d-4a69-43f3-8909-ceaf49f8f656__list_deployments",
-      "Bash(vercel --prod --yes)"
+      "Bash(vercel --prod --yes)",
+      "Bash(git add *)"
     ]
   }
 }

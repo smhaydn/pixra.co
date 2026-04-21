@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+dist/
+build/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+firms.json
+
+# Excel / test files
+*.xlsx
+*.xls
+*.pdf
+
+# Node
+node_modules/
+.next/
+frontend/.next/
+frontend/node_modules/
+
+# Vercel
+.vercel/
+frontend/.vercel/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# vibe-coder-kit (submodule, ayrı repo)
+vibe-coder-kit/
