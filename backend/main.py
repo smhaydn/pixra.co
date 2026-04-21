@@ -40,11 +40,69 @@ MAX_RETRIES = 3
 COST_LIMIT_TL = 100.0  # Maliyet limiti (TL)
 
 
+# ──────────────── GEMINI KEY POOL ────────────────
+
+import threading as _threading
+_key_pool: List[str] = []
+_key_pool_idx: int = 0
+_key_pool_lock = _threading.Lock()
+_key_pool_loaded_at: float = 0.0
+_KEY_POOL_TTL = 300  # 5 dakikada bir yenile
+
+
+def _load_key_pool() -> List[str]:
+    """Supabase'den aktif Gemini key'lerini çeker."""
+    try:
+        import httpx
+        url = os.getenv("SUPABASE_URL", "")
+        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+        if not url or not key:
+            return []
+        resp = httpx.get(
+            f"{url}/rest/v1/gemini_keys",
+            params={"is_active": "eq.true", "select": "api_key"},
+            headers={"apikey": key, "Authorization": f"Bearer {key}"},
+            timeout=5,
+        )
+        if resp.status_code == 200:
+            return [r["api_key"] for r in resp.json() if r.get("api_key")]
+    except Exception as e:
+        print(f"[KEY POOL] Yüklenemedi: {e}")
+    return []
+
+
+def get_gemini_key(requested_key: str = "") -> str:
+    """
+    Öncelik sırası:
+    1. Kullanıcıdan gelen key (varsa)
+    2. Admin key pool'undan round-robin
+    3. GEMINI_API_KEY env var fallback
+    """
+    if requested_key:
+        return requested_key
+
+    global _key_pool, _key_pool_idx, _key_pool_loaded_at
+    with _key_pool_lock:
+        if time.time() - _key_pool_loaded_at > _KEY_POOL_TTL:
+            _key_pool = _load_key_pool()
+            _key_pool_loaded_at = time.time()
+            print(f"[KEY POOL] {len(_key_pool)} adet aktif Gemini key yüklendi")
+
+        if _key_pool:
+            key = _key_pool[_key_pool_idx % len(_key_pool)]
+            _key_pool_idx += 1
+            return key
+
+    return os.getenv("GEMINI_API_KEY", "")
+
+
 # ──────────────── MODELLER ────────────────
 
 class FetchProductsRequest(BaseModel):
     domain_url: str
     ws_kodu: str
+    organization_id: Optional[str] = None
+    force_refresh: bool = False
 
 class AnalyzeRequest(BaseModel):
     ws_kodu: str
@@ -151,15 +209,114 @@ def read_root():
     return {"status": "ok", "message": "Pixra backend API is running"}
 
 
+def _sb_load_products(organization_id: str) -> Optional[list]:
+    """Supabase'den cache'lenmiş ürünleri yükler. 2 saatten eskiyse None döner."""
+    try:
+        supabase_url = os.getenv("SUPABASE_URL", "")
+        supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+        if not supabase_url or not supabase_key:
+            return None
+        import httpx
+        resp = httpx.get(
+            f"{supabase_url}/rest/v1/ticimax_products",
+            params={"organization_id": f"eq.{organization_id}", "select": "*", "limit": "5000"},
+            headers={"apikey": supabase_key, "Authorization": f"Bearer {supabase_key}"},
+            timeout=10
+        )
+        if resp.status_code != 200 or not resp.json():
+            return None
+        rows = resp.json()
+        # En son fetch zamanını kontrol et (2 saat TTL)
+        from datetime import timedelta
+        latest = max(r["fetched_at"] for r in rows)
+        fetched_dt = datetime.fromisoformat(latest.replace("Z", "+00:00"))
+        if datetime.now(timezone.utc) - fetched_dt > timedelta(hours=2):
+            return None
+        return rows
+    except Exception as e:
+        print(f"[CACHE LOAD] Hata: {e}")
+        return None
+
+
+def _sb_save_products(organization_id: str, rows: list):
+    """Ürünleri Supabase'e toplu upsert eder."""
+    try:
+        supabase_url = os.getenv("SUPABASE_URL", "")
+        supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+        if not supabase_url or not supabase_key:
+            return
+        import httpx
+        # Önce bu org'un eski ürünlerini sil
+        httpx.delete(
+            f"{supabase_url}/rest/v1/ticimax_products",
+            params={"organization_id": f"eq.{organization_id}"},
+            headers={"apikey": supabase_key, "Authorization": f"Bearer {supabase_key}"},
+            timeout=10
+        )
+        # Yeni ürünleri batch insert (500'er)
+        batch_size = 500
+        for i in range(0, len(rows), batch_size):
+            batch = rows[i:i+batch_size]
+            httpx.post(
+                f"{supabase_url}/rest/v1/ticimax_products",
+                json=batch,
+                headers={
+                    "apikey": supabase_key,
+                    "Authorization": f"Bearer {supabase_key}",
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal"
+                },
+                timeout=30
+            )
+        print(f"[CACHE SAVE] {len(rows)} ürün Supabase'e kaydedildi.")
+    except Exception as e:
+        print(f"[CACHE SAVE] Hata: {e}")
+
+
 @app.post("/api/products/fetch")
 def fetch_products(req: FetchProductsRequest):
-    """Ticimax'ten urunleri ceker, cache'e kaydeder ve frontend'e doner."""
+    """Supabase cache varsa oradan, yoksa Ticimax'ten çeker."""
     try:
+        # ── Supabase cache kontrolü ──
+        if req.organization_id and not req.force_refresh:
+            cached_rows = _sb_load_products(req.organization_id)
+            if cached_rows:
+                formatted = []
+                for r in cached_rows:
+                    resim_urls = r.get("resim_urls") or []
+                    products_cache[r["internal_key"]] = {
+                        "raw": None,
+                        "urun_adi": r["urun_adi"],
+                        "resim_urls": resim_urls,
+                        "stok_kodu": r["display_stok"],
+                        "marka": r["marka"],
+                        "satis_fiyati": r["satis_fiyati"],
+                        "mevcut_aciklama": r["mevcut_aciklama"],
+                        "mevcut_seo_anahtar": r["mevcut_seo_anahtar"],
+                        "mevcut_seo_aciklama": r["mevcut_seo_aciklama"],
+                        "ana_kategori": r["ana_kategori"],
+                        "adwords_aciklama": r.get("adwords_aciklama", ""),
+                        "adwords_kategori": r.get("adwords_kategori", ""),
+                        "adwords_tip": r.get("adwords_tip", ""),
+                        "breadcrumb_kat": r.get("breadcrumb_kat", ""),
+                        "kategoriler": r.get("kategoriler", ""),
+                    }
+                    formatted.append({
+                        "id": 0,
+                        "stok_kodu": r["internal_key"],
+                        "display_stok": r["display_stok"],
+                        "urun_adi": r["urun_adi"],
+                        "resim_url": r.get("resim_url_ilk", ""),
+                    })
+                print(f"[CACHE HIT] {len(formatted)} ürün Supabase'den yüklendi.")
+                return {"status": "success", "products": formatted, "total": len(formatted), "from_cache": True}
+
         wsdl_url = _build_wsdl_url(req.domain_url)
         print(f"[FETCH] Ticimax WSDL: {wsdl_url}")
         client = TicimaxClient(base_url=wsdl_url, uye_kodu=req.ws_kodu)
 
         tum_urunler = []
+        sb_rows_to_save = []
         sayfa_boyutu = 100
         baslangic = 0
 
@@ -244,24 +401,54 @@ def fetch_products(req: FetchProductsRequest):
             mevcut_seo_anahtar = str(get_field(u, 'SeoAnahtarKelime', ''))
             mevcut_seo_aciklama = str(get_field(u, 'SeoSayfaAciklama', ''))
             ana_kategori = str(get_field(u, 'AnaKategori', ''))
+            adwords_aciklama = str(get_field(u, 'AdwordsAciklama', ''))
+            adwords_kategori = str(get_field(u, 'AdwordsKategori', ''))
+            adwords_tip = str(get_field(u, 'AdwordsTip', ''))
+            breadcrumb_kat = str(get_field(u, 'BreadcrumbKat', ''))
+            kategoriler = str(get_field(u, 'Kategoriler', ''))
+            marka = str(get_field(u, 'Marka', ''))
 
-            # Cache'e tam veriyi kaydet
             products_cache[internal_key] = {
                 "raw": u,
                 "urun_adi": urun_adi,
                 "resim_urls": resim_urls,
                 "stok_kodu": display_stok,
-                "marka": str(get_field(u, 'Marka', '')),
+                "marka": marka,
                 "satis_fiyati": satis_fiyati,
                 "mevcut_aciklama": mevcut_aciklama,
                 "mevcut_seo_anahtar": mevcut_seo_anahtar,
                 "mevcut_seo_aciklama": mevcut_seo_aciklama,
                 "ana_kategori": ana_kategori,
+                "adwords_aciklama": adwords_aciklama,
+                "adwords_kategori": adwords_kategori,
+                "adwords_tip": adwords_tip,
+                "breadcrumb_kat": breadcrumb_kat,
+                "kategoriler": kategoriler,
             }
+
+            sb_rows_to_save.append({
+                "organization_id": req.organization_id,
+                "internal_key": internal_key,
+                "urun_adi": urun_adi,
+                "display_stok": display_stok,
+                "resim_urls": resim_urls,
+                "resim_url_ilk": resim_urls[0] if resim_urls else "",
+                "marka": marka,
+                "satis_fiyati": satis_fiyati,
+                "mevcut_aciklama": mevcut_aciklama,
+                "mevcut_seo_anahtar": mevcut_seo_anahtar,
+                "mevcut_seo_aciklama": mevcut_seo_aciklama,
+                "ana_kategori": ana_kategori,
+                "adwords_aciklama": adwords_aciklama,
+                "adwords_kategori": adwords_kategori,
+                "adwords_tip": adwords_tip,
+                "breadcrumb_kat": breadcrumb_kat,
+                "kategoriler": kategoriler,
+            })
 
             formatted.append({
                 "id": int(urun_id) if str(urun_id).isdigit() else 0,
-                "stok_kodu": internal_key,  # Frontend bunu analiz icin gonderecek
+                "stok_kodu": internal_key,
                 "display_stok": display_stok,
                 "urun_adi": urun_adi,
                 "resim_url": resim_urls[0] if resim_urls else "",
@@ -273,10 +460,20 @@ def fetch_products(req: FetchProductsRequest):
         print(f"[FETCH] {len(formatted)} urun cache'e kaydedildi. "
               f"Gorsel olan: {sum(1 for f in formatted if f['resim_url'])}")
 
+        # Supabase'e arka planda kaydet
+        if req.organization_id and sb_rows_to_save:
+            import threading
+            threading.Thread(
+                target=_sb_save_products,
+                args=(req.organization_id, sb_rows_to_save),
+                daemon=True
+            ).start()
+
         return {
             "status": "success",
             "products": formatted,
-            "total": len(formatted)
+            "total": len(formatted),
+            "from_cache": False
         }
 
     except Exception as e:
@@ -305,19 +502,16 @@ def _run_analysis(session_id: str, req: AnalyzeRequest):
     session["product_times"] = []  # Her urun icin sure kaydi
     results_db[session_id] = []
 
-    # 1. Gemini API key kontrolu
-    gemini_key = req.api_key or os.getenv("GEMINI_API_KEY", "")
+    # 1. Gemini API key kontrolu (pool'dan al, kullanici keyi yoksa)
+    gemini_key = get_gemini_key(req.api_key or "")
     if not gemini_key:
         session["status"] = "error"
-        session["errors"].append(
-            "Gemini API Key bulunamadi! "
-            "Firma ayarlarindan Gemini API Key giriniz."
-        )
-        _log(session_id, "HATA: Gemini API Key bos!")
-        sb.mark_failed(session_id, "Gemini API Key bulunamadi")
+        session["errors"].append("Gemini API Key bulunamadi! Admin panelinden key eklenmeli.")
+        _log(session_id, "HATA: Gemini API Key bos (pool da bos)!")
+        sb.mark_failed(session_id, "Gemini API Key bulunamadi — admin key eklemeli")
         return
 
-    _log(session_id, f"Gemini API Key alindi ({gemini_key[:8]}...)")
+    _log(session_id, f"Gemini API Key secildi ({gemini_key[:8]}...)")
 
     # 2. VisionEngine baslat
     try:
@@ -389,7 +583,7 @@ def _run_analysis(session_id: str, req: AnalyzeRequest):
             sb.update_progress(session_id, idx + 1)
             continue
 
-        urun = cached["raw"]
+        urun = cached.get("raw")  # Supabase cache'den yüklendiğinde None olabilir
         urun_adi = cached["urun_adi"]
         resim_urls = cached["resim_urls"]
         urun_marka = cached.get("marka", "") or marka
@@ -465,14 +659,14 @@ def _run_analysis(session_id: str, req: AnalyzeRequest):
                 ai_result = engine.analyze_product_image(
                     image_path=temp_paths[0],
                     marka=urun_marka,
-                    adwords_aciklama=str(get_field(urun, 'AdwordsAciklama', '')),
-                    adwords_kategori=str(get_field(urun, 'AdwordsKategori', '')),
-                    adwords_tip=str(get_field(urun, 'AdwordsTip', '')),
-                    breadcrumb_kat=str(get_field(urun, 'BreadcrumbKat', '')),
+                    adwords_aciklama=cached.get("adwords_aciklama") or (str(get_field(urun, 'AdwordsAciklama', '')) if urun else ''),
+                    adwords_kategori=cached.get("adwords_kategori") or (str(get_field(urun, 'AdwordsKategori', '')) if urun else ''),
+                    adwords_tip=cached.get("adwords_tip") or (str(get_field(urun, 'AdwordsTip', '')) if urun else ''),
+                    breadcrumb_kat=cached.get("breadcrumb_kat") or (str(get_field(urun, 'BreadcrumbKat', '')) if urun else ''),
                     image_paths=temp_paths,
                     mevcut_urun_adi=urun_adi,
                     satisfiyati=cached.get("satis_fiyati", ""),
-                    kategoriler=str(get_field(urun, 'Kategoriler', '')),
+                    kategoriler=cached.get("kategoriler") or (str(get_field(urun, 'Kategoriler', '')) if urun else ''),
                     stok_kodu=stok_kodu,
                     reference_content=reference_content,
                 )
@@ -1360,3 +1554,70 @@ def send_to_ticimax(req: SendToTicimaxRequest):
         "errors": error_count,
         "results": results,
     }
+
+
+# ──────────────── ADMIN GEMINI KEY YÖNETİMİ ────────────────
+
+class GeminiKeyRequest(BaseModel):
+    label: str
+    api_key: str
+
+
+def _sb_admin_request(method: str, path: str, **kwargs):
+    import httpx
+    url = os.getenv("SUPABASE_URL", "")
+    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    headers = {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+    return httpx.request(method, f"{url}/rest/v1/{path}", headers=headers, timeout=10, **kwargs)
+
+
+@app.get("/api/admin/gemini-keys")
+def list_gemini_keys():
+    resp = _sb_admin_request("GET", "gemini_keys", params={"select": "id,label,is_active,created_at,api_key"})
+    if resp.status_code != 200:
+        raise HTTPException(status_code=500, detail="Keys alınamadı")
+    rows = resp.json()
+    # api_key'i maskele
+    for r in rows:
+        k = r.get("api_key", "")
+        r["api_key_masked"] = k[:8] + "..." + k[-4:] if len(k) > 12 else "***"
+        del r["api_key"]
+    pool_size = len(_key_pool)
+    return {"keys": rows, "pool_size": pool_size}
+
+
+@app.post("/api/admin/gemini-keys")
+def add_gemini_key(req: GeminiKeyRequest):
+    resp = _sb_admin_request("POST", "gemini_keys",
+        json={"label": req.label, "api_key": req.api_key, "is_active": True},
+        params={"select": "id,label,is_active,created_at"})
+    if resp.status_code not in (200, 201):
+        raise HTTPException(status_code=500, detail="Key eklenemedi")
+    # Pool'u hemen sıfırla — bir sonraki istekte yeniden yüklensin
+    global _key_pool_loaded_at
+    _key_pool_loaded_at = 0.0
+    return resp.json()
+
+
+@app.patch("/api/admin/gemini-keys/{key_id}")
+def toggle_gemini_key(key_id: str, body: dict):
+    is_active = body.get("is_active")
+    if is_active is None:
+        raise HTTPException(status_code=400, detail="is_active gerekli")
+    resp = _sb_admin_request("PATCH", f"gemini_keys?id=eq.{key_id}",
+        json={"is_active": is_active})
+    if resp.status_code not in (200, 204):
+        raise HTTPException(status_code=500, detail="Güncellenemedi")
+    global _key_pool_loaded_at
+    _key_pool_loaded_at = 0.0
+    return {"ok": True}
+
+
+@app.delete("/api/admin/gemini-keys/{key_id}")
+def delete_gemini_key(key_id: str):
+    resp = _sb_admin_request("DELETE", f"gemini_keys?id=eq.{key_id}")
+    if resp.status_code not in (200, 204):
+        raise HTTPException(status_code=500, detail="Silinemedi")
+    global _key_pool_loaded_at
+    _key_pool_loaded_at = 0.0
+    return {"ok": True}
