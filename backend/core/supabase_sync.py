@@ -109,6 +109,7 @@ def mark_failed(session_id: str, error: str, processed: int = 0) -> None:
         status="failed",
         processed_products=processed,
         completed_at=datetime.now(timezone.utc).isoformat(),
+        error_message=error[:500] if error else None,
     )
 
 
