@@ -1563,11 +1563,13 @@ class GeminiKeyRequest(BaseModel):
     api_key: str
 
 
-def _sb_admin_request(method: str, path: str, **kwargs):
+def _sb_admin_request(method: str, path: str, prefer: str = "", **kwargs):
     import httpx
     url = os.getenv("SUPABASE_URL", "")
     key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
     headers = {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+    if prefer:
+        headers["Prefer"] = prefer
     return httpx.request(method, f"{url}/rest/v1/{path}", headers=headers, timeout=10, **kwargs)
 
 
@@ -1577,7 +1579,6 @@ def list_gemini_keys():
     if resp.status_code != 200:
         raise HTTPException(status_code=500, detail="Keys alınamadı")
     rows = resp.json()
-    # api_key'i maskele
     for r in rows:
         k = r.get("api_key", "")
         r["api_key_masked"] = k[:8] + "..." + k[-4:] if len(k) > 12 else "***"
@@ -1588,15 +1589,18 @@ def list_gemini_keys():
 
 @app.post("/api/admin/gemini-keys")
 def add_gemini_key(req: GeminiKeyRequest):
-    resp = _sb_admin_request("POST", "gemini_keys",
+    resp = _sb_admin_request(
+        "POST", "gemini_keys",
+        prefer="return=representation",
         json={"label": req.label, "api_key": req.api_key, "is_active": True},
-        params={"select": "id,label,is_active,created_at"})
+        params={"select": "id,label,is_active,created_at"},
+    )
     if resp.status_code not in (200, 201):
-        raise HTTPException(status_code=500, detail="Key eklenemedi")
-    # Pool'u hemen sıfırla — bir sonraki istekte yeniden yüklensin
+        raise HTTPException(status_code=500, detail=f"Key eklenemedi: {resp.text[:200]}")
     global _key_pool_loaded_at
     _key_pool_loaded_at = 0.0
-    return resp.json()
+    data = resp.json()
+    return data[0] if isinstance(data, list) else data
 
 
 @app.patch("/api/admin/gemini-keys/{key_id}")
