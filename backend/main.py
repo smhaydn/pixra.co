@@ -1449,19 +1449,44 @@ def send_to_ticimax(req: SendToTicimaxRequest):
 
     results = []
 
+    # Ticimax'ten tam liste lazımsa (raw eksik ürünler için) bir kez çek
+    _ticimax_full: Optional[list] = None
+
+    def _ensure_raw(stok: str) -> Optional[Any]:
+        """Cache'te raw yoksa Ticimax'ten çekip cache'e yazar, raw objeyi döner."""
+        nonlocal _ticimax_full
+        cached_item = products_cache.get(stok)
+        if cached_item and cached_item.get("raw"):
+            return cached_item["raw"]
+        # Lazy tam liste çekimi — birden fazla ürün için tek sefer
+        if _ticimax_full is None:
+            try:
+                _log("send", "raw eksik, Ticimax'ten tam liste çekiliyor...")
+                _ticimax_full = client.get_urun_liste(urun_karti_id=0)
+                for u in _ticimax_full:
+                    sk = _extract_stok_kodu(u)
+                    if sk:
+                        existing = products_cache.get(sk, {})
+                        existing["raw"] = u
+                        products_cache[sk] = existing
+                _log("send", f"Ticimax'ten {len(_ticimax_full)} ürün yüklendi")
+            except Exception as e:
+                _log("send", f"Ticimax yeniden çekme hatası: {e}")
+                _ticimax_full = []
+        cached_item2 = products_cache.get(stok)
+        return cached_item2.get("raw") if cached_item2 else None
+
     for prod in req.products:
         stok_kodu = prod.get("stok_kodu", "")
         if not stok_kodu:
             results.append({"stok_kodu": stok_kodu, "status": "error", "error": "stok_kodu eksik"})
             continue
 
-        # Cache'ten raw zeep objesini al
-        cached = products_cache.get(stok_kodu)
-        if not cached or not cached.get("raw"):
-            results.append({"stok_kodu": stok_kodu, "status": "error", "error": "Urun cache'te bulunamadi. Once urunleri cekin."})
+        raw = _ensure_raw(stok_kodu)
+        if not raw:
+            results.append({"stok_kodu": stok_kodu, "status": "error",
+                             "error": "Ürün Ticimax'te bulunamadı. WS kodu veya domain kontrol edin."})
             continue
-
-        raw = cached["raw"]
         urun_karti_id = get_field(raw, 'ID', None)
         if not urun_karti_id:
             results.append({"stok_kodu": stok_kodu, "status": "error", "error": "UrunKartiId bulunamadi"})
