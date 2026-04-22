@@ -1593,14 +1593,17 @@ def add_gemini_key(req: GeminiKeyRequest):
         "POST", "gemini_keys",
         prefer="return=representation",
         json={"label": req.label, "api_key": req.api_key, "is_active": True},
-        params={"select": "id,label,is_active,created_at"},
     )
     if resp.status_code not in (200, 201):
-        raise HTTPException(status_code=500, detail=f"Key eklenemedi: {resp.text[:200]}")
+        raise HTTPException(status_code=500, detail=f"Key eklenemedi ({resp.status_code}): {resp.text[:200]}")
     global _key_pool_loaded_at
     _key_pool_loaded_at = 0.0
-    data = resp.json()
-    return data[0] if isinstance(data, list) else data
+    # Body boş gelebilir — başarılı kabul et, listeden döndür
+    try:
+        data = resp.json()
+        return data[0] if isinstance(data, list) and data else {"ok": True}
+    except Exception:
+        return {"ok": True}
 
 
 @app.patch("/api/admin/gemini-keys/{key_id}")
