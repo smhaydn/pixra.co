@@ -99,6 +99,7 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
           height: var(--header-h);
           background: var(--surface-1);
           border-bottom: 1px solid var(--border-subtle);
+          box-shadow: var(--shadow-sm);
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -106,8 +107,6 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
           position: sticky;
           top: 0;
           z-index: var(--z-header);
-          backdrop-filter: blur(12px);
-          background-color: rgba(17, 17, 19, 0.85);
         }
         .topbar-left { display: flex; align-items: center; gap: 12px; }
         .topbar-right { display: flex; align-items: center; gap: 12px; }
@@ -122,13 +121,14 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
           border-radius: var(--radius-full);
           font-size: var(--text-sm);
           color: var(--text-secondary);
+          font-weight: var(--weight-medium);
         }
         .firm-dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
           background: var(--success);
-          box-shadow: 0 0 8px var(--success);
+          box-shadow: 0 0 6px var(--success);
         }
 
         .credit-pill {
@@ -143,15 +143,16 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
           font-weight: var(--weight-semibold);
           transition: all var(--duration-fast) var(--ease-out);
           text-decoration: none;
-          border: 1px solid transparent;
+          border: 1px solid var(--brand-border);
         }
         .credit-pill:hover {
-          background: rgba(99, 102, 241, 0.18);
-          border-color: var(--border-focus);
+          background: rgba(180, 83, 9, 0.12);
+          border-color: var(--brand-primary);
         }
         .credit-pill.warn {
           background: var(--warning-subtle);
           color: var(--warning-text);
+          border-color: rgba(217, 119, 6, 0.2);
         }
         .credit-value {
           font-variant-numeric: tabular-nums;
@@ -164,9 +165,7 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
         }
         .credit-pill.warn .credit-label { color: var(--warning-text); opacity: 0.8; }
 
-        .user-menu {
-          position: relative;
-        }
+        .user-menu { position: relative; }
         .user-trigger {
           background: none;
           border: none;
@@ -177,7 +176,7 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
         .avatar {
           width: 32px;
           height: 32px;
-          background: var(--brand-gradient);
+          background: var(--brand-primary);
           color: #fff;
           border-radius: 50%;
           display: flex;
@@ -185,6 +184,7 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
           justify-content: center;
           font-weight: var(--weight-bold);
           font-size: var(--text-sm);
+          box-shadow: var(--shadow-brand);
         }
         .avatar.lg {
           width: 40px;
@@ -197,7 +197,7 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
           right: 0;
           top: calc(100% + 8px);
           min-width: 240px;
-          background: var(--surface-2);
+          background: var(--surface-1);
           border: 1px solid var(--border-default);
           border-radius: var(--radius-lg);
           box-shadow: var(--shadow-overlay);
@@ -210,11 +210,13 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
           align-items: center;
           gap: 10px;
           padding: 10px;
+          border-bottom: 1px solid var(--border-subtle);
+          margin-bottom: 4px;
         }
         .user-email {
           font-size: var(--text-sm);
           color: var(--text-primary);
-          font-weight: var(--weight-medium);
+          font-weight: var(--weight-semibold);
           overflow: hidden;
           text-overflow: ellipsis;
           max-width: 160px;
@@ -222,6 +224,7 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
         .user-role {
           font-size: var(--text-xs);
           color: var(--text-tertiary);
+          margin-top: 2px;
         }
         .menu-divider {
           height: 1px;
@@ -243,6 +246,8 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
           text-align: left;
           text-decoration: none;
           font-family: inherit;
+          font-weight: var(--weight-medium);
+          transition: all var(--duration-fast) var(--ease-out);
         }
         .menu-item:hover {
           background: var(--surface-3);
