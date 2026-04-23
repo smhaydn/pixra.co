@@ -493,7 +493,7 @@ function SectorManager() {
     supabase.from('sector_intelligence')
       .select('*').eq('sector_id', selected).order('data_type').order('quality_score', { ascending: false })
       .then(({ data }) => { setIntels(data || []) })
-      .finally(() => setLoading(false))
+      .then(() => setLoading(false), () => setLoading(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected])
 
