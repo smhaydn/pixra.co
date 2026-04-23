@@ -1,72 +1,167 @@
-# Ticimax AI Manager - Proje Kurallari
+# Pixra — Claude Code Kılavuzu
 
-## Proje Yapisi
-- **app.py**: PyQt6 giris noktasi
-- **vision_engine.py**: Gemini Vision AI motoru (SEO/GEO analiz)
-- **ticimax_api.py**: Ticimax SOAP client (zeep)
-- **gui_manager.py**: Arayuz (LoginPanel, ProductDetailDialog, MainWindow)
-- **ai_workers.py**: QThread worker'lar (Ticimax, Vision, Create)
-- **helpers.py**: SessionState, retry, yardimci fonksiyonlar
-- **theme.py**: QSS dark tema
-- **main.py**: Legacy CLI test script (kullanilmiyor)
+> Bu dosya her konuşmada otomatik yüklenir. Kısa ve öz tut — token bütçesi kritik.
 
-## Her Zaman Gecerli Kurallar
+---
 
-### Kod Standartlari
-- Tum Python kodlari moduler ve OOP olmalidir
-- Ticimax SOAP entegrasyonu icin sadece `zeep` kutuphanesi kullanilmalidir
-- Gorsel analiz ciktilari Pydantic modelleri ile valide edilmelidir
-- API anahtarlari asla koda gomulmemeli, firms.json veya .env'den okunmalidir
-- Magic number/string kullanilmamali, sabitler tanimlanmalidir
-- Hata mesajlari aciklayici olmalidir, genel catch-all bloklardan kacinilmalidir
+## Proje Nedir?
 
-### SEO/GEO Standartlari
-- SEO baslik: max 60 karakter, aciklama: max 155 karakter
-- GEO icin her urun aciklamasina en az bir "Neden bu urunu almaliyim?" semantik paragraf eklenmeli
-- Ciktilar yapilandirilmis JSON formatinda olmali (urun_adi, aciklama, seo_baslik, seo_aciklama, geo_sss)
-- 2026 standartlarina uyulmali: semantik zenginlik, FAQ bloklari, E-E-A-T sinyalleri
-- Gemini Vision ciktisi her zaman yapilandirilmis JSON objesi olmali
+**Pixra** — Ticimax altyapısındaki e-ticaret firmalarına AI destekli SEO/GEO içerik üretimi sunan çok kiracılı (multi-tenant) SaaS platformu.
 
-### Multi-Tenant & Guvenlik
-- Hicbir marka, URL veya API anahtari hardcoded olmamalıdir
-- Tum baglanti parametreleri GUI uzerinden dinamik olarak alinmalidir
-- Ticimax'e veri gonderimi (Update/Create) oncesinde kullanicidan 3 asamali onay zorunludur
-- Hibrit veri kaynagi desteklenmeli: Bulut Modu (URL'den cekme) + Yerel Mod (klasorden gorsel okuma)
+**Stack:**
+- Frontend: Next.js 16 + React 19 + styled-jsx + Tailwind v4 → **Vercel** (pixra.co)
+- Backend: FastAPI (Python) + Gemini 2.5 Flash Vision → **Railway**
+- DB / Auth: Supabase (PostgreSQL + Row Level Security)
+- E-ticaret entegrasyon: Ticimax SOAP API (zeep)
 
-### Genel Calisma Prensipleri
-- Dosya degistirmeden once import'lari ve bagimliliklari kontrol et
-- Mevcut kod desenlerini takip et, yeni pattern olusturmadan once codebase'deki orneklere bak
-- Over-engineering yapma, sadece istenen degisiklikleri yap
-- Emin olunmayan durumlarda dosyayi oku, asla tahmin etme
+---
 
-## .agent Klasoru (Skills, Agents & Rules)
-Proje icinde `.agent/` klasoru bulunmaktadir (vibe-coder-kit). Ihtiyac halinde ilgili dosyalar okunmalidir:
+## Dosya Haritası (nerede ne var)
 
-### Agents (`.agent/agents/`)
-- `backend-dev.md` — Backend gelistirme persona (API, DB, guvenlik)
-- `designer.md` — UI/UX ve tasarim persona
-- `devops.md` — Altyapi ve deploy persona
-- `frontend-dev.md` — Frontend gelistirme persona
+### Frontend — `frontend/src/`
+```
+app/
+  page.tsx               → Dashboard (ana sayfa, server component)
+  dashboard.tsx          → Dashboard içeriği (client component)
+  layout.tsx             → Root layout, font yükleme, globals.css import
+  globals.css            → TÜM CSS token'ları (renk, tipografi, spacing, animasyon)
+  seo/
+    page.tsx             → SEO oturum listesi
+    seo-client.tsx       → SEO oturum UI
+    new/                 → Yeni analiz başlatma
+    session/[id]/        → Analiz detay + onay ekranı
+  admin/
+    page.tsx             → Admin panel (server)
+    admin-client.tsx     → Admin UI (müşteri yönetimi + SectorManager)
+  onboarding/            → Firma kaydı + sektör seçimi
+  settings/              → Firma ayarları + sektör güncelleme
+  credits/               → Kredi paketi satın alma
+  auth/ login/ ...       → Supabase auth sayfaları
 
-### Skills (`.agent/skills/`)
-- `architecture-review/SKILL.md` — Mimari degerlendirme
-- `brainstorming/SKILL.md` — Fikir uretme ve planlama
-- `code-review/SKILL.md` — Kod inceleme protokolu
-- `dependency-audit/SKILL.md` — Bagimlilık denetimi
-- `documentation-sync/SKILL.md` — Dokumantasyon guncelleme
-- `github/SKILL.md` — Git/GitHub workflow'u
-- `incident-response/SKILL.md` — Olay mudahale protokolu
-- `knowledge-base-update/SKILL.md` — Bilgi tabani guncelleme
-- `project-context-primer/SKILL.md` — Proje baglam hazirlamasi
-- `prompt-enhancer/SKILL.md` — Prompt iyilestirme rehberi
-- `test-driven-execution/SKILL.md` — TDD protokolu
-- `writing-plans/SKILL.md` — Plan yazma workflow'u
+components/
+  shell/
+    AppShell.tsx         → Sayfa iskelet (Sidebar + TopBar + içerik)
+    Sidebar.tsx          → Sol navigasyon (sabit 240px)
+    TopBar.tsx           → Üst bar (firma etiketi, dark mode, kredi, kullanıcı menüsü)
+    ImpersonateBanner.tsx→ Admin impersonation uyarı şeridi
+  ui/
+    Button.tsx Badge.tsx Card.tsx Progress.tsx
+    Input.tsx Modal.tsx Toast.tsx EmptyState.tsx
+    index.ts             → Toplu export
+```
 
-### Rules (`.agent/rules/`)
-- `code-hygiene.md` — Kod temizligi standartlari
-- `code-quality.md` — Kod kalitesi ve performans
-- `safety.md` — Guvenlik protokolleri
-- Detayli kurallar gerektiginde bu dosyalar okunmalidir
+### Backend — `backend/`
+```
+main.py                  → FastAPI app, tüm endpoint'ler, AnalyzeRequest modeli
+core/
+  vision_engine.py       → Gemini Vision çağrısı, prompt build, sector injection
+  ticimax_api.py         → Ticimax SOAP client (ürün çekme + yazma)
+  verifier.py            → Çıktı doğrulama (deterministik + LLM)
+  supabase_sync.py       → Supabase'e sonuç kaydetme
+  helpers.py             → Yardımcı fonksiyonlar, retry
+  prompts/
+    strategist_writer.py → Ana SEO/GEO prompt şablonu
+    strategy_brief.py    → Pass 1 strateji prompt'u
+    verifier.py          → Verifier prompt'u
+```
 
-### Kapsam (`.agent/SCOPE-ticimax-seo-saas.md`)
-- Projeye ozel kapsam ve sinirlar dokumani
+### Supabase Tabloları (kritikler)
+| Tablo | Ne İçin |
+|-------|---------|
+| `organizations` | Firma kaydı, `sector_id`, `hedef_kitle` |
+| `credits` | Kullanıcı başına kredi bakiyesi |
+| `analysis_sessions` | Analiz oturumları |
+| `analysis_products` | Ürün başına sonuçlar (JSONB) |
+| `sectors` | 16 sektör tanımı |
+| `sector_intelligence` | Sektöre özel keywords/faq/competitor (JSONB) |
+| `gemini_api_keys` | API key pool (round-robin) |
+| `profiles` | Kullanıcı rolü (customer / agency / admin) |
+
+---
+
+## Deploy Workflow
+
+```bash
+# Değişiklik yap → commit → push → Vercel otomatik deploy eder (~2-3 dk)
+git add frontend/src/... backend/...
+git commit -m "feat: açıklama"
+git push
+# ↑ Bu kadar. Vercel GitHub hook'u ile otomatik tetiklenir.
+
+# Acil / test deploy gerekirse:
+cd frontend && vercel deploy --prod
+```
+
+**⚠️ Backend (Railway) ayrı:** Railway deploy için Railway dashboard'dan manuel trigger veya Railway CLI.
+
+---
+
+## Kod Yazma Kuralları
+
+### Her zaman geçerli
+- Dosya değiştirmeden önce `Read` ile oku — asla tahmin etme
+- `styled-jsx` kullan, Tailwind utility class **kullanma** (renk, spacing için)
+- CSS token: `var(--brand-primary)`, `var(--surface-2)` vb. — hardcode hex/renk ismi yasak
+- TypeScript strict — `any` kullanma, tip tanımla
+- `console.log` bırakma — production'da kalır
+- API anahtarı asla koda gömme → `.env.local` / `.env`
+
+### Frontend kalıpları
+- Server component → veri çekme (Supabase server client)
+- Client component (`'use client'`) → etkileşim, state, useEffect
+- Yeni UI bileşeni eklemeden önce `components/ui/` içine bak, mevcut varsa kullan
+- Renk/spacing için `globals.css` token'larını kullan
+
+### Backend kalıpları
+- Yeni endpoint → `main.py`'ye ekle, Pydantic model tanımla
+- Supabase sorguları → `supabase_sync.py` veya direkt `httpx` (REST)
+- Gemini çağrısı → `vision_engine.py` üzerinden
+- Her dış çağrı try/except ile sar
+
+---
+
+## Token Tasarrufu Kuralları
+
+1. **Büyük dosyaları kısmen oku:** `Read(offset=100, limit=50)` — tüm dosyayı okuma
+2. **Arama için Grep kullan:** Sembol/fonksiyon bulmak için `grep` değil `Grep` tool
+3. **Glob ile dosya bul:** `find` yerine `Glob("**/pattern")`
+4. **Bağımlılık kontrolü:** Import değişikliği öncesi `Grep` ile nerelerde kullanıldığına bak
+5. **Tek seferlik okuma:** Aynı dosyayı iki kez okuma — Edit tool zaten son hali takip eder
+6. **Agent ile araştır:** Geniş kapsamlı araştırma gereken durumlarda `Agent` tool kullan
+
+---
+
+## Sık Yapılan Hatalar (yapma)
+
+- `admin-client.tsx`'te `.finally()` kullanma → `PromiseLike` desteklemiyor, `.then(ok, err)` kullan
+- `styled-jsx` içinde Tailwind `dark:` prefix çalışmaz — `[data-theme="dark"] .class` kullan
+- Supabase migration'da `CREATE TYPE IF NOT EXISTS` yok → `DO $$ BEGIN ... EXCEPTION WHEN duplicate_object THEN NULL; END $$;` kullan
+- `vercel deploy` frontend root'undan çalıştır (`cd frontend && vercel deploy --prod`)
+
+---
+
+## .agent Klasörü
+
+Detaylı rehberler için ihtiyaç halinde oku (token harcamadan önce karar ver):
+
+| Dosya | Ne Zaman Oku |
+|-------|-------------|
+| `.agent/ARCHITECTURE.md` | Sistem mimarisini anlamak, veri akışını görmek için |
+| `.agent/SCOPE-ticimax-seo-saas.md` | Kapsam kararı vermek, ne yapıp yapmayacağına karar vermek için |
+| `.agent/agents/backend-dev.md` | Backend endpoint/DB tasarımı yapacaksan |
+| `.agent/agents/frontend-dev.md` | Yeni sayfa/bileşen tasarımı yapacaksan |
+| `.agent/agents/designer.md` | UI/UX kararı vereceksen |
+| `.agent/rules/code-quality.md` | Büyük refactor öncesi |
+| `.agent/skills/architecture-review/SKILL.md` | Yeni servis veya büyük mimari değişiklik öncesi |
+
+---
+
+## Aktif Kararlar (değiştirme)
+
+| Karar | Sebep |
+|-------|-------|
+| styled-jsx, Tailwind utility yok | CSS token sistemi tutarlılığı |
+| `[data-theme="dark"]` ile dark mode | SSR uyumlu, localStorage persist |
+| Supabase REST (httpx), ORM yok | Backend bağımlılığı azalt |
+| Gemini 2.5 Flash, Claude değil | Vision + maliyet (0.10 TL/ürün hedefi) |
+| Railway backend, Vercel frontend | Ayrı scale, ayrı fiyat |
