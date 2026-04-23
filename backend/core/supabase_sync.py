@@ -193,6 +193,11 @@ def insert_result(
             if val:
                 row[f"ai_{key}"] = val
 
+        # Görsel alt taglar
+        alt_tags = ai_payload.get("gorsel_alt_tags")
+        if alt_tags:
+            row["ai_gorsel_alt_tags"] = alt_tags if isinstance(alt_tags, list) else []
+
         # Denetim katmanı
         cm = ai_payload.get("claim_map")
         if cm is not None:

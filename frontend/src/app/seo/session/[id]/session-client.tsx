@@ -35,6 +35,7 @@ interface AIResult {
   ai_claim_map?: string | null
   ai_information_gain?: number | null
   ai_uyarilar?: string | null
+  ai_gorsel_alt_tags?: string[] | null
   image_url?: string | null
   status: string
 }
@@ -73,6 +74,13 @@ export default function SessionClient({ session, initialResults }: SessionClient
   const [sending, setSending] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const [localStatus, setLocalStatus] = useState(session.status)
+  const [liveStats, setLiveStats] = useState<{
+    elapsed_sn: number
+    completed: number
+    total: number
+    current_product: string
+    product_times: { urun_adi: string; sure_sn: number }[]
+  } | null>(null)
 
   const current = results[currentIdx]
   const isProcessing = localStatus === 'processing' || localStatus === 'pending'
@@ -117,6 +125,13 @@ export default function SessionClient({ session, initialResults }: SessionClient
         const res = await fetch(`${API}/api/analyze/status/${session.id}`)
         if (!res.ok) return
         const data = await res.json()
+        setLiveStats({
+          elapsed_sn: data.elapsed_sn || 0,
+          completed: data.completed || 0,
+          total: data.total || session.total_products,
+          current_product: data.current_product || '',
+          product_times: data.product_times || [],
+        })
         if (data.status === 'completed' || data.status === 'cancelled' || data.status === 'error') {
           const { data: fresh } = await supabase.from('ai_results').select('*').eq('session_id', session.id)
           if (fresh) setResults(fresh)
@@ -290,6 +305,8 @@ export default function SessionClient({ session, initialResults }: SessionClient
       adwords_aciklama: r.ai_adwords_aciklama || '',
       adwords_kategori: r.ai_adwords_kategori || '',
       adwords_tip: r.ai_adwords_tip || '',
+      // Görsel alt taglar (analiz sırasında üretilir)
+      gorsel_alt_tags: Array.isArray(r.ai_gorsel_alt_tags) ? r.ai_gorsel_alt_tags : [],
     }))
 
     setSending(true)
@@ -307,15 +324,20 @@ export default function SessionClient({ session, initialResults }: SessionClient
       if (!res.ok) {
         throw new Error(data.detail || 'send failed')
       }
-      const successCount = Array.isArray(data.results)
-        ? data.results.filter((x: { status: string }) => x.status === 'success').length
-        : products.length
-      const errorCount = products.length - successCount
-      if (errorCount > 0) {
-        toast.show(`${successCount} başarılı, ${errorCount} hata — detay için konsol`, 'warning')
-        console.warn('Ticimax send partial errors:', data.results)
+      const allResults: { status: string; stok_kodu?: string; error?: string }[] = Array.isArray(data.results) ? data.results : []
+      const successCount = allResults.filter(x => x.status === 'success').length
+      const errorItems = allResults.filter(x => x.status === 'error')
+      if (errorItems.length > 0) {
+        const firstErr = errorItems[0]?.error || 'Bilinmeyen hata'
+        const msg = errorItems.length === 1
+          ? `Hata: ${firstErr}`
+          : `${successCount} başarılı, ${errorItems.length} hata — İlk hata: ${firstErr}`
+        toast.show(msg, errorItems.length === allResults.length ? 'error' : 'warning')
+        console.warn('Ticimax send errors:', errorItems)
+      } else if (successCount > 0) {
+        toast.show(`${successCount} ürün Ticimax'e gönderildi ✓`, 'success')
       } else {
-        toast.show(`${successCount} ürün Ticimax'e gönderildi`, 'success')
+        toast.show('Gönderim yanıtı boş geldi', 'warning')
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Bilinmeyen hata'
@@ -329,6 +351,14 @@ export default function SessionClient({ session, initialResults }: SessionClient
     ? (session.processed_products / session.total_products) * 100
     : 0
 
+  // Timing helpers
+  const fmtSec = (s: number) => s >= 60 ? `${Math.floor(s/60)}dk ${Math.round(s%60)}sn` : `${Math.round(s)}sn`
+  const completedCount = liveStats?.completed ?? session.processed_products
+  const totalCount = liveStats?.total ?? session.total_products
+  const elapsedSn = liveStats?.elapsed_sn ?? 0
+  const avgSec = completedCount > 0 ? elapsedSn / completedCount : 0
+  const productTimes = liveStats?.product_times ?? []
+
   // Empty state while processing
   if (isProcessing && results.length === 0) {
     return (
@@ -340,10 +370,45 @@ export default function SessionClient({ session, initialResults }: SessionClient
               <div className="spinner-lg" />
             </div>
             <h2>AI Analizi Devam Ediyor</h2>
-            <p>Ürünleriniz yapay zekâ ile analiz ediliyor. Bu işlem birkaç dakika sürebilir.</p>
+            {liveStats?.current_product && (
+              <p className="current-product">⚡ {liveStats.current_product}</p>
+            )}
             <div style={{ maxWidth: 420, width: '100%' }}>
-              <Progress value={percentComplete} showPercent label={`${session.processed_products} / ${session.total_products} ürün`} />
+              <Progress value={percentComplete} showPercent label={`${completedCount} / ${totalCount} ürün`} />
             </div>
+
+            {/* Canlı zamanlama */}
+            <div className="timing-row">
+              <div className="timing-chip">
+                <span className="timing-val">{fmtSec(elapsedSn)}</span>
+                <span className="timing-lbl">geçen süre</span>
+              </div>
+              {completedCount > 0 && (
+                <>
+                  <div className="timing-chip">
+                    <span className="timing-val">{fmtSec(avgSec)}</span>
+                    <span className="timing-lbl">ürün başına ort.</span>
+                  </div>
+                  <div className="timing-chip">
+                    <span className="timing-val">~{fmtSec(avgSec * (totalCount - completedCount))}</span>
+                    <span className="timing-lbl">tahmini kalan</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Son işlenen ürünler */}
+            {productTimes.length > 0 && (
+              <div className="product-log">
+                {[...productTimes].reverse().slice(0, 3).map((p, i) => (
+                  <div key={i} className="product-log-row">
+                    <span className="log-name">{p.urun_adi}</span>
+                    <span className="log-time">{fmtSec(p.sure_sn)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <Button variant="danger" size="md" loading={cancelling} onClick={cancelAnalysis}>
               ⏹ Analizi Durdur
             </Button>
@@ -404,6 +469,29 @@ export default function SessionClient({ session, initialResults }: SessionClient
             <span className="caption">Bekleyen</span>
             <strong>{decisionStats.pending}</strong>
           </div>
+          <div className="summary-divider" />
+          {/* Süre bilgisi */}
+          {(() => {
+            const totalSec = session.completed_at && session.created_at
+              ? Math.round((new Date(session.completed_at).getTime() - new Date(session.created_at).getTime()) / 1000)
+              : liveStats?.elapsed_sn ?? 0
+            const processed = session.processed_products || 1
+            const avg = totalSec > 0 ? Math.round(totalSec / processed) : 0
+            return (
+              <>
+                <div className="summary-metric">
+                  <span className="caption">Toplam süre</span>
+                  <strong>{fmtSec(totalSec)}</strong>
+                </div>
+                {avg > 0 && (
+                  <div className="summary-metric">
+                    <span className="caption">Ürün başına</span>
+                    <strong>~{fmtSec(avg)}</strong>
+                  </div>
+                )}
+              </>
+            )
+          })()}
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {isProcessing && (
               <Button variant="danger" size="sm" loading={cancelling} onClick={cancelAnalysis}>
@@ -753,5 +841,14 @@ const processingStyles = `
     animation: spin 0.8s linear infinite;
   }
   .processing h2 { margin: 0; font-size: var(--text-xl); }
-  .processing p { color: var(--text-tertiary); max-width: 420px; }
+  .processing p { color: var(--text-tertiary); max-width: 420px; margin: 0; }
+  .current-product { color: var(--brand-text) !important; font-size: var(--text-sm) !important; font-weight: 500; }
+  .timing-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .timing-chip { display: flex; flex-direction: column; align-items: center; padding: 10px 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); min-width: 90px; }
+  .timing-val { font-size: var(--text-lg); font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+  .timing-lbl { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 2px; }
+  .product-log { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 4px; background: rgba(0,0,0,0.2); border-radius: var(--radius-md); padding: 10px 14px; }
+  .product-log-row { display: flex; justify-content: space-between; align-items: center; font-size: var(--text-xs); }
+  .log-name { color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+  .log-time { color: var(--text-tertiary); flex-shrink: 0; margin-left: 12px; font-family: monospace; }
 `

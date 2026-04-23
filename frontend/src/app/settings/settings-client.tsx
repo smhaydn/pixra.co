@@ -1,17 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { Button, Card, Input, Badge, useToast } from '@/components/ui'
 import { PageHeader } from '@/components/shell/AppShell'
 
+interface SectorOption { id: string; display_name: string }
+
 interface Firm {
   id: string
   company_name: string
   domain_url: string | null
   ws_kodu: string | null
+  gemini_api_key: string | null
+  sector_id: string | null
   firma_profil?: Record<string, unknown> | null
   llms_txt_generated_at?: string | null
 }
@@ -30,11 +34,20 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
     full_name: user.user_metadata?.full_name || '',
     email: user.email || '',
   })
+  const [sectors, setSectors] = useState<SectorOption[]>([])
   const [firmForm, setFirmForm] = useState({
     company_name: firm?.company_name || '',
     domain_url: firm?.domain_url || '',
     ws_kodu: firm?.ws_kodu || '',
+    gemini_api_key: firm?.gemini_api_key || '',
+    sector_id: firm?.sector_id || '',
   })
+
+  useEffect(() => {
+    supabase.from('sectors').select('id,display_name').eq('aktif', true).order('display_name')
+      .then(({ data }) => { if (data) setSectors(data) })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const saveProfile = async () => {
     if (readOnly) return toast.show('Impersonate modunda değiştirilemez', 'warning')
@@ -53,6 +66,8 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
       company_name: firmForm.company_name,
       domain_url: firmForm.domain_url || null,
       ws_kodu: firmForm.ws_kodu || null,
+      gemini_api_key: firmForm.gemini_api_key || null,
+      sector_id: firmForm.sector_id || null,
     }).eq('id', firm.id)
     setSaving(false)
     toast.show('Firma bilgileri güncellendi', 'success')
@@ -183,6 +198,29 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
                       onChange={e => setFirmForm({ ...firmForm, ws_kodu: e.target.value })}
                       hint="Admin panel → Ayarlar → Web Servis → WS Yetki Kodu"
                     />
+                    {sectors.length > 0 && (
+                      <div>
+                        <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-semibold)', marginBottom: 8, color: 'var(--text-primary)' }}>
+                          Sektör
+                          <span style={{ color: 'var(--text-tertiary)', fontWeight: 'normal', marginLeft: 6, fontSize: 'var(--text-xs)' }}>— AI bu sektöre özel içerik üretir</span>
+                        </label>
+                        <select
+                          value={firmForm.sector_id}
+                          onChange={e => setFirmForm({ ...firmForm, sector_id: e.target.value })}
+                          style={{
+                            width: '100%', padding: '10px 12px',
+                            background: 'var(--surface-1)', border: '1px solid var(--border-default)',
+                            borderRadius: 'var(--radius-md)', color: 'var(--text-primary)',
+                            fontSize: 'var(--text-sm)', appearance: 'none',
+                          }}
+                        >
+                          <option value="">— Sektör seçin —</option>
+                          {sectors.map(s => (
+                            <option key={s.id} value={s.id}>{s.display_name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                   </div>
                   <div className="actions">
                     <a className="support-link" href="https://wa.me/905000000000" target="_blank" rel="noopener">

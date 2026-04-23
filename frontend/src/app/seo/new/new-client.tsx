@@ -39,38 +39,41 @@ export default function NewAnalysisClient({ firm, userId, credits, readOnly }: {
   const [phase, setPhase] = useState<Phase>('fetching')
   const [products, setProducts] = useState<Product[]>([])
   const [fetchError, setFetchError] = useState('')
+  const [fromCache, setFromCache] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState('')
   const [jobName, setJobName] = useState('')
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setPhase('fetching')
-      setFetchError('')
-      try {
-        const res = await fetch(`${API}/api/products/fetch`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            domain_url: firm.domain_url || '',
-            ws_kodu: firm.ws_kodu,
-          }),
-        })
-        const data = await res.json()
-        if (data.status === 'success') {
-          setProducts(data.products || [])
-          setPhase('ready')
-        } else {
-          setFetchError(data.error || 'Ürünler çekilemedi')
-          setPhase('error')
-        }
-      } catch (e) {
-        setFetchError(e instanceof Error ? e.message : 'Backend bağlantısı başarısız')
+  const fetchProducts = async (forceRefresh = false) => {
+    setPhase('fetching')
+    setFetchError('')
+    try {
+      const res = await fetch(`${API}/api/products/fetch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain_url: firm.domain_url || '',
+          ws_kodu: firm.ws_kodu,
+          organization_id: firm.id,
+          force_refresh: forceRefresh,
+        }),
+      })
+      const data = await res.json()
+      if (data.status === 'success') {
+        setProducts(data.products || [])
+        setFromCache(!!data.from_cache)
+        setPhase('ready')
+      } else {
+        setFetchError(data.error || 'Ürünler çekilemedi')
         setPhase('error')
       }
+    } catch (e) {
+      setFetchError(e instanceof Error ? e.message : 'Backend bağlantısı başarısız')
+      setPhase('error')
     }
-    fetchProducts()
-  }, [firm.domain_url, firm.ws_kodu])
+  }
+
+  useEffect(() => { fetchProducts() }, [firm.domain_url, firm.ws_kodu])
 
   const filtered = useMemo(() => {
     if (!search.trim()) return products
@@ -149,6 +152,7 @@ export default function NewAnalysisClient({ firm, userId, credits, readOnly }: {
           domain_url: firm.domain_url || '',
           brand_name: firm.company_name,
           session_id: session.id,
+          organization_id: firm.id,
         }),
       })
       toast.show('Analiz başlatıldı', 'success')
@@ -201,7 +205,16 @@ export default function NewAnalysisClient({ firm, userId, credits, readOnly }: {
           <div className="summary-bar">
             <div className="summary-left">
               <div className="sum-num">{products.length.toLocaleString('tr-TR')}</div>
-              <div className="sum-lbl">ürün çekildi</div>
+              <div className="sum-lbl">
+                {fromCache ? 'ürün (önbellekten)' : 'ürün çekildi'}
+              </div>
+              <button
+                className="refresh-btn"
+                onClick={() => fetchProducts(true)}
+                title="Ticimax'ten yeniden çek"
+              >
+                ↻ Yenile
+              </button>
             </div>
             <div className="summary-mid">
               <Input
@@ -357,6 +370,17 @@ export default function NewAnalysisClient({ firm, userId, credits, readOnly }: {
           font-size: var(--text-xs);
           color: var(--text-tertiary);
         }
+        .refresh-btn {
+          margin-top: 4px;
+          background: none;
+          border: none;
+          color: var(--brand-text);
+          font-size: var(--text-xs);
+          cursor: pointer;
+          padding: 0;
+          font-weight: var(--weight-medium);
+        }
+        .refresh-btn:hover { text-decoration: underline; }
 
         .bulk-bar {
           display: flex;

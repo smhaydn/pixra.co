@@ -1,15 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button, Card, Input, Badge, ToastProvider, useToast } from '@/components/ui'
+
+interface SectorOption {
+  id: string
+  slug: string
+  display_name: string
+}
 
 const FIRMA_SORULARI = [
   {
     key: 'ana_kategori',
     soru: 'Markanızın ana ürün kategorisi nedir?',
-    tip: 'select',
+    tip: 'checkbox',
+    hint: 'Birden fazla seçebilirsiniz',
     secenekler: [
       { label: 'İç Giyim (sütyen, külot, pijama)', value: 'ic_giyim' },
       { label: 'Dış Giyim (elbise, bluz, pantolon)', value: 'kadin_giyim' },
@@ -31,8 +38,9 @@ const FIRMA_SORULARI = [
   },
   {
     key: 'deger_onerisi',
-    soru: 'Markanızın müşteriye verdiği ana değer nedir?',
-    tip: 'select',
+    soru: 'Markanızın müşteriye verdiği değerler nelerdir?',
+    tip: 'checkbox',
+    hint: 'Birden fazla seçebilirsiniz',
     secenekler: [
       { label: 'Uygun fiyat / bütçe dostu', value: 'fiyat' },
       { label: 'Yüksek kalite / uzun ömürlü', value: 'kalite' },
@@ -68,21 +76,26 @@ const FIRMA_SORULARI = [
     ],
   },
   {
-    key: 'uretim_yeri',
-    soru: 'Ürünleriniz nereden temin ediliyor?',
-    tip: 'select',
+    key: 'marka_gucu',
+    soru: 'Markanızın en güçlü yanları nelerdir?',
+    tip: 'checkbox',
+    hint: 'Birden fazla seçebilirsiniz — AI içeriğinizde bunları öne çıkarır',
     secenekler: [
-      { label: 'Türkiye üretimi (kendi fabrika/atölye)', value: 'turkiye' },
-      { label: 'Türkiye üretimi (fason/tedarikçi)', value: 'turkiye_fason' },
-      { label: 'İthal ürün', value: 'ithal' },
-      { label: 'El yapımı (bireysel üretim)', value: 'el_yapimi' },
-      { label: 'Karma (yerli + ithal)', value: 'karma' },
+      { label: 'Özgün / kendi tasarımı ürünler', value: 'ozgun_tasarim' },
+      { label: 'Güçlü müşteri hizmetleri', value: 'musteri_hizmetleri' },
+      { label: 'Hızlı & güvenilir teslimat', value: 'hizli_teslimat' },
+      { label: 'Özel ambalaj / unboxing deneyimi', value: 'ozel_ambalaj' },
+      { label: 'Sadık / geri dönen müşteri kitlesi', value: 'sadik_musteri' },
+      { label: 'Güçlü sosyal medya varlığı', value: 'sosyal_medya_varligi' },
+      { label: 'Ödül / sertifika / basın haberi', value: 'odul_sertifika' },
+      { label: 'Geniş ürün çeşitliliği', value: 'genis_cesit' },
     ],
   },
   {
     key: 'musteri_kriteri',
-    soru: 'Müşterileriniz için en önemli satın alma kriteri nedir?',
-    tip: 'select',
+    soru: 'Müşterileriniz için önemli satın alma kriterleri nelerdir?',
+    tip: 'checkbox',
+    hint: 'Birden fazla seçebilirsiniz',
     secenekler: [
       { label: 'Fiyat (uygun/indirimli)', value: 'fiyat' },
       { label: 'Kalite (uzun ömürlü, dayanıklı)', value: 'kalite' },
@@ -106,11 +119,12 @@ const FIRMA_SORULARI = [
   },
   {
     key: 'marka_hikayesi',
-    soru: 'Markanızın kısa hikayesi veya vizyonu nedir?',
+    soru: 'Markanızın hikayesi veya vizyonu nedir?',
     tip: 'textarea',
-    placeholder: 'Örn: 2015\'te İstanbul\'da kurulan markamız, Türk kadınına konforlu ve kaliteli iç giyim sunmayı hedefler...',
-    hint: 'Max 200 karakter — AI\'nın sizi tanıması için en kritik alan',
-    maxLen: 200,
+    placeholder: 'Örn: 2015\'te İstanbul\'da kurulan markamız, Türk kadınına konforlu ve kaliteli iç giyim sunmayı hedefler. Müşteri memnuniyetini her şeyin önünde tutarak...',
+    hint: 'Min 200 — Max 5000 karakter. AI\'nın sizi tanıması için en kritik alan.',
+    minLen: 200,
+    maxLen: 5000,
   },
 ]
 
@@ -119,6 +133,7 @@ interface Existing {
   company_name: string
   domain_url: string | null
   ws_kodu: string | null
+  sector_id: string | null
   firma_profil?: Record<string, unknown> | null
 }
 
@@ -134,17 +149,28 @@ function Inner({ userId, existing }: { userId: string; existing: Existing | null
   const hasExisting = !!existing?.company_name
   const hasWs = !!existing?.ws_kodu
   const hasProfil = !!(existing?.firma_profil && Object.keys(existing.firma_profil).length > 0)
-  const [step, setStep] = useState(hasProfil ? 3 : hasWs ? 2 : hasExisting ? 1 : 0)
+  const hasKurucu = !!(existing?.firma_profil && (existing.firma_profil as Record<string, unknown>)['kurucu_adi'])
+  const [step, setStep] = useState(hasKurucu ? 4 : hasProfil ? 3 : hasWs ? 2 : hasExisting ? 1 : 0)
 
+  const [sectors, setSectors] = useState<SectorOption[]>([])
   const [form, setForm] = useState({
     company_name: existing?.company_name || '',
     domain_url: existing?.domain_url || '',
     ws_kodu: existing?.ws_kodu || '',
+    sector_id: existing?.sector_id || '',
   })
 
-  // Profil anketi cevapları
+  useEffect(() => {
+    supabase.from('sectors').select('id,slug,display_name').eq('aktif', true).order('display_name')
+      .then(({ data }) => { if (data) setSectors(data) })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const [profil, setProfil] = useState<Record<string, unknown>>(
     (existing?.firma_profil as Record<string, unknown>) || {}
+  )
+  const [kurucu, setKurucu] = useState<Record<string, string>>(
+    ((existing?.firma_profil as Record<string, unknown>)?.['kurucu'] as Record<string, string>) || {}
   )
   const [saving, setSaving] = useState(false)
   const [orgId, setOrgId] = useState(existing?.id || '')
@@ -152,23 +178,25 @@ function Inner({ userId, existing }: { userId: string; existing: Existing | null
   const supabase = createClient()
   const toast = useToast()
 
-  const goNext = () => setStep(s => Math.min(3, s + 1))
+  const goNext = () => setStep(s => Math.min(4, s + 1))
   const goBack = () => setStep(s => Math.max(0, s - 1))
 
   const saveStep0 = async () => {
     if (!form.company_name.trim()) return toast.show('Firma adı gerekli', 'warning')
+    if (!form.sector_id) return toast.show('Lütfen sektör seçin', 'warning')
     setSaving(true)
+    const orgPayload = {
+      company_name: form.company_name,
+      domain_url: form.domain_url || null,
+      sector_id: form.sector_id || null,
+    }
     if (existing) {
-      await supabase.from('organizations').update({
-        company_name: form.company_name,
-        domain_url: form.domain_url || null,
-      }).eq('id', existing.id)
+      await supabase.from('organizations').update(orgPayload).eq('id', existing.id)
       setOrgId(existing.id)
     } else {
       const { data } = await supabase.from('organizations').insert({
         user_id: userId,
-        company_name: form.company_name,
-        domain_url: form.domain_url || null,
+        ...orgPayload,
       }).select('id').single()
       if (data?.id) setOrgId(data.id)
     }
@@ -186,8 +214,14 @@ function Inner({ userId, existing }: { userId: string; existing: Existing | null
 
   const saveStep2 = async () => {
     const required = ['ana_kategori', 'hedef_kitle', 'marka_tonu']
-    const missing = required.find(k => !profil[k])
+    const missing = required.find(k => {
+      const v = profil[k]
+      return !v || (Array.isArray(v) && v.length === 0)
+    })
     if (missing) return toast.show('Lütfen zorunlu soruları doldurun', 'warning')
+    const hikaye = (profil['marka_hikayesi'] as string) || ''
+    if (hikaye.length > 0 && hikaye.length < 200)
+      return toast.show('Marka hikayesi en az 200 karakter olmalı', 'warning')
     setSaving(true)
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/firma-profil`, {
@@ -206,6 +240,27 @@ function Inner({ userId, existing }: { userId: string; existing: Existing | null
     }
   }
 
+  const saveStep3 = async () => {
+    if (!kurucu.kurucu_adi?.trim()) return toast.show('Kurucu adı gerekli', 'warning')
+    setSaving(true)
+    try {
+      const merged = { ...profil, kurucu }
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/firma-profil`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ organization_id: orgId, profil: merged }),
+      })
+      if (!res.ok) throw new Error()
+      toast.show('Kurucu bilgileri kaydedildi', 'success')
+      goNext()
+    } catch {
+      toast.show('Kaydedilemedi, devam edebilirsiniz', 'warning')
+      goNext()
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const finish = () => {
     toast.show('Kurulum tamamlandı!', 'success')
     router.push('/seo')
@@ -214,13 +269,16 @@ function Inner({ userId, existing }: { userId: string; existing: Existing | null
   const setProfilField = (key: string, val: unknown) =>
     setProfil(p => ({ ...p, [key]: val }))
 
+  const setKurucuField = (key: string, val: string) =>
+    setKurucu(k => ({ ...k, [key]: val }))
+
   const toggleCheckbox = (key: string, val: string) => {
     const cur = (profil[key] as string[]) || []
     const next = cur.includes(val) ? cur.filter(v => v !== val) : [...cur, val]
     setProfilField(key, next)
   }
 
-  const STEPS = ['Firma Bilgileri', 'Ticimax Bağlantısı', 'Marka Profili', 'Tamamlandı']
+  const STEPS = ['Firma Bilgileri', 'Ticimax Bağlantısı', 'Marka Profili', 'Kurucu & Hikaye', 'Tamamlandı']
 
   return (
     <div className="onboarding-page">
@@ -266,6 +324,26 @@ function Inner({ userId, existing }: { userId: string; existing: Existing | null
                 onChange={e => setForm({ ...form, domain_url: e.target.value })}
                 hint="Opsiyonel — SEO içerik üretiminde kullanılır."
               />
+              <div className="field-group">
+                <label className="field-label">
+                  Sektör <span className="required-star">*</span>
+                  <span className="field-hint"> — AI bu sektöre özel içerik üretir</span>
+                </label>
+                <div className="sector-grid">
+                  {sectors.map(s => (
+                    <label key={s.id} className={`sector-opt ${form.sector_id === s.id ? 'selected' : ''}`}>
+                      <input
+                        type="radio"
+                        name="sector"
+                        value={s.id}
+                        checked={form.sector_id === s.id}
+                        onChange={() => setForm({ ...form, sector_id: s.id })}
+                      />
+                      {s.display_name}
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="actions">
               <Button variant="ghost" onClick={() => router.push('/')}>İptal</Button>
@@ -381,13 +459,21 @@ function Inner({ userId, existing }: { userId: string; existing: Existing | null
                         className="textarea-input"
                         placeholder={soru.placeholder}
                         maxLength={soru.maxLen}
-                        rows={3}
+                        rows={5}
                         value={(profil[soru.key] as string) || ''}
                         onChange={e => setProfilField(soru.key, e.target.value)}
                       />
-                      <span className="char-count">
-                        {((profil[soru.key] as string) || '').length} / {soru.maxLen}
-                      </span>
+                      {(() => {
+                        const len = ((profil[soru.key] as string) || '').length
+                        const underMin = soru.minLen && len > 0 && len < soru.minLen
+                        const color = underMin ? 'var(--warning-text)' : len > 0 ? 'var(--success-text)' : 'var(--text-quaternary)'
+                        return (
+                          <span className="char-count" style={{ color }}>
+                            {len} / {soru.maxLen}
+                            {underMin && ` — en az ${soru.minLen} karakter`}
+                          </span>
+                        )
+                      })()}
                     </>
                   )}
                 </div>
@@ -403,8 +489,82 @@ function Inner({ userId, existing }: { userId: string; existing: Existing | null
           </Card>
         )}
 
-        {/* ── Adım 3: Tamamlandı ── */}
+        {/* ── Adım 3: Kurucu & Hikaye ── */}
         {step === 3 && (
+          <Card padding="lg">
+            <h2>Kurucu & Marka Hikayesi</h2>
+            <p className="desc">
+              Bu bilgiler ChatGPT, Perplexity ve Google&apos;ın markanızı bir <strong>gerçek kişiyle</strong> ilişkilendirmesini sağlar.
+              E-E-A-T sinyali olarak içeriklerinize ve llms.txt dosyanıza yansıtılır.
+            </p>
+            <div className="profil-grid">
+
+              <div className="soru-blok">
+                <label className="soru-label"><span className="soru-no">1</span>Kurucu / Marka sahibinin adı soyadı<span className="required-star"> *</span></label>
+                <input className="text-input" placeholder="Örn: Ayşe Kaya" value={kurucu.kurucu_adi || ''} onChange={e => setKurucuField('kurucu_adi', e.target.value)} />
+              </div>
+
+              <div className="soru-blok">
+                <label className="soru-label"><span className="soru-no">2</span>Unvan / Rol</label>
+                <input className="text-input" placeholder="Örn: Kurucu & Baş Tasarımcı, CEO, Girişimci" value={kurucu.unvan || ''} onChange={e => setKurucuField('unvan', e.target.value)} />
+              </div>
+
+              <div className="soru-blok">
+                <label className="soru-label"><span className="soru-no">3</span>Markanın kuruluş yılı</label>
+                <input className="text-input" placeholder="Örn: 2018" value={kurucu.kurulis_yili || ''} onChange={e => setKurucuField('kurulis_yili', e.target.value)} />
+              </div>
+
+              <div className="soru-blok">
+                <label className="soru-label"><span className="soru-no">4</span>Kurucunun kısa biyografisi</label>
+                <p className="soru-hint">Hangi geçmişten geliyor, neden bu markayı kurdu? (min 100 / max 1000 karakter)</p>
+                <textarea
+                  className="textarea-input"
+                  rows={4}
+                  placeholder="Örn: 15 yıl tekstil sektöründe çalıştıktan sonra 2018'de kendi markasını kurdu. Sürdürülebilir moda konusunda uzman..."
+                  maxLength={1000}
+                  value={kurucu.biyografi || ''}
+                  onChange={e => setKurucuField('biyografi', e.target.value)}
+                />
+                {(() => {
+                  const len = (kurucu.biyografi || '').length
+                  const color = len > 0 && len < 100 ? 'var(--warning-text)' : len >= 100 ? 'var(--success-text)' : 'var(--text-quaternary)'
+                  return <span className="char-count" style={{ color }}>{len} / 1000{len > 0 && len < 100 ? ' — en az 100 karakter' : ''}</span>
+                })()}
+              </div>
+
+              <div className="soru-blok">
+                <label className="soru-label"><span className="soru-no">5</span>Markanın ilham kaynağı</label>
+                <textarea
+                  className="textarea-input"
+                  rows={3}
+                  placeholder="Örn: Annesinin dikiş makinesiyle başladığı küçük atölye, büyük bedenlere uygun giysi bulmanın zorluğu..."
+                  maxLength={500}
+                  value={kurucu.ilham || ''}
+                  onChange={e => setKurucuField('ilham', e.target.value)}
+                />
+                <span className="char-count">{(kurucu.ilham || '').length} / 500</span>
+              </div>
+
+              <div className="soru-blok">
+                <label className="soru-label"><span className="soru-no">6</span>Ödül / Sertifika / Basın haberi</label>
+                <input className="text-input" placeholder="Örn: 2022 Girişimci Ödülü, Vogue Türkiye'de yer aldı" value={kurucu.odul_basin || ''} onChange={e => setKurucuField('odul_basin', e.target.value)} />
+              </div>
+
+              <div className="soru-blok">
+                <label className="soru-label"><span className="soru-no">7</span>Sosyal medya / Web sitesi</label>
+                <input className="text-input" placeholder="Örn: instagram.com/aysekaya, linkedin.com/in/aysekaya" value={kurucu.sosyal_medya || ''} onChange={e => setKurucuField('sosyal_medya', e.target.value)} />
+              </div>
+
+            </div>
+            <div className="actions">
+              <Button variant="ghost" onClick={goBack}>← Geri</Button>
+              <Button variant="gradient" onClick={saveStep3} loading={saving}>Kaydet & Tamamla →</Button>
+            </div>
+          </Card>
+        )}
+
+        {/* ── Adım 4: Tamamlandı ── */}
+        {step === 4 && (
           <Card variant="magic" padding="lg">
             <div className="success">
               <div className="success-icon">🎉</div>
@@ -507,7 +667,41 @@ function Inner({ userId, existing }: { userId: string; existing: Existing | null
         }
         .desc strong { color: var(--brand-text); font-weight: var(--weight-semibold); }
 
-        .fields { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+        .fields { display: flex; flex-direction: column; gap: 20px; margin-bottom: 24px; }
+        .field-group { display: flex; flex-direction: column; gap: 8px; }
+        .field-label {
+          font-size: var(--text-sm);
+          font-weight: var(--weight-semibold);
+          color: var(--text-primary);
+        }
+        .field-hint { color: var(--text-tertiary); font-weight: var(--weight-normal); }
+        .sector-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .sector-opt {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 14px;
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-full);
+          font-size: var(--text-sm);
+          cursor: pointer;
+          transition: all var(--duration-fast) var(--ease-out);
+          background: var(--surface-1);
+          color: var(--text-secondary);
+          user-select: none;
+        }
+        .sector-opt:hover { border-color: var(--brand-border); color: var(--text-primary); }
+        .sector-opt.selected {
+          background: var(--brand-subtle);
+          border-color: var(--brand-border);
+          color: var(--brand-text);
+          font-weight: var(--weight-medium);
+        }
+        .sector-opt input { display: none; }
         .actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 24px; }
         .split { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
 

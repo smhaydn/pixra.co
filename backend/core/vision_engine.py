@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -65,6 +65,13 @@ class ProductAIContent(BaseModel):
     ozelalan_4: str = ""
     ozelalan_5: str = ""
 
+    # AI null döndürürse boş string'e çevir
+    @field_validator('ozelalan_1', 'ozelalan_2', 'ozelalan_3', 'ozelalan_4', 'ozelalan_5',
+                     mode='before')
+    @classmethod
+    def none_to_empty(cls, v):
+        return v if v is not None else ""
+
     # ── Denetim katmanı ──
     claim_map: dict[str, ClaimEntry] = Field(default_factory=dict)
     information_gain_skoru: int = Field(default=0, ge=0, le=10)
@@ -87,6 +94,7 @@ def _build_runtime_prompt(
     breadcrumb_kat: str,
     adwords_kategori: str,
     strategy_brief: str = "",
+    sector_intelligence: Optional[dict] = None,
 ) -> str:
     """Sistem prompt'u (strategist_writer) + ürün bağlamı + görev talimatı."""
     base = build_prompt(category_key=category_key, include_fewshot=True)
@@ -119,6 +127,33 @@ def _build_runtime_prompt(
         referans_satirlari.append(f"- stok_kodu: {stok_kodu}")
 
     referans_blogu = "\n".join(referans_satirlari) or "- (Ek meta yok — yalnız görselden çalış)"
+
+    # ── Sektör İstihbarat Bloğu ──────────────────────────────────────
+    sektor_block = ""
+    if sector_intelligence:
+        import json as _json
+        from datetime import datetime as _dt
+        current_month = _dt.now().strftime("%B")  # Ocak, Şubat ...
+        sektor_adi = sector_intelligence.get("display_name", "")
+        lines = [f"\n---\n\n# SEKTÖR İSTİHBARAT VERİSİ — {sektor_adi}\n"]
+        lines.append(
+            "Bu veriyi tüm içerik üretiminde kullan. "
+            "Anahtar kelimeleri doğal dil içine yerleştir, "
+            "FAQ sorularını geo_sss'e dönüştür, schema kalıplarını takip et.\n"
+        )
+        kws = sector_intelligence.get("keywords")
+        if kws:
+            lines.append(f"### Bu Sektörde Çalışan Anahtar Kelimeler\n```json\n{_json.dumps(kws, ensure_ascii=False, indent=2)[:1500]}\n```\n")
+        faqs = sector_intelligence.get("faq")
+        if faqs:
+            lines.append(f"### Alıcıların Gerçek Soruları (FAQ Kalıpları)\n```json\n{_json.dumps(faqs, ensure_ascii=False, indent=2)[:1200]}\n```\n")
+        comp = sector_intelligence.get("competitor")
+        if comp:
+            lines.append(f"### Rakip SEO Kalıpları\n```json\n{_json.dumps(comp, ensure_ascii=False, indent=2)[:800]}\n```\n")
+        seasonal = sector_intelligence.get("seasonal")
+        if seasonal:
+            lines.append(f"### Mevsimsel Öncelik ({current_month})\n```json\n{_json.dumps(seasonal, ensure_ascii=False, indent=2)[:600]}\n```\n")
+        sektor_block = "".join(lines)
 
     strategy_block = ""
     if strategy_brief:
@@ -165,7 +200,7 @@ self-check, IG rubric, yasaklı ifadeler, kategori talimatları, negatif/pozitif
 **Yalnız ve yalnız geçerli JSON döndür.** Markdown kod bloğu, açıklama, yorum YOK.
 """
 
-    return base + strategy_block + runtime_block
+    return base + sektor_block + strategy_block + runtime_block
 
 
 # ──────────────── VISION ENGINE ────────────────
@@ -403,6 +438,7 @@ Yalnızca alt-text metnini döndür. Tırnak, açıklama, ek metin YOK.
         stok_kodu: str = "",
         reference_content: str = "",
         category_key: Optional[str] = None,
+        sector_intelligence: Optional[dict] = None,
     ) -> ProductAIContent:
         """Ana analiz fonksiyonu — yeni Strategist+Writer prompt ile."""
         # reference_content'i parçala (geriye uyumluluk için main.py değiştirmeden)
@@ -457,6 +493,7 @@ Yalnızca alt-text metnini döndür. Tırnak, açıklama, ek metin YOK.
                 breadcrumb_kat=breadcrumb_kat,
                 adwords_kategori=adwords_kategori,
                 strategy_brief=strategy_brief,
+                sector_intelligence=sector_intelligence,
             )
 
             content_parts = [prompt] + uploaded_files

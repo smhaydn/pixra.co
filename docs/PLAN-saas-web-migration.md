@@ -1,83 +1,276 @@
 # PLAN: Pixra SaaS Web Migration
 
+> **Son güncelleme:** 2026-04-22
+> **Durum:** Canlıda — pixra.co (Vercel) + Railway backend
+
+---
+
 ## 1. Proje Özeti
-Pixra e-ticaret yapay zekasını, çok oyunculu (multi-tenant) bir SaaS formatına taşıyacağız. 
-- **Mevcut Durum:** Masaüstü PyQt6 uygulaması (Local Python işlemleri).
-- **Hedef:** `www.pixra.com` alan adında çalışan, Supabase veritabanıyla kullanıcıları yöneten, Vercel üzerinden yayınlanan web tabanlı bir SAAS uygulaması.
+
+Pixra e-ticaret yapay zekasını, çok oyunculu (multi-tenant) bir SaaS formatına taşıyacağız.
+- **Mevcut Durum:** ✅ Web SaaS olarak canlıda
+- **Stack:** Next.js (Vercel) + FastAPI (Railway) + Supabase + Gemini Vision
+- **Hedef:** Ticimax kullanan Türk e-ticaret firmalarına sektör bazlı otomatik SEO/GEO içerik üretimi
 
 ---
 
-## 2. Mimari Kararları (Architecture)
+## 2. Mimari (Tamamlandı ✅)
 
-### 🖥️ Frontend (Arayüz)
-- **Teknoloji:** Next.js (React) + Tailwind CSS + Shadcn UI
-- **Hosting:** Vercel
-- **Görev:** Kullanıcı girişi (Supabase Auth), firma ekleme-yönetme masası, interaktif ürün tabloları (Update/Create ekranları), analiz raporları ve indirme aşamaları.
+### Frontend
+- Next.js + Tailwind CSS — Vercel'de canlı
+- Supabase Auth (email/şifre)
+- Kullanıcı: Login → Dashboard → Analiz → Onayla → Ticimax'e Gönder
 
-### 🗄️ Database & Auth (Veritabanı ve Kimlik Doğrulama)
-- **Teknoloji:** Supabase (PostgreSQL)
-- **Modüller:**
-  - `Supabase Auth`: Müşterilere (Ticimax partnerlerine) özel üyelik sistemi.
-  - `PostgreSQL`: Oturumlar, analiz sonuçları, firma API anahtarları saklanacak.
-- **Güvenlik:** RLS (Row Level Security) ile her müşteri kendi firmasının datasını ve API keyini (şifrelenmiş) görecek.
+### Backend (Railway)
+- FastAPI — `pixraco-production.up.railway.app`
+- Gemini Vision (2-pass: strategy brief + writer)
+- Verifier ajan (hallucination kontrolü)
+- Ticimax SOAP entegrasyonu (zeep)
 
-### ⚙️ Backend (Python Mikroservisi)
-- **Teknoloji:** FastAPI (Python)
-- **Görev:** `vision_engine.py`, `ticimax_api.py`, ve Gemini etkileşimleri burada çalışacak.
-- **Kritik Durum (Socratic Check 1):** Vercel API rotaları, uzun süren analizlerde (örneğin 200 ürün analizi 30 dakika sürebilir) zaman aşımına (Timeout) uğrar. Bu yüzden, arka plan işlemcisini (AI Python kodları) **Railway** veya **Render** gibi bir platforma ayrı bir servis (Worker) olarak yüklemeliyiz.
-
----
-
-## 3. Veritabanı Şeması (Supabase)
-
-### `organizations (firmalar)` tablosu
-- `id` (uuid)
-- `user_id` (Auth bağıntısı - Sahibi kim?)
-- `domain_url` (www.ornek.com)
-- `ws_kodu` 
-- `gemini_api_key` (Güvenli şifrelenmiş)
-
-### `ai_sessions (işlem geçmişi)` tablosu
-- `id` (uuid)
-- `firm_id` (Hangi firmaya ait?)
-- `status` (pending, active, completed, failed)
-- `total_products`, `processed_products`, `success_rate`
-- `created_at`
-
-### `ai_results (analiz sonuçları)` tablosu
-- `id` (uuid)
-- `session_id` 
-- `stok_kodu`, `eski_urun_adi`, `ai_urun_adi` vb. (Product AI verileri, JSON formatında)
+### Database
+- Supabase PostgreSQL
+- RLS ile multi-tenant izolasyon
+- Admin key pool (Gemini API anahtarları)
 
 ---
 
-## 4. Geliştirme Süreci (Fazlar)
+## 3. Veritabanı Şeması (Mevcut)
 
-### Faz 1: Supabase & Next.js Kurulumu (Temel Hazırlık)
-- `pixra` projesi için Vercel üzerinde Next.js ayağa kaldırılacak.
-- Supabase Projesi oluşturulacak (Veritabanı tabloları, Auth RLS kuralları yazılacak).
-- Supabase Auth entegrasyonu ile Login sayfası yapılacak.
+### `organizations`
+- id, user_id, company_name, domain_url, ws_kodu, sector_id (YENİ →)
 
-### Faz 2: Python Backend (FastAPI API Servisi)
-- PyQt6 kodu (`gui_manager.py`) atılıp, sistem bir REST API'ye dönüştürülecek (`main.py` -> `app = FastAPI()`).
-- `vision_engine` ve `ticimax_api`, API uçları (endpoints) arkasında asenkron çalışacak.
-- **Kuyruk Sistemi (Redis/Celery veya BackgroundTasks):** Web kullanıcısı analize basınca Python arkada çalışırken Vercel arayüzüne soket veya sık sorma (polling) ile "%10 ... %20 .. tıklandı" verisi basacak.
+### `ai_sessions`
+- id, organization_id, status, total_products, processed_products, job_name, created_at, completed_at, error_message
 
-### Faz 3: Web UI Dashboard Gelişimi
-- Dashboard sayfası: Firmalarım, Aktif Analizler.
-- Firma Detay Sayfası: "Update Mode (Bulut)", "Create Mode (Yerel)".
-- Analiz bittiğinde, Supabase veritabanından çekilip Excel aktarım veya doğrudan Ticimax'a (SaveUrun) Triple-Check mekanizması ile aktarım ekranları.
+### `ai_results`
+- id, session_id, stok_kodu, urun_adi, status
+- ai_urun_adi, ai_seo_baslik, ai_seo_aciklama, ai_aciklama, ai_onyazi
+- ai_anahtar_kelime, ai_seo_anahtar_kelime, ai_geo_sss, ai_schema_jsonld
+- ai_adwords_aciklama, ai_adwords_kategori, ai_adwords_tip
+- ai_ozelalan_1..5, ai_gorsel_alt_tags (JSONB)
+- ai_claim_map, ai_information_gain, ai_uyarilar
+- original_* alanlar, verifier_report, cost_tl
 
-### Faz 4: Deployment & Prod Geçişi
-- Next.js kodları -> Vercel'e push. `www.pixra.com` DNS yönlendirmesi.
-- Python Backend -> Railway/Render ortamına deploy.
-- Canlı ortam testleri.
+### `credits`
+- user_id, balance
+
+### `gemini_keys` (Admin yönetimli)
+- api_key, aktif, created_at
 
 ---
 
-## 5. Doğrulama Paneli (Verification Checklist)
-- [ ] Kullanıcı kendi email ve şifresiyle girebiliyor mu?
-- [ ] `Firmalarım` ekranında API keyleri güvenle saklandı mı?
-- [ ] Kullanıcı "100 Ürün Cek" tuşuna basınca Vercel arayüzünde dönen ibare çıkıp hata vermeden bitiyor mu?
-- [ ] Ürünler analiz edilirken Vercel Timeout (5 dk sınırı) sorununa takılmadan asenkron işlemler Railway Python tarafında işleniyor mu?
-- [ ] `www.pixra.com`'da canlı yayına alındı mı?
+## 4. Tamamlanan İşler ✅
+
+### Temel Sistem
+- [x] Supabase Auth + RLS kurulumu
+- [x] Multi-tenant firma yönetimi
+- [x] Analiz session sistemi (polling ile ilerleme)
+- [x] Kredi sistemi
+- [x] Admin paneli (kullanıcı, kredi, session yönetimi)
+- [x] Admin Gemini key pool (birden fazla key, yük dağılımı)
+
+### AI Motoru
+- [x] Gemini Vision 2-pass (strategy brief + strategist/writer)
+- [x] Verifier ajan (hallucination denetimi + otomatik patch)
+- [x] Pydantic JSON output validation
+- [x] ozelalan null/validation hatası düzeltildi
+- [x] Marka adı ürün adına eklenmemesi (prompt fix)
+- [x] Analiz süresi ve maliyet takibi
+
+### Ticimax SOAP Entegrasyonu
+- [x] zeep client, HistoryPlugin ile SOAP XML loglama
+- [x] WSDL doğrulaması (xsd2 schema analizi)
+- [x] SaveUrun flag bug düzeltildi (dinamik filtre kaldırıldı, tüm flagler çalışıyor)
+- [x] UrunKartiAyar flag isimleri WSDL ile doğrulandı
+- [x] StokKodu WSDL uyumsuzluğu düzeltildi
+- [x] Ticimax'e gönderim: UrunAdi, Aciklama, SeoBaslik, SeoAciklama, SeoAnahtarKelime, OnYazi, AdwordsAciklama, AdwordsKategori, AdwordsTip — hepsi çalışıyor ✅
+- [x] Görsel alt tag üretimi (Gemini ile, Supabase'e kaydediliyor)
+- [x] Görsellere dokunulmuyor (SaveUrun ile görsel güncelleme duplikasyona yol açıyor — devre dışı)
+
+### Frontend
+- [x] Session silme (kullanıcı + admin)
+- [x] Analiz süresi gösterimi
+- [x] Ticimax gönderim onay akışı (3 aşamalı)
+- [x] Hata logları admin panelinde görünüyor
+
+---
+
+## 5. Kalan Küçük İşler ⚠️
+
+- [ ] SEO Title 60 karakter limitini Ticimax panelinde doğrula (şu an 203 gösteriyor — muhtemelen Ticimax'in kendi sayma farkı)
+- [ ] Strategy brief Pass 1 "atlandı" sorunu (JSON parse hatası — kalite etkiler, kritik değil)
+- [ ] Alt tag Ticimax'e gönderimi — SaveUrun dışı bir Ticimax API endpoint araştırılacak
+- [ ] llm.txt otomatik üretimi (Sektör RAG ile birlikte gelecek)
+
+---
+
+## 6. SONRAKİ BÜYÜK ADIM: Sektör Bazlı RAG Sistemi 🚀
+
+### Problem
+Ticimax'te 50.000+ aktif e-ticaret sitesi var. %90'ı SEO alanlarını boş bırakıyor ya da kopyalıyor. Pixra bu boşluğu dolduruyor — ama şu an sektör körü çalışıyor. İç giyim firması ile elektronik firması için aynı prompt kullanılıyor.
+
+### Vizyon
+Her firma kayıt sırasında sektörünü seçer. Sistem o sektör için önceden hazırlanmış 5 katmanlı bir intelligence veritabanından beslenir. AI analizde bu verileri kullanır. Başarılı çıktılar sistemi geri besler — zamanla kendi kendine öğrenen bir yapı.
+
+---
+
+### Mimari
+
+#### Yeni Tablolar (Supabase)
+
+**`sectors` tablosu**
+```
+id, slug (kadin-ic-giyim | elektronik | mobilya | ...)
+display_name, parent_sector_id, aktif
+```
+
+**`sector_intelligence` tablosu**
+```
+id, sector_id
+data_type: ENUM(keywords | faq | schema | competitor | seasonal)
+content: JSONB          ← asıl bilgi
+source: ENUM(admin | auto_crawl | user_feedback)
+quality_score: 0-10
+updated_at, version
+```
+
+#### `organizations` tablosuna eklenir
+```
+sector_id (FK → sectors)
+sub_sector: text (daha spesifik tanım)
+hedef_kitle: text
+```
+
+---
+
+### 5 Katman — İçerik Yapısı
+
+| Katman | İçerik | Kaynak |
+|---|---|---|
+| `keywords` | Anahtar kelime kümeleri, arama niyeti (informational/transactional), zorluk skoru | Web crawl + manuel |
+| `faq` | Alıcıların sorduğu 20-30 gerçek soru + ideal cevap yapısı | Forum/yorum scraping |
+| `schema` | Hangi schema.org markup bu sektörde çalışıyor, örnek yapılar | Rakip analiz |
+| `competitor` | Top 5-10 rakibin SEO yaklaşımı, title yapısı, description kalıpları | Otomatik crawl |
+| `seasonal` | Hangi ay hangi kelimeler zirve yapıyor, kampanya dönemleri | Google Trends scraping |
+
+---
+
+### Veri Toplama Pipeline
+
+Admin dashboard'dan tetiklenir, background task olarak çalışır:
+
+```
+/api/admin/sector/crawl  →  BackgroundTask
+1. Google TR'de "{sektör} satın al / fiyat / yorumlar" → top 20 URL
+2. Her URL: title, meta desc, h1-h3, FAQ schema, OG tags çek
+3. Gemini analiz: keyword clusters, FAQ patterns, schema kalıpları çıkar
+4. sector_intelligence tablosuna yaz (source=auto_crawl)
+5. quality_score ata (0-10)
+```
+
+Dışarıdan API gerekmez — direkt web crawl yeterli.
+
+---
+
+### Prompt Injection
+
+Mevcut `_build_runtime_prompt()` fonksiyonuna sektör bloğu eklenir:
+
+```python
+## SEKTÖR İSTİHBARAT VERİSİ — {sector_display_name}
+
+### Bu Sektörde Çalışan Anahtar Kelimeler
+{keywords_json}
+
+### Alıcıların Gerçek Soruları (FAQ Kalıpları)
+{faq_json}
+
+### Rakip SEO Kalıpları (Top 5 site analizi)
+{competitor_patterns}
+
+### Mevsimsel Öncelik ({current_month})
+{seasonal_current}
+```
+
+---
+
+### Öğrenme Döngüsü
+
+```
+Kullanıcı analiz onayladı (decisions = 'approved')
+        ↓
+Firma'nın sector_id'si alınır
+        ↓
+Onaylanan çıktıdan pattern extraction:
+  - Hangi kelimeler kullanıldı?
+  - FAQ yapısı nasıldı?
+  - Information gain skoru kaçtı?
+  - Verifier kaç uyarı verdi?
+        ↓
+sector_intelligence güncelle (source=user_feedback)
+quality_score artar → yüksek kaliteli patterns önceliklenir
+```
+
+---
+
+### llm.txt Otomatik Üretimi
+
+Her firma için `/{domain}/llm.txt` otomatik üretilir:
+
+```
+# {firma_adi} — {sektör_adi}
+Marka: {company_name}
+Uzmanlık: {sector_intelligence.keywords top 5}
+Kategoriler: {analiz edilmiş ürünlerin kategorileri}
+Öne Çıkan Ürünler: {onaylı çıktıların SEO başlıkları}
+İletişim: {domain_url}
+```
+
+Perplexity, ChatGPT, Claude gibi AI'lar firmayı araştırırken bu dosyayı görür → citation probability artar.
+
+---
+
+### Sprint Planı
+
+#### Sprint 1 — Altyapı (1 hafta)
+- [ ] `sectors` ve `sector_intelligence` tabloları Supabase'e ekle
+- [ ] `organizations` tablosuna `sector_id` kolonu ekle
+- [ ] Firma kayıt/düzenleme formuna sektör seçimi ekle (zorunlu, 2 kademeli)
+- [ ] Admin panelinden manuel sektör verisi girişi (basit CRUD)
+- [ ] `analyze_product_image()` fonksiyonuna `sector_intelligence` parametresi ekle
+- [ ] Prompt'a sektör injection bloğu ekle
+
+#### Sprint 2 — Otomatik Crawl (1-2 hafta)
+- [ ] `/api/admin/sector/crawl` endpoint (BackgroundTask)
+- [ ] Web scraping pipeline (requests + BeautifulSoup)
+- [ ] Gemini ile içerik analizi + structured extraction
+- [ ] Quality score sistemi
+- [ ] Admin panelinde crawl tetikleme + durum gösterimi
+
+#### Sprint 3 — Öğrenme Döngüsü + llm.txt (2 hafta)
+- [ ] Onaylı çıktılardan feedback extraction
+- [ ] `sector_intelligence` güncelleme mekanizması
+- [ ] `/api/llm-txt/{organization_id}` endpoint
+- [ ] Frontend'de "llm.txt indir/görüntüle" butonu
+- [ ] Sektörler arası kalite karşılaştırma (admin dashboard)
+
+---
+
+## 7. Teknik Borç / Bilinen Sınırlamalar
+
+| Konu | Durum | Not |
+|---|---|---|
+| Alt tag Ticimax'e gönderim | Beklemede | SaveUrun görseli bozuyor; ayrı API araştırılacak |
+| Strategy brief Pass 1 skip | Düşük öncelik | JSON parse sorunu, kaliteyi etkiler |
+| ozelalan_1..5 gönderimi | Hazır ama test edilmedi | WSDL'de OzelAlan1Guncelle var |
+| Varyasyon güncellemesi | Kapsam dışı | Şimdilik sadece ana ürün alanları |
+
+---
+
+## 8. Yayın Bilgileri
+
+| Bileşen | URL | Platform |
+|---|---|---|
+| Frontend | pixra.co | Vercel |
+| Backend | pixraco-production.up.railway.app | Railway |
+| Database | zukqlkeecpgcqitlbgma.supabase.co | Supabase |

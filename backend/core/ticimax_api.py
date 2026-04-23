@@ -2,6 +2,7 @@ import os
 from typing import Dict, Any, List, Optional
 from zeep import Client
 from zeep.exceptions import Fault
+from zeep.plugins import HistoryPlugin
 from dotenv import load_dotenv
 
 # .env dosyasını yükle
@@ -16,23 +17,38 @@ class TicimaxClient:
     def __init__(self, base_url: str = None, uye_kodu: str = None) -> None:
         """
         TicimaxClient constructor metodu.
-        
+
         Parametreler verilmezse .env dosyasından okunur (geriye uyumluluk).
-        
+
         Args:
             base_url (str, optional): Ticimax WSDL servisi URL adresi.
             uye_kodu (str, optional): Ticimax WS yetki kodu.
         """
         self.base_url = base_url or os.getenv("TICIMAX_BASE_URL")
         self.uye_kodu = uye_kodu or os.getenv("TICIMAX_UYE_KODU")
-        
+
         if not self.base_url or not self.uye_kodu:
             raise ValueError("TICIMAX_BASE_URL veya TICIMAX_UYE_KODU eksik. Lütfen parametreleri veya .env dosyasını kontrol edin.")
-            
+
         try:
-            self.client = Client(wsdl=self.base_url)
+            self._history = HistoryPlugin()
+            self.client = Client(wsdl=self.base_url, plugins=[self._history])
         except Exception as e:
             raise ConnectionError(f"WSDL yüklenirken bağlantı hatası oluştu: {str(e)}")
+
+    def get_urunkartiayar_fields(self) -> List[str]:
+        """WSDL'den UrunKartiAyar tipinin alan adlarini doner (debug icin)."""
+        try:
+            t = self.client.get_type('ns2:UrunKartiAyar')
+            elements = t._type.elements  # zeep internal
+            return [e[0] for e in elements]
+        except Exception:
+            try:
+                # Alternatif yol
+                t = self.client.get_type('ns2:UrunKartiAyar')
+                return list(t._type.elements_by_name.keys())
+            except Exception as e:
+                return [f"HATA: {e}"]
 
     def get_kategori(self, kategori_id: int = 0, dil: str = "") -> List[Any]:
         """
@@ -56,7 +72,78 @@ class TicimaxClient:
             print(f"Kategori çekilirken SOAP Hatası: {fault}")
             return []
 
-    def save_urun(self, raw_urun, updates: Dict[str, Any], update_flags: Dict[str, bool]) -> Any:
+    def _build_resimler_with_alt_tags(self, factory, raw_resimler, alt_tags: List[str]):
+        """
+        Mevcut Resimler objesine alt_tags uygular.
+        Ticimax WSDL'de UrunKarti.Resimler = ArrayOfResim (Resim objeleri).
+        Her Resim objesinin ResimAdi alani alt tag olarak kullanilir.
+
+        Args:
+            factory: zeep type_factory('ns2')
+            raw_resimler: SelectUrun'dan gelen Resimler objesi (ArrayOfResim)
+            alt_tags: Gorsel sirasina gore alt text listesi ["alt1", "alt2", ...]
+        Returns:
+            Guncellenmis ArrayOfResim objesi (veya orijinal)
+        """
+        if not alt_tags or not raw_resimler:
+            return raw_resimler
+
+        # ArrayOfResim formati: raw_resimler.Resim listesi
+        resim_listesi = None
+        if hasattr(raw_resimler, 'Resim') and raw_resimler.Resim:
+            resim_listesi = raw_resimler.Resim
+        elif isinstance(raw_resimler, list):
+            resim_listesi = raw_resimler
+
+        if resim_listesi:
+            try:
+                yeni_resimler = []
+                for i, r in enumerate(resim_listesi):
+                    alt = alt_tags[i] if i < len(alt_tags) else (alt_tags[0] if alt_tags else "")
+                    try:
+                        yeni_r = factory.Resim(
+                            ID=getattr(r, 'ID', 0),
+                            ResimAdi=alt[:125],          # Alt tag = ResimAdi
+                            Aktif=getattr(r, 'Aktif', True),
+                            Sira=getattr(r, 'Sira', i),
+                            UrunID=getattr(r, 'UrunID', 0),
+                            UrunKartiID=getattr(r, 'UrunKartiID', 0),
+                        )
+                        yeni_resimler.append(yeni_r)
+                        print(f"[ALT_TAG] Resim {i+1} ResimAdi: '{alt[:60]}'")
+                    except Exception as e:
+                        print(f"[ALT_TAG] Resim olusturma hatasi (index {i}): {e}")
+                        yeni_resimler.append(r)  # Hata olursa orijinali kullan
+
+                if yeni_resimler:
+                    try:
+                        return factory.ArrayOfResim(Resim=yeni_resimler)
+                    except Exception as e:
+                        print(f"[ALT_TAG] ArrayOfResim sarmalama hatasi: {e}")
+                        return raw_resimler
+            except Exception as e:
+                print(f"[ALT_TAG] Resim guncelleme genel hatasi: {e}")
+        else:
+            print(f"[ALT_TAG] UYARI: Resimler formatı tanımlanamadı "
+                  f"(tip={type(raw_resimler)}) — alt tag gönderilemez")
+
+        return raw_resimler
+
+    def get_urunresim_fields(self) -> List[str]:
+        """WSDL'den UrunResim tipinin alan adlarini doner (debug icin)."""
+        try:
+            t = self.client.get_type('ns2:UrunResim')
+            elements = t._type.elements
+            return [e[0] for e in elements]
+        except Exception:
+            try:
+                t = self.client.get_type('ns2:UrunResim')
+                return list(t._type.elements_by_name.keys())
+            except Exception as e:
+                return [f"HATA: {e}"]
+
+    def save_urun(self, raw_urun, updates: Dict[str, Any], update_flags: Dict[str, bool],
+                  alt_tags: Optional[List[str]] = None) -> Any:
         """
         Mevcut urunu gunceller. Raw SelectUrun objesinden yeni UrunKarti olusturur,
         updates'teki alanlari uzerine yazar ve update_flags'e gore gunceller.
@@ -70,6 +157,7 @@ class TicimaxClient:
             raw_urun: SelectUrun'dan gelen zeep UrunKarti objesi
             updates: Degistirilecek alanlar (orn: {"SeoSayfaBaslik": "Yeni Baslik"})
             update_flags: UrunKartiAyar icin True olan alanlar (orn: {"SeoSayfaBaslikGuncelle": True})
+            alt_tags: Gorsel sirasina gore alt text listesi ["alt1", "alt2", ...]
 
         Returns:
             SaveUrunResponse objesi (SaveUrunResult=0 basarili demek)
@@ -97,7 +185,10 @@ class TicimaxClient:
                 mv.Resimler = v.Resimler if v.Resimler else []
                 varyasyon_objeleri.append(mv)
 
-            # UrunKarti olustur — zorunlu alanlar raw'dan
+            # ── UrunKarti olustur — zorunlu alanlar raw'dan ───────────────────
+            # StokKodu dahil edilmeli; yoksa None donebilir
+            raw_stok = getattr(raw_urun, 'StokKodu', None) or ''
+
             urun = factory.UrunKarti(
                 ID=raw_urun.ID,
                 Aktif=raw_urun.Aktif,
@@ -120,7 +211,11 @@ class TicimaxClient:
 
             # Array alanlari raw'dan koru (zeep tipleriyle)
             urun.Kategoriler = raw_urun.Kategoriler
+
+            # Resimler: DOKUNMA — SaveUrun ile gorsel guncelleme gorsel duplikasyonuna
+            # yol aciyor. Alt tag icin ayri bir API endpoint gerekiyor.
             urun.Resimler = raw_urun.Resimler
+
             urun.Varyasyonlar = factory.ArrayOfVaryasyon(Varyasyon=varyasyon_objeleri)
             urun.Etiketler = raw_urun.Etiketler if raw_urun.Etiketler else []
 
@@ -129,10 +224,17 @@ class TicimaxClient:
                 if hasattr(urun, field):
                     setattr(urun, field, value)
 
+            print(f"[SAVE_URUN] ID={raw_urun.ID}, StokKodu='{raw_stok}', "
+                  f"guncellenen_alanlar={list(updates.keys())}")
+
             # ArrayOfUrunKarti wrapper — zeep bunu gerektirir
             arr = factory.ArrayOfUrunKarti(UrunKarti=[urun])
 
-            # UrunKartiAyar — tum alanlari acikca set et
+            # UrunKartiAyar — flag isimleri WSDL'den dogrulanmis, dogrudan kullan
+            # (dinamik filtreleme kaldirildi — introspection API'si calismiyor,
+            #  flag isimleri zaten xsd2 schemasi ile dogrulanmistir)
+            print(f"[SAVE_URUN] UrunKartiAyar flags: "
+                  f"{[k for k,v in update_flags.items() if v]}")
             uk_ayar_obj = factory.UrunKartiAyar(**update_flags)
 
             # VaryasyonAyar — hicbir varyasyon alani guncellenmez
@@ -144,6 +246,24 @@ class TicimaxClient:
                 ukAyar=uk_ayar_obj,
                 vAyar=v_ayar_obj
             )
+
+            # ── Gonderilen/alinan SOAP XML'i logla ───────────────────────────
+            try:
+                from lxml import etree
+                if self._history.last_sent:
+                    sent_xml = etree.tostring(
+                        self._history.last_sent["envelope"], pretty_print=True
+                    ).decode()
+                    # Sadece ilk 3000 karakteri log'la (Railway limit)
+                    print(f"[SOAP SENT]\n{sent_xml[:3000]}")
+                if self._history.last_received:
+                    recv_xml = etree.tostring(
+                        self._history.last_received["envelope"], pretty_print=True
+                    ).decode()
+                    print(f"[SOAP RECV]\n{recv_xml[:3000]}")
+            except Exception as log_err:
+                print(f"[SOAP LOG] XML log hatasi: {log_err}")
+
             return response
         except Fault as fault:
             raise RuntimeError(f"SOAP Hatasi: {fault}")

@@ -112,6 +112,7 @@ class AnalyzeRequest(BaseModel):
     domain_url: str = ""
     brand_name: str = ""
     session_id: str | None = None
+    organization_id: str | None = None
 
 
 class SendToTicimaxRequest(BaseModel):
@@ -138,6 +139,81 @@ class AltTextRequest(BaseModel):
 
 
 # ──────────────── YARDIMCI ────────────────
+
+def _load_sector_intelligence(organization_id: str) -> Optional[dict]:
+    """
+    Firmanın sector_id'sini al, o sektör için tüm sector_intelligence
+    kayıtlarını quality_score'a göre sırala, katman bazlı birleştir.
+    Dönen dict: {display_name, keywords, faq, schema, competitor, seasonal}
+    """
+    try:
+        import httpx
+        url = os.getenv("SUPABASE_URL", "")
+        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+        if not url or not key:
+            return None
+
+        headers = {"apikey": key, "Authorization": f"Bearer {key}"}
+
+        # 1. Firmanın sector_id'sini çek
+        r = httpx.get(
+            f"{url}/rest/v1/organizations",
+            params={"id": f"eq.{organization_id}", "select": "sector_id,hedef_kitle"},
+            headers=headers, timeout=5
+        )
+        if r.status_code != 200 or not r.json():
+            return None
+        org = r.json()[0]
+        sector_id = org.get("sector_id")
+        if not sector_id:
+            return None
+
+        # 2. Sektör adını çek
+        rs = httpx.get(
+            f"{url}/rest/v1/sectors",
+            params={"id": f"eq.{sector_id}", "select": "slug,display_name"},
+            headers=headers, timeout=5
+        )
+        if rs.status_code != 200 or not rs.json():
+            return None
+        sector = rs.json()[0]
+
+        # 3. sector_intelligence kayıtlarını çek (quality_score'a göre desc)
+        ri = httpx.get(
+            f"{url}/rest/v1/sector_intelligence",
+            params={
+                "sector_id": f"eq.{sector_id}",
+                "select": "data_type,content,quality_score",
+                "order": "quality_score.desc",
+                "limit": "50"
+            },
+            headers=headers, timeout=5
+        )
+        if ri.status_code != 200:
+            return None
+
+        rows = ri.json()
+        result: dict = {
+            "display_name": sector["display_name"],
+            "slug": sector["slug"],
+        }
+
+        # Her data_type için en yüksek quality_score'lu içerikleri birleştir
+        for row in rows:
+            dt = row["data_type"]
+            if dt not in result:
+                result[dt] = row["content"]
+
+        # Firma hedef_kitle'si varsa ekle
+        if org.get("hedef_kitle"):
+            result["hedef_kitle"] = org["hedef_kitle"]
+
+        return result if len(result) > 2 else None  # En az 1 katman olmalı
+
+    except Exception as e:
+        print(f"[SECTOR INTEL] Yüklenemedi ({organization_id[:8]}): {e}")
+        return None
+
 
 def _build_wsdl_url(domain_url: str) -> str:
     base_url = domain_url
@@ -502,6 +578,16 @@ def _run_analysis(session_id: str, req: AnalyzeRequest):
     session["product_times"] = []  # Her urun icin sure kaydi
     results_db[session_id] = []
 
+    # 0. Sektör intelligence yükle (organization_id varsa)
+    sector_intelligence: Optional[dict] = None
+    if req.organization_id:
+        sector_intelligence = _load_sector_intelligence(req.organization_id)
+        if sector_intelligence:
+            _log(session_id, f"Sektör verisi yüklendi: {sector_intelligence.get('display_name','?')} "
+                             f"({sum(1 for k in ['keywords','faq','competitor','seasonal','schema'] if sector_intelligence.get(k))} katman)")
+        else:
+            _log(session_id, "Sektör verisi bulunamadı — genel prompt kullanılacak")
+
     # 1. Gemini API key kontrolu (pool'dan al, kullanici keyi yoksa)
     gemini_key = get_gemini_key(req.api_key or "")
     if not gemini_key:
@@ -669,6 +755,7 @@ def _run_analysis(session_id: str, req: AnalyzeRequest):
                     kategoriler=cached.get("kategoriler") or (str(get_field(urun, 'Kategoriler', '')) if urun else ''),
                     stok_kodu=stok_kodu,
                     reference_content=reference_content,
+                    sector_intelligence=sector_intelligence,
                 )
 
                 # SEO baslik karakter kontrolu
@@ -797,6 +884,26 @@ def _run_analysis(session_id: str, req: AnalyzeRequest):
                                     block.pop("offers", None)
                 except Exception as serr:
                     _log(session_id, f"  Schema post-process hatası (devam): {serr}")
+
+                # ── Görsel Alt Tag üretimi (tüm görseller, best-effort) ──────────
+                try:
+                    alt_tags_list = []
+                    for tmp_path in temp_paths:
+                        alt = engine.generate_alt_text(
+                            image_path=tmp_path,
+                            urun_adi=result_data.get("urun_adi") or urun_adi,
+                            kategori=cached.get("kategoriler", ""),
+                            marka=urun_marka,
+                        )
+                        alt_tags_list.append(alt)
+                    result_data["gorsel_alt_tags"] = alt_tags_list
+                    if alt_tags_list:
+                        _log(session_id,
+                             f"  Alt tag: {len(alt_tags_list)} gorsel — "
+                             f"'{alt_tags_list[0][:50]}...'")
+                except Exception as _alt_err:
+                    _log(session_id, f"  Alt tag uretimi basarisiz (devam): {_alt_err}")
+                    result_data["gorsel_alt_tags"] = []
 
                 results_db[session_id].append(result_data)
 
@@ -1526,16 +1633,21 @@ def send_to_ticimax(req: SendToTicimaxRequest):
             "AdwordsTipGuncelle": "AdwordsTip" in updates,
         }
 
+        # Gorsel alt tagleri (analiz sirasinda uretilmis olabilir)
+        gorsel_alt_tags = prod.get("gorsel_alt_tags") or []
+
         try:
             active_flags = {k: v for k, v in update_flags.items() if v}
             print(f"\n[TICIMAX SEND] stok={stok_kodu}, ID={urun_karti_id}, "
                   f"updates={list(updates.keys())}, "
-                  f"flags={active_flags}")
+                  f"flags={active_flags}, "
+                  f"alt_tags={len(gorsel_alt_tags)} gorsel")
 
             response = client.save_urun(
                 raw_urun=raw,
                 updates=updates,
                 update_flags=update_flags,
+                alt_tags=gorsel_alt_tags if gorsel_alt_tags else None,
             )
 
             # SaveUrunResult=0 basarili demek (0 hata),
@@ -1579,6 +1691,66 @@ def send_to_ticimax(req: SendToTicimaxRequest):
         "errors": error_count,
         "results": results,
     }
+
+
+# ──────────────── TICIMAX DEBUG ────────────────
+
+class TicimaxDebugRequest(BaseModel):
+    domain_url: str
+    ws_kodu: str
+    stok_kodu: Optional[str] = None
+
+
+@app.post("/api/ticimax/debug-wsdl")
+def debug_ticimax_wsdl(req: TicimaxDebugRequest):
+    """
+    WSDL'den UrunKartiAyar ve UrunResim alan adlarini doner.
+    Hangi flag isimlerinin dogru oldugunu ve alt tag desteklenip desteklenmedigini anlamak icin kullanilir.
+    """
+    try:
+        wsdl_url = _build_wsdl_url(req.domain_url)
+        client = TicimaxClient(base_url=wsdl_url, uye_kodu=req.ws_kodu)
+        uk_fields = client.get_urunkartiayar_fields()
+        ur_fields = client.get_urunresim_fields()
+        alt_tag_destekleniyor = "AlternatifMetin" in ur_fields
+        return {
+            "urunkartiayar_fields": uk_fields,
+            "urunresim_fields": ur_fields,
+            "alt_tag_destekleniyor": alt_tag_destekleniyor,
+            "resimler_guncelle_flag_var": "ResimlerGuncelle" in uk_fields,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/ticimax/verify-send")
+def verify_ticimax_send(req: TicimaxDebugRequest):
+    """
+    Belirli bir urun icin SaveUrun sonrasi SelectUrun ile degerleri
+    karsilastirir — guncelleme gercekten yapildi mi kontrol eder.
+    """
+    if not req.stok_kodu:
+        raise HTTPException(status_code=400, detail="stok_kodu zorunlu")
+    try:
+        wsdl_url = _build_wsdl_url(req.domain_url)
+        client = TicimaxClient(base_url=wsdl_url, uye_kodu=req.ws_kodu)
+        urunler = client.get_urun_liste(urun_karti_id=int(req.stok_kodu))
+        if not urunler:
+            return {"found": False}
+        u = urunler[0]
+        return {
+            "found": True,
+            "ID": getattr(u, "ID", None),
+            "StokKodu": getattr(u, "StokKodu", None),
+            "UrunAdi": getattr(u, "UrunAdi", None),
+            "SeoSayfaBaslik": getattr(u, "SeoSayfaBaslik", None),
+            "SeoSayfaAciklama": getattr(u, "SeoSayfaAciklama", None),
+            "SeoAnahtarKelime": getattr(u, "SeoAnahtarKelime", None),
+            "Aciklama": (getattr(u, "Aciklama", None) or "")[:200],
+            "OnYazi": getattr(u, "OnYazi", None),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ──────────────── ADMIN GEMINI KEY YÖNETİMİ ────────────────

@@ -105,7 +105,11 @@ Kötü örnek (Information Gain = 0):
 
 Çıktın aşağıdaki tüm alanları içermelidir:
 
-1. **urun_adi** (60-80 karakter): Marka + ürün özelliği + kategori
+1. **urun_adi** (60-80 karakter): Ürün özelliği + kategori.
+   ❌ BAŞA MARKA ADI EKLEME — Ticimax'te marka ayrı bir alanda gösterilir, ürün adında tekrarlamak görüntü kirliliği yaratır.
+   ✅ Doğru örnek: "Yayoi Kusama Pembe Pamuklu Çiçek Desenli Balensiz Bralet Set"
+   ❌ Yanlış örnek: "Lola of Shine Yayoi Kusama Pembe Pamuklu Çiçek Desenli Bralet Set"
+   Kural: `mevcut_urun_adi` zaten marka içermiyorsa sen de EKLEME. Varsa koru ama öne ALMA.
 2. **seo_baslik** (max 60 karakter, KESINLIKLE aşma): Ana keyword + diferansiyatör + marka
 3. **seo_aciklama** (max 155 karakter, KESINLIKLE aşma): CTA içermeli
 4. **anahtar_kelime** (5-8 adet): Site içi navigasyon için, virgülle ayrılmış
@@ -235,7 +239,7 @@ JSON çıktıyı yazmadan ÖNCE şu kontrolleri yap (zihninde say):
 | `seo_baslik` | ≤ 60 karakter | 60'ı geçiyorsa kısalt, marka adını sona at |
 | `seo_aciklama` | ≤ 155 karakter | 155'i geçiyorsa CTA'yı kes, fayda cümlesini koru |
 | `adwords_aciklama` | ≤ 90 karakter | 90'ı geçerse keyword + CTA bırak |
-| `urun_adi` | 60-80 karakter | Aralık dışındaysa yeniden yaz |
+| `urun_adi` | 60-80 karakter | Aralık dışındaysa yeniden yaz. Marka adını BAŞA KOYMA. |
 | `geo_sss` cevap | 40-60 kelime | 60+ ise gereksiz cümleyi sil, 40- ise detay ekle |
 
 Limit aşımı = çıktı reddedilir. Saymadan JSON yazma.
