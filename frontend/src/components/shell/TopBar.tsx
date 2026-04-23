@@ -15,9 +15,26 @@ interface TopBarProps {
 
 export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isDark, setIsDark] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const supabase = createClient()
+
+  // Initialise theme from localStorage / system preference
+  useEffect(() => {
+    const stored = localStorage.getItem('pixra-theme')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const dark = stored ? stored === 'dark' : prefersDark
+    setIsDark(dark)
+    document.documentElement.dataset.theme = dark ? 'dark' : ''
+  }, [])
+
+  const toggleTheme = () => {
+    const next = !isDark
+    setIsDark(next)
+    document.documentElement.dataset.theme = next ? 'dark' : ''
+    localStorage.setItem('pixra-theme', next ? 'dark' : 'light')
+  }
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -50,6 +67,21 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
       </div>
 
       <div className="topbar-right">
+        <button className="theme-toggle" onClick={toggleTheme} aria-label={isDark ? 'Açık temaya geç' : 'Koyu temaya geç'}>
+          {isDark ? (
+            // Sun icon
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden>
+              <circle cx="9" cy="9" r="3" stroke="currentColor" strokeWidth="1.4" />
+              <path d="M9 2V4M9 14V16M2 9H4M14 9H16M4 4L5.5 5.5M12.5 12.5L14 14M4 14L5.5 12.5M12.5 5.5L14 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+            </svg>
+          ) : (
+            // Moon icon
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden>
+              <path d="M15 10.5A7 7 0 017.5 3c0-.17.01-.34.02-.5A7 7 0 1015 10.5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+            </svg>
+          )}
+        </button>
+
         <Link href="/credits" className={`credit-pill ${lowCredits ? 'warn' : ''}`} aria-label="Krediler">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
             <path d="M7 1L8.5 5L13 5.5L9.5 8.5L10.5 13L7 10.5L3.5 13L4.5 8.5L1 5.5L5.5 5L7 1Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
@@ -164,6 +196,26 @@ export function TopBar({ user, role, credits = 0, firmName }: TopBarProps) {
           font-size: var(--text-xs);
         }
         .credit-pill.warn .credit-label { color: var(--warning-text); opacity: 0.8; }
+
+        .theme-toggle {
+          width: 32px;
+          height: 32px;
+          border-radius: var(--radius-md);
+          border: 1px solid var(--border-default);
+          background: var(--surface-2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-tertiary);
+          cursor: pointer;
+          transition: all var(--duration-fast) var(--ease-out);
+          flex-shrink: 0;
+        }
+        .theme-toggle:hover {
+          background: var(--surface-3);
+          color: var(--text-primary);
+          border-color: var(--border-default);
+        }
 
         .user-menu { position: relative; }
         .user-trigger {
