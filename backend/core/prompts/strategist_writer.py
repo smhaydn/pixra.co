@@ -434,6 +434,182 @@ CATEGORY_INSTRUCTIONS_TR = {
 - "El yapımı" (üretim sürecini bilmiyorsan YAZMA)
 - Taş sertlik/karat iddiası (belgesiz YAZMA)
 """,
+
+    "elektronik": """\
+# ELEKTRONİK & TEKNOLOJİ SEKTÖRÜ ÖZEL TALİMATLARI
+
+## Zorunlu özel alanlar
+- ozelalan_1: Teknik spec özeti (Watt, GHz, GB, mAh, inç vb. — görselde/meta'da varsa)
+- ozelalan_2: Uyumluluk (hangi işletim sistemi, cihaz, format ile çalışır)
+- ozelalan_3: Bağlantı / Arayüz (USB-C, Bluetooth 5.0, WiFi 6, HDMI 2.1 vb.)
+- ozelalan_4: Garanti süresi ve türü (Türkiye resmi garantisi / ithalat garantisi)
+- ozelalan_5: Renk / Varyant
+
+## Information Gain için kategori bilgisi
+- Spec rakamı + gerçek bağlam: "5000 mAh = ortalama 2 tam telefon şarjı" IG katar
+- Uyumluluk kritik: iOS/Android sürüm, Windows/Mac uyumu kullanıcı için karar faktörü
+- Resmi Türkiye garantisi vs paralel ithalat farkı: servis ağı ve garanti koşulları farklı
+- Enerji tüketimi ve verimlilik: yıllık elektrik faturasına etkisi somut veri
+- Bluetooth versiyonu: 5.0+ latency sorunu çözülmüş; eski sürümler müzik dinlemede gecikme
+
+## SSS örnekleri (intent gap'lerden)
+- "Hangi telefonlarla / cihazlarla uyumlu, iOS ve Android çalışır mı?" (uyumluluk niyeti)
+- "Pil / şarj ömrü ortalama kaç saat veya kaç kullanım?" (verimlilik niyeti)
+- "Resmi Türkiye garantisi var mı, yetkili servis ağı nasıl?" (güven / satış sonrası niyeti)
+
+## Yasaklı iddialar (kaynak olmadan)
+- "Dünyada 1 numara" / "Türkiye'nin en iyisi" (kaynak olmadan)
+- Spesifik ömür iddiası: "10 yıl dayanır" (datasheet olmadan)
+- Enerji sınıfı etiketi (ürün etiketi görülmeden yazma)
+- "En hızlı şarj" / "En uzun pil" (benchmark olmadan)
+""",
+
+    "kozmetik": """\
+# KOZMETİK & KİŞİSEL BAKIM SEKTÖRÜ ÖZEL TALİMATLARI
+
+## Zorunlu özel alanlar
+- ozelalan_1: Ürün tipi (Parfüm / Yüz Kremi / Serum / Fondöten / Şampuan / Saç Bakım vb.)
+- ozelalan_2: Cilt/Saç tipi (Kuru / Yağlı / Karma / Hassas / Tüm cilt tipleri)
+- ozelalan_3: Hacim / Miktar (ml veya gr)
+- ozelalan_4: Aktif bileşen veya koku ailesi (Hyalüronik Asit / Retinol / Floral / Woody vb.)
+- ozelalan_5: Kullanım şekli ve uygulama sıklığı
+
+## Information Gain için kategori bilgisi
+- Hyalüronik Asit: düşük moleküler ağırlık daha derin cilt penetrasyonu sağlar
+- SPF değerleri: SPF 30 = UVB ışınlarının %97'sini engeller; SPF 50 = %98 engeller
+- Parfüm yoğunluğu: EDP (Eau de Parfum) ~8 saat; EDT ~4-6 saat kalıcılık
+- Parabensiz: koruyucu madde içermiyor, hassas cilt tercih eder; ancak kısa raf ömrü
+- Cruelty-free: hayvan testi yapılmamış; vegan: hayvansal içerik de yok (farklı kavramlar)
+- Cilt bakım sırası: temizleyici → toner → serum → nemlendirici → SPF (sabah)
+
+## SSS örnekleri (intent gap'lerden)
+- "Hassas/alerjik cilt için uygun mu, tahriş yapar mı?" (güvenlik niyeti)
+- "Ne kadar sürer, kaç kullanım çıkar?" (ekonomi / değer niyeti)
+- "Parfüm yaz-kış ne kadar kalıcı, çantaya sığar mı?" (performans / pratiklik niyeti)
+
+## Yasaklı iddialar (kaynak olmadan)
+- "Dermatolog testli" / "Klinik onaylı" (sertifika belgesiz YAZMA)
+- "Anti-aging" / "Kırışıklık giderir" (tıbbi iddia — klinik kanıt olmadan YAZMA)
+- "Cruelty-free" / "Vegan" / "ECOCERT" (sertifika görmeden YAZMA)
+- Spesifik içerik oranı: "%5 Niasinamid" (formül bilgisi olmadan YAZMA)
+""",
+
+    "mobilya_ev": """\
+# MOBİLYA & EV DEKORASYON SEKTÖRÜ ÖZEL TALİMATLARI
+
+## Zorunlu özel alanlar
+- ozelalan_1: Boyutlar (cm cinsinden: Genişlik × Derinlik × Yükseklik)
+- ozelalan_2: Materyal / Malzeme (Masif çam / MDF / Metal / Cam / Rattan vb.)
+- ozelalan_3: Renk / Finish (Lake beyaz / Ceviz / Ham metal / Doğal ahşap vb.)
+- ozelalan_4: Montaj durumu (Hazır / Kurulum gerektiriyor / Profesyonel montaj önerilir)
+- ozelalan_5: Taşıma kapasitesi veya maksimum yük (kg — varsa)
+
+## Information Gain için kategori bilgisi
+- MDF vs masif ağaç: MDF nem dayanımı düşük; masif ağaç daha ağır ve onarılabilir
+- E0/E1 formaldehit emisyonu: çocuk odası için E1 sınıfı önerilir; E0 daha güvenli
+- Montaj süresi bilgisi: "2 kişiyle yaklaşık 45 dakika" gibi somut bilgi IG katar
+- Raf yük kapasitesi: "20 kg'a kadar" bilgisi kullanıcı için kritik karar faktörü
+- Renk tutarlılığı: ekranda gördüğü ile ürün arasında sapma olabileceği belirtilmeli
+
+## SSS örnekleri (intent gap'lerden)
+- "Gerçek boyutlar nedir, 150cm'lik duvara sığar mı?" (ölçü doğrulama niyeti)
+- "Neme dayanıklı mı, banyo veya mutfakta kullanılabilir mi?" (dayanıklılık niyeti)
+- "Montajı zor mu, özel alet veya vidalar geliyor mu?" (kurulum niyeti)
+
+## Yasaklı iddialar (kaynak olmadan)
+- Spesifik yük kapasitesi (üretici datası olmadan YAZMA)
+- "Antibakteriyel kaplama" / "Alerjik olmayan" (test belgesi şart)
+- "İtalyan tasarım" / "Danimarkalı konsept" (üretim kaynağı bilinmiyorsa YAZMA)
+""",
+
+    "spor": """\
+# SPOR & OUTdoor SEKTÖRÜ ÖZEL TALİMATLARI
+
+## Zorunlu özel alanlar
+- ozelalan_1: Spor dalı / Kullanım alanı (Koşu / Yoga / Bisiklet / Yüzme / Kamp vb.)
+- ozelalan_2: Materyal (Polyester / Nylon / Spandex / Neopren / Gore-Tex vb.)
+- ozelalan_3: Beden aralığı veya boyut
+- ozelalan_4: Kullanım koşulu (İç mekan / Dış mekan / Kış-Yaz / 4 Mevsim)
+- ozelalan_5: Teknik özellik özeti (Su itici / UPF koruma / Reflektör / Sıkıştırma)
+
+## Information Gain için kategori bilgisi
+- Moisture-wicking (nem uzaklaştırma): polyester ve nylon terlemeyi dışarı taşır, pamuk taşımaz
+- Compression giyim: kas titremesini azaltır, egzersiz sırasında kasılma riskini düşürür
+- SPF/UPF: UPF 50+ kumaş güneş ışınlarının %98'ini engeller, normal t-shirt ~%5 engeller
+- Su itici (DWR kaplama) vs su geçirmez (waterproof): hafif yağmur için DWR yeterli
+- Reflektör detay: düşük ışık koşullarında (sabah/akşam) güvenlik açısından kritik
+
+## SSS örnekleri (intent gap'lerden)
+- "Yoğun egzersizde terlemeyi vücuttan uzaklaştırıyor mu?" (performans niyeti)
+- "Açık hava koşularında UPF/güneş koruması var mı?" (güvenlik niyeti)
+- "Makinede yıkanabilir mi, baskı veya renk solar mı?" (bakım niyeti)
+
+## Yasaklı iddialar (kaynak olmadan)
+- "Profesyonel sporcu tercihi" (resmî referans olmadan YAZMA)
+- "Su geçirmez" (basınç test değeri olmadan — "su itici" ile karıştırma)
+- Spesifik UPF değeri (test sertifikası olmadan YAZMA)
+- "Ortopedik taban" (tıbbi onay olmadan YAZMA)
+""",
+
+    "bebek_cocuk": """\
+# BEBEK & ÇOCUK SEKTÖRÜ ÖZEL TALİMATLARI
+
+## Zorunlu özel alanlar
+- ozelalan_1: Yaş aralığı (0-6 ay / 6-12 ay / 1-3 yaş / 4-6 yaş vb.)
+- ozelalan_2: Materyal (Pamuk / Organik pamuk / Bambu / Polyester karışım vb.)
+- ozelalan_3: Beden (cm veya yaş bazlı; beden tablosuna yönlendirme önerilir)
+- ozelalan_4: Güvenlik sertifikası (CE / OEKO-TEX vb. — görselde/meta'da varsa)
+- ozelalan_5: Yıkama talimatı (özellikle sıcaklık ve program)
+
+## Information Gain için kategori bilgisi
+- OEKO-TEX Standard 100: zararlı kimyasal içermediği bağımsız test edilmiş sertifika
+- Organik pamuk: pestisidsiz; konvansiyonel pamuktan daha yumuşak his, daha az tahriş
+- Beden tablosu kritik: bebekler aynı yaşta farklı boyda olabilir, cm bazlı seçim önerilir
+- Küçük parça uyarısı: 3 yaş altı çocuklar için 3 cm'den küçük parça içeren oyuncak tehlikeli
+- Boyama güvenliği: yutma ihtimaline karşı gıda sınıfı boya kullanımı ASTM F963 standardı
+
+## SSS örnekleri (intent gap'lerden)
+- "Bebek derisine uygun mu, cilt tahrişi veya kaşıntı yapar mı?" (güvenlik / sağlık niyeti)
+- "Beden tam oturuyor mu, büyük almak gerekir mi?" (beden uyumu niyeti)
+- "60°C'de makinede yıkanabilir mi, hijyenik tutmak mümkün mü?" (hijyen niyeti)
+
+## Yasaklı iddialar (kaynak olmadan)
+- "Hipoalerjenik" (klinik test belgesi olmadan YAZMA)
+- OEKO-TEX / CE sertifikası (sertifika belgesi görmeden YAZMA)
+- "Antibakteriyel" (mikrobiyolojik test olmadan YAZMA)
+- "Dünyanın en güvenli oyuncağı" (kıyaslama kaynağı olmadan YAZMA)
+""",
+
+    "genel": """\
+# GENEL E-TİCARET SEKTÖRÜ TALİMATLARI
+# (Kategori-spesifik şablon bulunamadığında devreye girer)
+
+## Zorunlu özel alanlar
+- ozelalan_1: Ürün tipi / Ana kategori (görselden çıkar)
+- ozelalan_2: Materyal / Malzeme (görselden çıkarılabilen en güvenilir veri)
+- ozelalan_3: Boyut / Ağırlık / Kapasite (varsa, görselden veya meta'dan)
+- ozelalan_4: Renk / Varyant
+- ozelalan_5: Kullanım alanı / Hedef kitle
+
+## Information Gain için temel prensipler
+- Ürünün KİME hitap ettiğini ve NEDEN tercih edileceğini açıkla
+- Alternatiflere göre somut fark (fiyat/performans/dayanıklılık) belirt
+- Kullanım senaryosu: kim, nerede, ne zaman ve nasıl kullanır
+- Bakım / uzun ömür önerileri: sektör genel bilgisi olarak serbest
+- Satın alma karar noktası: müşterinin son tereddüdünü gider
+
+## SSS için yönergeler
+- "Bu üründe X var mı?" evet/hayır sorulardan KAÇIN
+- "Neden bu ürün [alternatif]e göre daha iyi?" (karşılaştırma niyeti)
+- "Kim için en uygun ve nasıl kullanılır?" (hedef kitle + kullanım niyeti)
+- "Bakımı / temizliği nasıl yapılır, ne kadar dayanır?" (uzun ömür niyeti)
+
+## Yasaklı iddialar (kaynak olmadan)
+- Sertifika, patent, ödül (belge olmadan YAZMA)
+- Spesifik teknik ölçüm (datasheet olmadan YAZMA)
+- Üretim yeri / hammadde kaynağı (bilmiyorsan YAZMA)
+- Rakip firma ile doğrudan kıyaslama (kaynak olmadan YAZMA)
+""",
 }
 
 

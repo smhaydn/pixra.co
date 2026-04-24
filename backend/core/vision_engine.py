@@ -215,9 +215,9 @@ class VisionEngine:
     USD_TO_TRY = 45.0
 
     # Pass 3 tetikleme eşiği: IG skoru bu değerin altındaysa iyileştirme çalışır
-    REFINE_TRIGGER_IG = 5
+    REFINE_TRIGGER_IG = 6
 
-    DEFAULT_CATEGORY_KEY = "ic_giyim"
+    DEFAULT_CATEGORY_KEY = "genel"
 
     def __init__(self, api_key: Optional[str] = None) -> None:
         resolved_key = api_key or os.getenv("GEMINI_API_KEY")
@@ -347,22 +347,71 @@ Yalnızca geçerli JSON döndür.
             print(f"[VisionEngine] Pass 3 (refine) atlandı: {e}")
             return result
 
-    def _detect_category_key(self, kategoriler: str, breadcrumb_kat: str) -> str:
-        """Kategori sezgisi — kategori şablonu seçimi için."""
-        text = f"{kategoriler} {breadcrumb_kat}".lower()
-        if any(k in text for k in ["sütyen", "iç giyim", "külot", "korse", "sütyan"]):
+    def _detect_category_key(self, kategoriler: str, breadcrumb_kat: str, urun_adi: str = "") -> str:
+        """Kategori sezgisi — kategori şablonu seçimi için.
+
+        Sırayla kontrol eder; ilk eşleşen kategoriyi döner.
+        Hiçbiri eşleşmezse DEFAULT_CATEGORY_KEY ("genel") döner.
+        Not: urun_adi eklenmesiyle ürün adından da algılama yapılır.
+        """
+        text = f"{kategoriler} {breadcrumb_kat} {urun_adi}".lower()
+
+        # İç giyim (önce kontrol et — kadın giyim kelimelerine çakışma olabilir)
+        if any(k in text for k in ["sütyen", "iç giyim", "külot", "korse", "sütyan",
+                                    "bralet", "jartiyer", "gece elbisesi"]):
             return "ic_giyim"
-        if any(k in text for k in ["çanta", "el çantası", "omuz çantası", "sırt çantası"]):
-            return "kadin_canta"
-        if any(k in text for k in ["takı", "gümüş", "kolye", "yüzük", "küpe", "bileklik"]):
+        # Gümüş takı
+        if any(k in text for k in ["takı", "gümüş", "kolye", "yüzük", "küpe",
+                                    "bileklik", "broş", "mücevher", "925"]):
             return "gumus_taki"
-        if any(k in text for k in ["matkap", "vida", "çekiç", "anahtar", "tornavida", "hırdavat"]):
+        # Kadın çanta
+        if any(k in text for k in ["çanta", "el çantası", "omuz çantası", "sırt çantası",
+                                    "clutch", "portföy", "bel çantası"]):
+            return "kadin_canta"
+        # Hırdavat / el aletleri
+        if any(k in text for k in ["matkap", "tornavida", "hırdavat", "alet",
+                                    "çekiç", "testere", "buat", "pense", "mengene"]):
             return "hirdavat"
-        if any(k in text for k in ["ayakkabı", "bot", "sandalet", "terlik", "sneaker"]):
+        # Ayakkabı
+        if any(k in text for k in ["ayakkabı", "bot", "sandalet", "terlik",
+                                    "sneaker", "loafer", "stiletto", "topuklu"]):
             return "ayakkabi"
-        if any(k in text for k in ["elbise", "etek", "bluz", "pantolon", "kazak", "mont", "ceket", "gömlek"]):
+        # Elektronik / Teknoloji
+        if any(k in text for k in ["telefon", "tablet", "laptop", "bilgisayar",
+                                    "kulaklık", "şarj", "kablo", "televizyon", "tv",
+                                    "monitör", "klavye", "mouse", "elektronik",
+                                    "batarya", "kamera", "fotoğraf makinesi",
+                                    "robot süpürge", "klima", "buzdolabı", "çamaşır"]):
+            return "elektronik"
+        # Kozmetik / Kişisel bakım
+        if any(k in text for k in ["parfüm", "krem", "serum", "losyon", "makyaj",
+                                    "ruj", "fondöten", "maskara", "şampuan",
+                                    "kozmetik", "cilt bakım", "yüz bakım",
+                                    "deodorant", "saç bakım", "oje", "nemlendirici"]):
+            return "kozmetik"
+        # Mobilya / Ev dekorasyonu
+        if any(k in text for k in ["koltuk", "masa", "sandalye", "yatak", "dolap",
+                                    "raf", "mobilya", "halı", "perde", "aydınlatma",
+                                    "lamba", "dekorasyon", "çerçeve", "saksı",
+                                    "mutfak eşyası", "ev tekstil", "nevresim"]):
+            return "mobilya_ev"
+        # Spor / Outdoor
+        if any(k in text for k in ["spor", "koşu", "yoga", "pilates", "fitness",
+                                    "bisiklet", "yüzme", "outdoor", "kamp",
+                                    "trekking", "dağcılık", "antrenman", "sporcu"]):
+            return "spor"
+        # Bebek / Çocuk
+        if any(k in text for k in ["bebek", "çocuk", "oyuncak", "emzirme",
+                                    "mama", "bez", "kreş", "çocuk odası"]):
+            return "bebek_cocuk"
+        # Kadın giyim (geniş — son kontrol, yukarıdakilerle çakışma önlenir)
+        if any(k in text for k in ["elbise", "etek", "bluz", "pantolon", "kazak",
+                                    "mont", "ceket", "gömlek", "tunik", "tulum",
+                                    "hırka", "sweatshirt", "trençkot", "mini etek",
+                                    "giyim", "kıyafet"]):
             return "kadin_giyim"
-        return self.DEFAULT_CATEGORY_KEY
+
+        return self.DEFAULT_CATEGORY_KEY  # → "genel"
 
     def generate_alt_text(
         self,
@@ -454,7 +503,9 @@ Yalnızca alt-text metnini döndür. Tırnak, açıklama, ek metin YOK.
                 elif line.startswith("MEVCUT SEO BASLIK:"):
                     mevcut_seo_baslik = line.replace("MEVCUT SEO BASLIK:", "").strip()
 
-        resolved_category = category_key or self._detect_category_key(kategoriler, breadcrumb_kat)
+        resolved_category = category_key or self._detect_category_key(
+            kategoriler, breadcrumb_kat, mevcut_urun_adi
+        )
 
         # ── PASS 1: Strateji Brifing (metin-tabanlı, görselsiz, ucuz) ──────────
         strategy_brief = self._generate_strategy_brief(
