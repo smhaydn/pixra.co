@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -35,7 +35,6 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const router = useRouter()
-  const supabase = createClient()
 
   const switchMode = (m: Mode) => {
     setMode(m)
@@ -48,6 +47,8 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     setSuccess('')
+
+    const supabase = createClient()
 
     if (mode === 'signup') {
       if (!fullName.trim()) {
