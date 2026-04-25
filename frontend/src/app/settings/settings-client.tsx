@@ -143,7 +143,6 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
 
   const saveGoogleOAuth = async () => {
     if (!firm) return
-    if (readOnly) return toast.show('Impersonate modunda değiştirilemez', 'warning')
     setSavingOAuth(true)
     // Mevcut firma_profil'i koru, sadece __google_oauth__ güncelle
     const currentProfil = (firm.firma_profil as Record<string, unknown>) || {}
