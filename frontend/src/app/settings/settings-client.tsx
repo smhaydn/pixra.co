@@ -64,6 +64,7 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
     client_secret: googleOAuthRaw?.client_secret || '',
   })
   const [savingOAuth, setSavingOAuth] = useState(false)
+  const [editingOAuth, setEditingOAuth] = useState(!googleOAuthRaw?.client_id)
 
   // GSC state
   const [gscStatus, setGscStatus] = useState<GscStatus | null>(null)
@@ -156,6 +157,7 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
       })
       if (!res.ok) throw new Error('Kayıt başarısız')
       toast.show('Google OAuth bilgileri kaydedildi', 'success')
+      setEditingOAuth(false)
     } catch {
       toast.show('Kaydedilemedi, tekrar dene', 'error')
     }
@@ -393,51 +395,74 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
               <Card padding="lg" variant="flat">
                 <div className="sec-head">
                   <h2>Google OAuth Kimlik Bilgileri</h2>
-                  {googleOAuth.client_id ? (
-                    <Badge tone="success" dot>Ayarlandı</Badge>
-                  ) : (
-                    <Badge tone="warning" dot>Eksik</Badge>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {googleOAuth.client_id ? (
+                      <Badge tone="success" dot>Aktif</Badge>
+                    ) : (
+                      <Badge tone="error" dot>Ayarlanmamış</Badge>
+                    )}
+                    <Button variant="secondary" size="sm" onClick={() => setEditingOAuth(v => !v)}>
+                      {editingOAuth ? 'Kapat' : 'Düzenle'}
+                    </Button>
+                  </div>
                 </div>
-                <p className="desc">
-                  Google Search Console bağlantısı için kendi Google Cloud projenizden OAuth 2.0 kimlik bilgilerinizi girin.
-                  Bu bilgiler şifreli saklanır ve yalnızca GSC bağlantısı için kullanılır.
-                </p>
-                <div className="fields">
-                  <Input
-                    label="Client ID"
-                    placeholder="123456789-abc.apps.googleusercontent.com"
-                    value={googleOAuth.client_id}
-                    onChange={e => setGoogleOAuth({ ...googleOAuth, client_id: e.target.value })}
-                    hint="Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID"
-                  />
-                  <Input
-                    label="Client Secret"
-                    type="password"
-                    placeholder="GOCSPX-..."
-                    value={googleOAuth.client_secret}
-                    onChange={e => setGoogleOAuth({ ...googleOAuth, client_secret: e.target.value })}
-                  />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <a
-                    href="https://console.cloud.google.com/apis/credentials"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="support-link"
-                  >
-                    Google Cloud Console →
-                  </a>
-                  <Button
-                    variant="gradient"
-                    size="sm"
-                    onClick={saveGoogleOAuth}
-                    loading={savingOAuth}
-                    disabled={!googleOAuth.client_id || !googleOAuth.client_secret}
-                  >
-                    Kaydet
-                  </Button>
-                </div>
+
+                {!editingOAuth && googleOAuth.client_id && (
+                  <p className="desc" style={{ margin: 0 }}>
+                    Client ID: <code style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
+                      {googleOAuth.client_id.slice(0, 24)}…
+                    </code>
+                  </p>
+                )}
+
+                {!editingOAuth && !googleOAuth.client_id && (
+                  <p className="desc" style={{ margin: 0 }}>
+                    GSC bağlantısı için Google Cloud projenizden OAuth 2.0 kimlik bilgilerini ekleyin.
+                  </p>
+                )}
+
+                {editingOAuth && (
+                  <>
+                    <p className="desc">
+                      Google Cloud projenizden OAuth 2.0 kimlik bilgilerini girin. Şifreli saklanır, yalnızca GSC bağlantısı için kullanılır.
+                    </p>
+                    <div className="fields">
+                      <Input
+                        label="Client ID"
+                        placeholder="123456789-abc.apps.googleusercontent.com"
+                        value={googleOAuth.client_id}
+                        onChange={e => setGoogleOAuth({ ...googleOAuth, client_id: e.target.value })}
+                        hint="Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID"
+                      />
+                      <Input
+                        label="Client Secret"
+                        type="password"
+                        placeholder="GOCSPX-..."
+                        value={googleOAuth.client_secret}
+                        onChange={e => setGoogleOAuth({ ...googleOAuth, client_secret: e.target.value })}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <a
+                        href="https://console.cloud.google.com/apis/credentials"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="support-link"
+                      >
+                        Google Cloud Console →
+                      </a>
+                      <Button
+                        variant="gradient"
+                        size="sm"
+                        onClick={saveGoogleOAuth}
+                        loading={savingOAuth}
+                        disabled={!googleOAuth.client_id || !googleOAuth.client_secret}
+                      >
+                        Kaydet
+                      </Button>
+                    </div>
+                  </>
+                )}
               </Card>
 
               <Card padding="lg">
