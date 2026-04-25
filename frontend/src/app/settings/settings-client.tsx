@@ -399,7 +399,7 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
                     {googleOAuth.client_id ? (
                       <Badge tone="success" dot>Aktif</Badge>
                     ) : (
-                      <Badge tone="error" dot>Ayarlanmamış</Badge>
+                      <Badge tone="warning" dot>Ayarlanmamış</Badge>
                     )}
                     <Button variant="secondary" size="sm" onClick={() => setEditingOAuth(v => !v)}>
                       {editingOAuth ? 'Kapat' : 'Düzenle'}
