@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import { AppShell } from '@/components/shell/AppShell'
 import { getEffectiveUser } from '@/lib/auth/effective-user'
 import SettingsClient from './settings-client'
@@ -22,7 +23,10 @@ export default async function SettingsPage() {
 
   return (
     <AppShell user={user} role={role} credits={creditRow?.balance ?? 10} firmName={firm?.company_name} impersonation={eff.impersonation}>
-      <SettingsClient user={user} firm={firm} readOnly={!!eff.impersonation} />
+      {/* useSearchParams() için Suspense boundary gerekli */}
+      <Suspense fallback={null}>
+        <SettingsClient user={user} firm={firm} readOnly={!!eff.impersonation} />
+      </Suspense>
     </AppShell>
   )
 }

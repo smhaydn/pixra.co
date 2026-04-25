@@ -480,6 +480,8 @@ function SectorManager() {
   const [newContent, setNewContent] = useState('')
   const [newScore, setNewScore] = useState(7)
   const [jsonError, setJsonError] = useState('')
+  const [crawling, setCrawling] = useState(false)
+  const [crawlResult, setCrawlResult] = useState<{ status: string; layers?: string[]; quality?: number; error?: string } | null>(null)
 
   useEffect(() => {
     supabase.from('sectors').select('id,slug,display_name').eq('aktif', true).order('display_name')
@@ -524,6 +526,52 @@ function SectorManager() {
     setIntels(prev => prev.filter(i => i.id !== id))
   }
 
+  const startCrawl = async () => {
+    const sector = sectors.find(s => s.id === selected)
+    if (!sector) return
+    setCrawling(true)
+    setCrawlResult(null)
+    try {
+      const res = await fetch(`${API}/api/admin/sector/crawl`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sector_id: sector.id,
+          sector_slug: sector.slug,
+          sector_name: sector.display_name,
+        }),
+      })
+      const data = await res.json()
+      if (data.status === 'queued' || data.status === 'already_running') {
+        // Tarama arka planda — 45 saniye sonra durum kontrolü yap
+        setCrawlResult({ status: 'running' })
+        setTimeout(async () => {
+          const statusRes = await fetch(`${API}/api/admin/sector/crawl/${sector.id}`)
+          const statusData = await statusRes.json()
+          setCrawlResult({
+            status: statusData.status,
+            layers: statusData.saved_layers,
+            quality: statusData.quality_score,
+            error: statusData.error,
+          })
+          // Tamamlandıysa listeyi yenile
+          if (statusData.status === 'completed') {
+            const { data: fresh } = await supabase.from('sector_intelligence')
+              .select('*').eq('sector_id', selected).order('data_type').order('quality_score', { ascending: false })
+            setIntels(fresh || [])
+          }
+          setCrawling(false)
+        }, 45000)
+      } else {
+        setCrawlResult({ status: 'error', error: data.message })
+        setCrawling(false)
+      }
+    } catch (err) {
+      setCrawlResult({ status: 'error', error: String(err) })
+      setCrawling(false)
+    }
+  }
+
   const currentSector = sectors.find(s => s.id === selected)
 
   const JSON_TEMPLATES: Record<string, string> = {
@@ -538,8 +586,44 @@ function SectorManager() {
     <section className="sec">
       <div className="sec-head">
         <h2>Sektör İstihbarat Yönetimi</h2>
-        <Badge tone="brand" soft>{intels.length} veri katmanı</Badge>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <Badge tone="brand" soft>{intels.length} veri katmanı</Badge>
+          {selected && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={startCrawl}
+              loading={crawling}
+              disabled={crawling}
+            >
+              {crawling ? 'Taranıyor...' : '🔍 Otomatik Tara'}
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Tarama sonuç bandı */}
+      {crawlResult && (
+        <div style={{
+          padding: '10px 14px',
+          borderRadius: 'var(--radius-md)',
+          marginBottom: 12,
+          fontSize: 'var(--text-sm)',
+          background: crawlResult.status === 'completed'
+            ? 'rgba(34,197,94,0.1)'
+            : crawlResult.status === 'error'
+            ? 'rgba(239,68,68,0.1)'
+            : 'rgba(var(--brand-rgb),0.1)',
+          border: `1px solid ${crawlResult.status === 'completed' ? 'rgba(34,197,94,0.3)' : crawlResult.status === 'error' ? 'rgba(239,68,68,0.3)' : 'var(--brand-border)'}`,
+          color: 'var(--text-primary)',
+        }}>
+          {crawlResult.status === 'running' && '⏳ Tarama arka planda devam ediyor (~45sn)...'}
+          {crawlResult.status === 'completed' && (
+            <>✅ Tarama tamamlandı — {crawlResult.layers?.join(', ')} katmanları kaydedildi · Kalite skoru: {crawlResult.quality}/10</>
+          )}
+          {crawlResult.status === 'error' && `❌ Hata: ${crawlResult.error}`}
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {sectors.map(s => (

@@ -1825,3 +1825,426 @@ def delete_gemini_key(key_id: str):
     global _key_pool_loaded_at
     _key_pool_loaded_at = 0.0
     return {"ok": True}
+
+
+# ──────────────── SPRINT 2 — SEKTÖR RAG OTOMATİK TARAYICI ────────────────
+
+# Devam eden tarama görevlerini izlemek için in-memory state
+_crawl_jobs: Dict[str, dict] = {}  # sector_id -> {status, started_at, result, error}
+
+
+class SectorCrawlRequest(BaseModel):
+    sector_id: str
+    sector_slug: str
+    sector_name: str
+    extra_keywords: Optional[List[str]] = None   # Admin manuel keyword ekleyebilir
+    use_gsc: bool = False                         # GSC verisini de kullansın mı
+    org_id: Optional[str] = None                 # use_gsc=True ise gerekli
+
+
+def _run_sector_crawl(sector_id: str, sector_slug: str, sector_name: str,
+                      extra_keywords: Optional[List[str]], use_gsc: bool,
+                      org_id: Optional[str]) -> None:
+    """Background task: sektörü tara ve sector_intelligence'a kaydet."""
+    import httpx as _httpx
+    from core.sector_crawler import SectorCrawler
+
+    _crawl_jobs[sector_id]["status"] = "running"
+    _crawl_jobs[sector_id]["started_at"] = time.time()
+
+    try:
+        # GSC keyword'leri al (isteğe bağlı)
+        gsc_keywords: Optional[List[str]] = None
+        if use_gsc and org_id:
+            try:
+                gsc_keywords = _fetch_gsc_top_queries(org_id, limit=15)
+            except Exception as gsc_err:
+                print(f"[CRAWL] GSC alınamadı ({org_id}): {gsc_err}")
+
+        crawler = SectorCrawler()
+        intel = crawler.crawl(
+            sector_slug=sector_slug,
+            sector_name=sector_name,
+            gsc_keywords=extra_keywords or gsc_keywords,
+        )
+
+        if "error" in intel:
+            _crawl_jobs[sector_id]["status"] = "error"
+            _crawl_jobs[sector_id]["error"] = intel["error"]
+            return
+
+        quality = intel.get("quality_score", 5)
+        crawled_at = intel["keywords"].get("crawled_at", "")
+
+        sb_url = os.getenv("SUPABASE_URL", "")
+        sb_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+        headers = {
+            "apikey": sb_key,
+            "Authorization": f"Bearer {sb_key}",
+            "Content-Type": "application/json",
+        }
+
+        saved_layers: list[str] = []
+        for data_type in ("keywords", "faq", "competitor"):
+            content = intel.get(data_type)
+            if not content:
+                continue
+
+            # Önce mevcut crawler kaydını sil (upsert benzeri)
+            _httpx.delete(
+                f"{sb_url}/rest/v1/sector_intelligence"
+                f"?sector_id=eq.{sector_id}&data_type=eq.{data_type}&source=eq.crawler",
+                headers=headers,
+                timeout=10,
+            )
+
+            # Yeni kayıt ekle
+            resp = _httpx.post(
+                f"{sb_url}/rest/v1/sector_intelligence",
+                headers={**headers, "Prefer": "return=minimal"},
+                json={
+                    "sector_id": sector_id,
+                    "data_type": data_type,
+                    "content": content,
+                    "quality_score": quality,
+                    "source": "crawler",
+                    "notes": (
+                        f"DuckDuckGo SERP taraması • {intel.get('serp_results_count', 0)} sonuç • "
+                        f"{intel.get('pages_scraped', 0)} sayfa kazındı"
+                        + (" • GSC verisi entegre" if gsc_keywords else "")
+                    ),
+                },
+                timeout=10,
+            )
+            if resp.status_code in (200, 201):
+                saved_layers.append(data_type)
+            else:
+                print(f"[CRAWL] {data_type} kaydedilemedi: {resp.status_code} {resp.text[:200]}")
+
+        _crawl_jobs[sector_id]["status"] = "completed"
+        _crawl_jobs[sector_id]["saved_layers"] = saved_layers
+        _crawl_jobs[sector_id]["quality_score"] = quality
+        _crawl_jobs[sector_id]["serp_count"] = intel.get("serp_results_count", 0)
+        _crawl_jobs[sector_id]["pages_scraped"] = intel.get("pages_scraped", 0)
+        _crawl_jobs[sector_id]["elapsed_sn"] = round(time.time() - _crawl_jobs[sector_id]["started_at"], 1)
+
+        print(f"[CRAWL] {sector_name} tamamlandı: {saved_layers}, Q={quality}")
+
+    except Exception as exc:
+        _crawl_jobs[sector_id]["status"] = "error"
+        _crawl_jobs[sector_id]["error"] = str(exc)[:300]
+        print(f"[CRAWL] {sector_name} HATA: {exc}")
+
+
+@app.post("/api/admin/sector/crawl")
+def start_sector_crawl(req: SectorCrawlRequest, bg_tasks: BackgroundTasks):
+    """Belirtilen sektör için arka planda SERP taraması başlatır.
+
+    Tarama sonuçları sector_intelligence tablosuna 'crawler' kaynağıyla kaydedilir.
+    Mevcut 'crawler' kayıtları güncellenir, 'admin' kayıtlarına dokunulmaz.
+    """
+    sector_id = req.sector_id
+
+    # Zaten çalışıyorsa reddet
+    existing = _crawl_jobs.get(sector_id, {})
+    if existing.get("status") == "running":
+        return {
+            "status": "already_running",
+            "message": f"{req.sector_name} için tarama zaten devam ediyor",
+        }
+
+    _crawl_jobs[sector_id] = {
+        "status": "queued",
+        "sector_name": req.sector_name,
+        "sector_slug": req.sector_slug,
+        "started_at": None,
+        "elapsed_sn": None,
+        "saved_layers": [],
+        "quality_score": None,
+        "error": None,
+    }
+
+    bg_tasks.add_task(
+        _run_sector_crawl,
+        sector_id=sector_id,
+        sector_slug=req.sector_slug,
+        sector_name=req.sector_name,
+        extra_keywords=req.extra_keywords,
+        use_gsc=req.use_gsc,
+        org_id=req.org_id,
+    )
+
+    return {
+        "status": "queued",
+        "message": f"{req.sector_name} taraması başlatıldı",
+        "sector_id": sector_id,
+    }
+
+
+@app.get("/api/admin/sector/crawl/{sector_id}")
+def get_crawl_status(sector_id: str):
+    """Tarama görevinin durumunu döner."""
+    job = _crawl_jobs.get(sector_id)
+    if not job:
+        return {"status": "not_started"}
+    return job
+
+
+# ──────────────── GOOGLE SEARCH CONSOLE ENTEGRASYONu ────────────────
+
+
+def _fetch_gsc_top_queries(org_id: str, limit: int = 20) -> list[str]:
+    """
+    Bir firmanın GSC bağlantısından top arama sorgularını çeker.
+    Döner: ["sorgu1", "sorgu2", ...]  veya boş liste.
+    """
+    import httpx as _httpx
+
+    sb_url = os.getenv("SUPABASE_URL", "")
+    sb_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
+
+    # firma_profil.__gsc__ içinden token al
+    r = _httpx.get(
+        f"{sb_url}/rest/v1/organizations",
+        params={"id": f"eq.{org_id}", "select": "firma_profil"},
+        headers=headers,
+        timeout=8,
+    )
+    if r.status_code != 200 or not r.json():
+        return []
+
+    profil = r.json()[0].get("firma_profil") or {}
+    gsc = profil.get("__gsc__", {})
+    refresh_token = gsc.get("refresh_token")
+    property_url = gsc.get("property_url")
+    if not refresh_token or not property_url:
+        return []
+
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    if not client_id or not client_secret:
+        return []
+
+    # Refresh token → access token
+    token_resp = _httpx.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "refresh_token": refresh_token,
+            "grant_type": "refresh_token",
+        },
+        timeout=10,
+    )
+    if token_resp.status_code != 200:
+        return []
+
+    access_token = token_resp.json().get("access_token", "")
+    if not access_token:
+        return []
+
+    # GSC Search Analytics API — son 90 günün top sorguları
+    from datetime import date, timedelta
+    end_date = date.today().isoformat()
+    start_date = (date.today() - timedelta(days=90)).isoformat()
+
+    gsc_resp = _httpx.post(
+        f"https://searchconsole.googleapis.com/webmasters/v3/sites/{property_url}/searchAnalytics/query",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={
+            "startDate": start_date,
+            "endDate": end_date,
+            "dimensions": ["query"],
+            "rowLimit": limit,
+            "orderBy": [{"fieldName": "impressions", "sortOrder": "DESCENDING"}],
+        },
+        timeout=15,
+    )
+    if gsc_resp.status_code != 200:
+        return []
+
+    rows = gsc_resp.json().get("rows", [])
+    return [row["keys"][0] for row in rows if row.get("keys")]
+
+
+@app.get("/api/integrations/gsc/auth-url")
+def gsc_auth_url(org_id: str):
+    """Google OAuth consent URL döner. Frontend bu URL'yi açar."""
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+    if not client_id:
+        raise HTTPException(status_code=503, detail="GOOGLE_CLIENT_ID env var eksik")
+
+    backend_url = os.getenv("BACKEND_URL", "").rstrip("/")
+    if not backend_url:
+        raise HTTPException(status_code=503, detail="BACKEND_URL env var eksik")
+
+    import urllib.parse
+    params = {
+        "client_id": client_id,
+        "redirect_uri": f"{backend_url}/api/integrations/gsc/callback",
+        "response_type": "code",
+        "scope": "https://www.googleapis.com/auth/webmasters.readonly",
+        "access_type": "offline",
+        "prompt": "consent",
+        "state": org_id,   # callback'te hangi firma olduğunu bilmek için
+    }
+    url = "https://accounts.google.com/o/oauth2/auth?" + urllib.parse.urlencode(params)
+    return {"url": url}
+
+
+@app.get("/api/integrations/gsc/callback")
+def gsc_oauth_callback(code: str, state: str):
+    """Google OAuth callback. Token'ları alıp Supabase'e kaydeder."""
+    import httpx as _httpx
+    import urllib.parse
+
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    backend_url = os.getenv("BACKEND_URL", "").rstrip("/")
+    frontend_url = os.getenv("FRONTEND_URL", "https://pixra.co").rstrip("/")
+    org_id = state
+
+    if not client_id or not client_secret:
+        raise HTTPException(status_code=503, detail="GSC env vars eksik")
+
+    # Code → tokens
+    token_resp = _httpx.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "code": code,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirect_uri": f"{backend_url}/api/integrations/gsc/callback",
+            "grant_type": "authorization_code",
+        },
+        timeout=15,
+    )
+
+    if token_resp.status_code != 200:
+        # Frontend'e hata ile redirect
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(f"{frontend_url}/settings?gsc=error&detail=token_exchange_failed")
+
+    tokens = token_resp.json()
+    refresh_token = tokens.get("refresh_token")
+    if not refresh_token:
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(f"{frontend_url}/settings?gsc=error&detail=no_refresh_token")
+
+    # Property listesi çek → ilk siteyi varsayılan yap
+    site_list_resp = _httpx.get(
+        "https://searchconsole.googleapis.com/webmasters/v3/sites",
+        headers={"Authorization": f"Bearer {tokens.get('access_token', '')}"},
+        timeout=10,
+    )
+    property_url = ""
+    if site_list_resp.status_code == 200:
+        sites = site_list_resp.json().get("siteEntry", [])
+        if sites:
+            property_url = urllib.parse.quote(sites[0].get("siteUrl", ""), safe="")
+
+    # Supabase'e kaydet — firma_profil.__gsc__ altında
+    sb_url = os.getenv("SUPABASE_URL", "")
+    sb_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
+
+    # Mevcut firma_profil'i çek
+    r = _httpx.get(
+        f"{sb_url}/rest/v1/organizations",
+        params={"id": f"eq.{org_id}", "select": "firma_profil"},
+        headers=headers,
+        timeout=8,
+    )
+    profil: dict = {}
+    if r.status_code == 200 and r.json():
+        profil = r.json()[0].get("firma_profil") or {}
+
+    profil["__gsc__"] = {
+        "refresh_token": refresh_token,
+        "property_url": urllib.parse.unquote(property_url),
+        "connected_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "sites_count": len(site_list_resp.json().get("siteEntry", [])) if site_list_resp.status_code == 200 else 0,
+    }
+
+    _httpx.patch(
+        f"{sb_url}/rest/v1/organizations?id=eq.{org_id}",
+        headers={**headers, "Content-Type": "application/json"},
+        json={"firma_profil": profil},
+        timeout=10,
+    )
+
+    # Frontend'e başarı ile redirect
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(f"{frontend_url}/settings?gsc=connected&tab=integrations")
+
+
+@app.get("/api/integrations/gsc/status")
+def gsc_status(org_id: str):
+    """Firmanın GSC bağlantı durumunu döner."""
+    import httpx as _httpx
+
+    sb_url = os.getenv("SUPABASE_URL", "")
+    sb_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
+
+    r = _httpx.get(
+        f"{sb_url}/rest/v1/organizations",
+        params={"id": f"eq.{org_id}", "select": "firma_profil"},
+        headers=headers,
+        timeout=8,
+    )
+    if r.status_code != 200 or not r.json():
+        return {"connected": False}
+
+    profil = r.json()[0].get("firma_profil") or {}
+    gsc = profil.get("__gsc__", {})
+
+    if not gsc.get("refresh_token"):
+        return {"connected": False}
+
+    return {
+        "connected": True,
+        "property_url": gsc.get("property_url", ""),
+        "connected_at": gsc.get("connected_at", ""),
+        "sites_count": gsc.get("sites_count", 0),
+    }
+
+
+@app.delete("/api/integrations/gsc/disconnect")
+def gsc_disconnect(org_id: str):
+    """GSC bağlantısını kaldırır (token'ları siler)."""
+    import httpx as _httpx
+
+    sb_url = os.getenv("SUPABASE_URL", "")
+    sb_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
+
+    r = _httpx.get(
+        f"{sb_url}/rest/v1/organizations",
+        params={"id": f"eq.{org_id}", "select": "firma_profil"},
+        headers=headers,
+        timeout=8,
+    )
+    if r.status_code == 200 and r.json():
+        profil = r.json()[0].get("firma_profil") or {}
+        profil.pop("__gsc__", None)
+
+        _httpx.patch(
+            f"{sb_url}/rest/v1/organizations?id=eq.{org_id}",
+            headers={**headers, "Content-Type": "application/json"},
+            json={"firma_profil": profil},
+            timeout=10,
+        )
+
+    return {"ok": True, "message": "GSC bağlantısı kaldırıldı"}
+
+
+@app.get("/api/integrations/gsc/top-queries")
+def gsc_top_queries(org_id: str, limit: int = 30):
+    """Firmanın GSC'sinden son 90 günün top arama sorgularını döner."""
+    try:
+        queries = _fetch_gsc_top_queries(org_id, limit=limit)
+        return {"queries": queries, "count": len(queries)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"GSC verisi alınamadı: {str(e)}")

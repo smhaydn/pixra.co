@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { Button, Card, Input, Badge, useToast } from '@/components/ui'
 import { PageHeader } from '@/components/shell/AppShell'
+
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 interface SectorOption { id: string; display_name: string }
 
@@ -20,10 +22,22 @@ interface Firm {
   llms_txt_generated_at?: string | null
 }
 
-type Tab = 'profile' | 'firm' | 'billing'
+interface GscStatus {
+  connected: boolean
+  property_url?: string
+  connected_at?: string
+  sites_count?: number
+}
+
+type Tab = 'profile' | 'firm' | 'integrations' | 'billing'
 
 export default function SettingsClient({ user, firm, readOnly = false }: { user: User; firm: Firm | null; readOnly?: boolean }) {
-  const [tab, setTab] = useState<Tab>('profile')
+  const searchParams = useSearchParams()
+  const [tab, setTab] = useState<Tab>(() => {
+    const t = searchParams?.get('tab')
+    if (t === 'integrations') return 'integrations'
+    return 'profile'
+  })
   const [saving, setSaving] = useState(false)
   const [logouting, setLogouting] = useState(false)
   const toast = useToast()
@@ -43,11 +57,42 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
     sector_id: firm?.sector_id || '',
   })
 
+  // GSC state
+  const [gscStatus, setGscStatus] = useState<GscStatus | null>(null)
+  const [gscLoading, setGscLoading] = useState(false)
+  const [gscConnecting, setGscConnecting] = useState(false)
+  const [gscDisconnecting, setGscDisconnecting] = useState(false)
+
+  const loadGscStatus = useCallback(async () => {
+    if (!firm) return
+    setGscLoading(true)
+    try {
+      const res = await fetch(`${API}/api/integrations/gsc/status?org_id=${firm.id}`)
+      if (res.ok) setGscStatus(await res.json())
+    } catch { /* best-effort */ }
+    setGscLoading(false)
+  }, [firm])
+
   useEffect(() => {
     supabase.from('sectors').select('id,display_name').eq('aktif', true).order('display_name')
       .then(({ data }) => { if (data) setSectors(data) })
+    // GSC callback sonrası bildirim
+    const gscParam = searchParams?.get('gsc')
+    if (gscParam === 'connected') {
+      toast.show('Google Search Console başarıyla bağlandı! 🎉', 'success')
+      loadGscStatus()
+    } else if (gscParam === 'error') {
+      toast.show('GSC bağlantısı başarısız oldu, tekrar deneyin.', 'error')
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (tab === 'integrations' && !gscStatus && !gscLoading) {
+      loadGscStatus()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab])
 
   const saveProfile = async () => {
     if (readOnly) return toast.show('Impersonate modunda değiştirilemez', 'warning')
@@ -72,6 +117,33 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
     setSaving(false)
     toast.show('Firma bilgileri güncellendi', 'success')
     router.refresh()
+  }
+
+  const connectGsc = async () => {
+    if (!firm) return
+    setGscConnecting(true)
+    try {
+      const res = await fetch(`${API}/api/integrations/gsc/auth-url?org_id=${firm.id}`)
+      if (!res.ok) throw new Error('URL alınamadı')
+      const { url } = await res.json()
+      window.location.href = url   // Google OAuth sayfasına yönlendir
+    } catch (err) {
+      toast.show(`GSC bağlantısı başlatılamadı: ${String(err)}`, 'error')
+      setGscConnecting(false)
+    }
+  }
+
+  const disconnectGsc = async () => {
+    if (!firm || !confirm('GSC bağlantısını kaldırmak istediğinizden emin misiniz?')) return
+    setGscDisconnecting(true)
+    try {
+      await fetch(`${API}/api/integrations/gsc/disconnect?org_id=${firm.id}`, { method: 'DELETE' })
+      setGscStatus({ connected: false })
+      toast.show('GSC bağlantısı kaldırıldı', 'success')
+    } catch {
+      toast.show('Kaldırılamadı, tekrar deneyin', 'error')
+    }
+    setGscDisconnecting(false)
   }
 
   const [llmsLoading, setLlmsLoading] = useState(false)
@@ -123,6 +195,13 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
             <div>
               <strong>Firma</strong>
               <small>Ticimax bağlantısı</small>
+            </div>
+          </button>
+          <button className={`tab ${tab === 'integrations' ? 'active' : ''}`} onClick={() => setTab('integrations')}>
+            <span className="tab-ico">🔗</span>
+            <div>
+              <strong>Entegrasyonlar</strong>
+              <small>GSC, Analytics bağlantıları</small>
             </div>
           </button>
           <button className={`tab ${tab === 'billing' ? 'active' : ''}`} onClick={() => setTab('billing')}>
@@ -279,6 +358,90 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
             </>
           )}
 
+          {tab === 'integrations' && (
+            <>
+              <Card padding="lg">
+                <div className="sec-head">
+                  <h2>Google Search Console</h2>
+                  {gscStatus?.connected ? (
+                    <Badge tone="success" dot>Bağlı</Badge>
+                  ) : (
+                    <Badge tone="neutral" dot>Bağlı değil</Badge>
+                  )}
+                </div>
+                <p className="desc">
+                  GSC bağlantısı ile mağazanızın gerçek arama sorgularını sisteme entegre edin.
+                  AI içerik üretimi ve sektör RAG verisi bu keyword&apos;lerle otomatik güçlenir.
+                </p>
+
+                {gscLoading ? (
+                  <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)' }}>Durum kontrol ediliyor...</p>
+                ) : gscStatus?.connected ? (
+                  <div className="integration-card connected">
+                    <div className="int-icon">✅</div>
+                    <div className="int-body">
+                      <strong>Search Console Bağlı</strong>
+                      {gscStatus.property_url && (
+                        <p>Mülk: <code>{gscStatus.property_url}</code></p>
+                      )}
+                      {gscStatus.connected_at && (
+                        <span className="tool-meta">
+                          Bağlandı: {new Date(gscStatus.connected_at).toLocaleDateString('tr-TR')}
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={disconnectGsc}
+                      loading={gscDisconnecting}
+                    >
+                      Bağlantıyı Kaldır
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="integration-card">
+                    <div className="int-icon">📊</div>
+                    <div className="int-body">
+                      <strong>Henüz bağlı değil</strong>
+                      <p>Google hesabınızla oturum açıp Search Console erişimine izin verin.</p>
+                      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-quaternary)' }}>
+                        Yalnızca <strong>okuma</strong> yetkisi istenir — hiçbir değişiklik yapılmaz.
+                      </p>
+                    </div>
+                    <Button
+                      variant="gradient"
+                      size="sm"
+                      onClick={connectGsc}
+                      loading={gscConnecting}
+                      disabled={!firm}
+                    >
+                      Google ile Bağla
+                    </Button>
+                  </div>
+                )}
+              </Card>
+
+              <Card padding="lg" variant="flat">
+                <h2>Yakında</h2>
+                <p className="desc">Google Analytics 4, Meta Pixel ve daha fazla entegrasyon geliyor.</p>
+                <div className="coming-soon-list">
+                  {[
+                    { icon: '📈', label: 'Google Analytics 4', status: 'Geliştiriliyor' },
+                    { icon: '🎯', label: 'Meta Pixel / CAPI', status: 'Planlandı' },
+                    { icon: '🛒', label: 'Kritik Ürün Takibi', status: 'Planlandı' },
+                  ].map(item => (
+                    <div key={item.label} className="coming-item">
+                      <span className="int-icon">{item.icon}</span>
+                      <span className="int-body"><strong>{item.label}</strong></span>
+                      <Badge tone="neutral" soft>{item.status}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </>
+          )}
+
           {tab === 'billing' && (
             <Card padding="lg" variant="flat">
               <div className="billing-empty">
@@ -429,11 +592,71 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
           gap: 16px;
         }
 
+        /* ── Entegrasyon kartı ── */
+        .integration-card {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 16px;
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-md);
+          background: var(--surface-1);
+        }
+        .integration-card.connected {
+          border-color: rgba(34,197,94,0.3);
+          background: rgba(34,197,94,0.04);
+        }
+        .int-icon {
+          font-size: 1.5rem;
+          flex-shrink: 0;
+          width: 36px;
+          text-align: center;
+        }
+        .int-body {
+          flex: 1;
+          min-width: 0;
+        }
+        .int-body strong {
+          display: block;
+          font-size: var(--text-sm);
+          font-weight: var(--weight-semibold);
+          margin-bottom: 2px;
+        }
+        .int-body p {
+          font-size: var(--text-xs);
+          color: var(--text-tertiary);
+          margin: 2px 0;
+          line-height: 1.4;
+        }
+        .int-body code {
+          font-size: var(--text-xs);
+          background: var(--surface-2);
+          padding: 1px 5px;
+          border-radius: 4px;
+        }
+        .coming-soon-list {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          margin-top: 12px;
+        }
+        .coming-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 12px;
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-md);
+          background: var(--surface-1);
+          opacity: 0.7;
+        }
+
         @media (max-width: 800px) {
           .settings-layout { grid-template-columns: 1fr; }
           .tabs { flex-direction: row; overflow-x: auto; }
           .tab { flex-shrink: 0; }
           .ai-tool-card { flex-wrap: wrap; }
+          .integration-card { flex-wrap: wrap; }
         }
       `}</style>
     </>
