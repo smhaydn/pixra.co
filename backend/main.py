@@ -2143,18 +2143,42 @@ def _fetch_gsc_top_queries(org_id: str, limit: int = 20) -> list[str]:
     return [row["keys"][0] for row in rows if row.get("keys")]
 
 
+def _get_org_profil(org_id: str) -> dict:
+    """Org'un firma_profil JSONB'sini Supabase'den çeker."""
+    import httpx as _httpx
+    sb_url = os.getenv("SUPABASE_URL", "")
+    sb_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    r = _httpx.get(
+        f"{sb_url}/rest/v1/organizations",
+        params={"id": f"eq.{org_id}", "select": "firma_profil"},
+        headers={"apikey": sb_key, "Authorization": f"Bearer {sb_key}"},
+        timeout=8,
+    )
+    if r.status_code == 200 and r.json():
+        return r.json()[0].get("firma_profil") or {}
+    return {}
+
+
 @app.get("/api/integrations/gsc/auth-url")
 def gsc_auth_url(org_id: str):
     """Google OAuth consent URL döner. Frontend bu URL'yi açar."""
-    client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+    import urllib.parse
+
+    # Önce org'un kendi credentials'ını dene, yoksa env var'a bak
+    profil = _get_org_profil(org_id)
+    google_oauth = profil.get("__google_oauth__", {})
+    client_id = google_oauth.get("client_id") or os.getenv("GOOGLE_CLIENT_ID", "")
+
     if not client_id:
-        raise HTTPException(status_code=503, detail="GOOGLE_CLIENT_ID env var eksik")
+        raise HTTPException(
+            status_code=503,
+            detail="Google Client ID girilmemiş. Ayarlar → Entegrasyonlar sayfasından ekleyin."
+        )
 
     backend_url = os.getenv("BACKEND_URL", "").rstrip("/")
     if not backend_url:
         raise HTTPException(status_code=503, detail="BACKEND_URL env var eksik")
 
-    import urllib.parse
     params = {
         "client_id": client_id,
         "redirect_uri": f"{backend_url}/api/integrations/gsc/callback",
@@ -2162,7 +2186,7 @@ def gsc_auth_url(org_id: str):
         "scope": "https://www.googleapis.com/auth/webmasters.readonly",
         "access_type": "offline",
         "prompt": "consent",
-        "state": org_id,   # callback'te hangi firma olduğunu bilmek için
+        "state": org_id,
     }
     url = "https://accounts.google.com/o/oauth2/auth?" + urllib.parse.urlencode(params)
     return {"url": url}
@@ -2174,14 +2198,18 @@ def gsc_oauth_callback(code: str, state: str):
     import httpx as _httpx
     import urllib.parse
 
-    client_id = os.getenv("GOOGLE_CLIENT_ID", "")
-    client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
     backend_url = os.getenv("BACKEND_URL", "").rstrip("/")
     frontend_url = os.getenv("FRONTEND_URL", "https://pixra.co").rstrip("/")
     org_id = state
 
+    # Org'un kendi credentials'ını al, yoksa env var
+    profil = _get_org_profil(org_id)
+    google_oauth = profil.get("__google_oauth__", {})
+    client_id = google_oauth.get("client_id") or os.getenv("GOOGLE_CLIENT_ID", "")
+    client_secret = google_oauth.get("client_secret") or os.getenv("GOOGLE_CLIENT_SECRET", "")
+
     if not client_id or not client_secret:
-        raise HTTPException(status_code=503, detail="GSC env vars eksik")
+        raise HTTPException(status_code=503, detail="Google OAuth credentials eksik")
 
     # Code → tokens
     token_resp = _httpx.post(
@@ -2224,16 +2252,9 @@ def gsc_oauth_callback(code: str, state: str):
     sb_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
     headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
 
-    # Mevcut firma_profil'i çek
-    r = _httpx.get(
-        f"{sb_url}/rest/v1/organizations",
-        params={"id": f"eq.{org_id}", "select": "firma_profil"},
-        headers=headers,
-        timeout=8,
-    )
-    profil: dict = {}
-    if r.status_code == 200 and r.json():
-        profil = r.json()[0].get("firma_profil") or {}
+    # Mevcut profil zaten çekildi (_get_org_profil ile), yeniden kullan
+    if not profil:
+        profil = _get_org_profil(org_id)
 
     profil["__gsc__"] = {
         "refresh_token": refresh_token,

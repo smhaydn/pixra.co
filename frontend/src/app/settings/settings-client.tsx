@@ -57,6 +57,14 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
     sector_id: firm?.sector_id || '',
   })
 
+  // Google OAuth credentials (per-org, saved to firma_profil.__google_oauth__)
+  const googleOAuthRaw = firm?.firma_profil?.__google_oauth__ as Record<string, string> | undefined
+  const [googleOAuth, setGoogleOAuth] = useState({
+    client_id: googleOAuthRaw?.client_id || '',
+    client_secret: googleOAuthRaw?.client_secret || '',
+  })
+  const [savingOAuth, setSavingOAuth] = useState(false)
+
   // GSC state
   const [gscStatus, setGscStatus] = useState<GscStatus | null>(null)
   const [gscLoading, setGscLoading] = useState(false)
@@ -131,6 +139,24 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
       toast.show(`GSC bağlantısı başlatılamadı: ${String(err)}`, 'error')
       setGscConnecting(false)
     }
+  }
+
+  const saveGoogleOAuth = async () => {
+    if (!firm) return
+    if (readOnly) return toast.show('Impersonate modunda değiştirilemez', 'warning')
+    setSavingOAuth(true)
+    // Mevcut firma_profil'i koru, sadece __google_oauth__ güncelle
+    const currentProfil = (firm.firma_profil as Record<string, unknown>) || {}
+    const merged = {
+      ...currentProfil,
+      __google_oauth__: {
+        client_id: googleOAuth.client_id.trim(),
+        client_secret: googleOAuth.client_secret.trim(),
+      },
+    }
+    await supabase.from('organizations').update({ firma_profil: merged }).eq('id', firm.id)
+    setSavingOAuth(false)
+    toast.show('Google OAuth bilgileri kaydedildi', 'success')
   }
 
   const disconnectGsc = async () => {
@@ -360,6 +386,57 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
 
           {tab === 'integrations' && (
             <>
+              {/* ── Google OAuth Credentials ── */}
+              <Card padding="lg" variant="flat">
+                <div className="sec-head">
+                  <h2>Google OAuth Kimlik Bilgileri</h2>
+                  {googleOAuth.client_id ? (
+                    <Badge tone="success" dot>Ayarlandı</Badge>
+                  ) : (
+                    <Badge tone="warning" dot>Eksik</Badge>
+                  )}
+                </div>
+                <p className="desc">
+                  Google Search Console bağlantısı için kendi Google Cloud projenizden OAuth 2.0 kimlik bilgilerinizi girin.
+                  Bu bilgiler şifreli saklanır ve yalnızca GSC bağlantısı için kullanılır.
+                </p>
+                <div className="fields">
+                  <Input
+                    label="Client ID"
+                    placeholder="123456789-abc.apps.googleusercontent.com"
+                    value={googleOAuth.client_id}
+                    onChange={e => setGoogleOAuth({ ...googleOAuth, client_id: e.target.value })}
+                    hint="Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID"
+                  />
+                  <Input
+                    label="Client Secret"
+                    type="password"
+                    placeholder="GOCSPX-..."
+                    value={googleOAuth.client_secret}
+                    onChange={e => setGoogleOAuth({ ...googleOAuth, client_secret: e.target.value })}
+                  />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <a
+                    href="https://console.cloud.google.com/apis/credentials"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="support-link"
+                  >
+                    Google Cloud Console →
+                  </a>
+                  <Button
+                    variant="gradient"
+                    size="sm"
+                    onClick={saveGoogleOAuth}
+                    loading={savingOAuth}
+                    disabled={!googleOAuth.client_id || !googleOAuth.client_secret}
+                  >
+                    Kaydet
+                  </Button>
+                </div>
+              </Card>
+
               <Card padding="lg">
                 <div className="sec-head">
                   <h2>Google Search Console</h2>
@@ -405,16 +482,23 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
                     <div className="int-body">
                       <strong>Henüz bağlı değil</strong>
                       <p>Google hesabınızla oturum açıp Search Console erişimine izin verin.</p>
-                      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-quaternary)' }}>
-                        Yalnızca <strong>okuma</strong> yetkisi istenir — hiçbir değişiklik yapılmaz.
-                      </p>
+                      {!googleOAuth.client_id && (
+                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--error-text)' }}>
+                          ⚠️ Önce yukarıdan Google OAuth bilgilerini girin.
+                        </p>
+                      )}
+                      {googleOAuth.client_id && (
+                        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-quaternary)' }}>
+                          Yalnızca <strong>okuma</strong> yetkisi istenir — hiçbir değişiklik yapılmaz.
+                        </p>
+                      )}
                     </div>
                     <Button
                       variant="gradient"
                       size="sm"
                       onClick={connectGsc}
                       loading={gscConnecting}
-                      disabled={!firm}
+                      disabled={!firm || !googleOAuth.client_id}
                     >
                       Google ile Bağla
                     </Button>
