@@ -1532,6 +1532,81 @@ def generate_alt_text_batch(req: AltTextRequest, background_tasks: BackgroundTas
     }
 
 
+# ──────────────── ALT-TEXT (ENHANCED) ────────────────
+
+class GenerateProductAltTextRequest(BaseModel):
+    """Analiz seansı sırasında ürün görselleri için alt-text üretimi."""
+    session_id: str
+    stok_kodu: str
+    urun_adi: str
+    kategori: str = ""
+    marka: str = ""
+    resim_urls: List[str] = []  # Kaç tane görsel olursa olsun işle
+
+
+@app.post("/api/alt-text/generate-for-session")
+def generate_alt_text_for_session(req: GenerateProductAltTextRequest):
+    """
+    Analiz oturum sırasında bir ürünün tüm görselleri için alt-text üret.
+    Frontend'ten üretilen alt-text'ler onay ekranında gösterilir,
+    kullanıcı düzeltebilir, sonra ticimax/send'le beraber gönderilir.
+
+    Returns:
+        {
+            "stok_kodu": str,
+            "results": [
+                {"url": str, "alt_text": str, "status": "ok"|"error"},
+                ...
+            ],
+            "cost_tl": float
+        }
+    """
+    if not req.session_id or not req.stok_kodu:
+        raise HTTPException(status_code=400, detail="session_id ve stok_kodu zorunludur")
+
+    if not req.resim_urls:
+        return {
+            "stok_kodu": req.stok_kodu,
+            "results": [],
+            "cost_tl": 0,
+            "message": "Görsel URL'i sağlanmamış"
+        }
+
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    if not gemini_key:
+        raise HTTPException(status_code=503, detail="GEMINI_API_KEY eksik")
+
+    engine = VisionEngine(api_key=gemini_key)
+    results = []
+
+    # Max 5 görsel işle (para tasarrufu)
+    for url in req.resim_urls[:5]:
+        tmp_path = None
+        try:
+            tmp_path = download_image(url)
+            if not tmp_path:
+                results.append({"url": url, "status": "download_failed", "alt_text": ""})
+                continue
+
+            alt_text = engine.generate_alt_text(
+                image_path=tmp_path,
+                urun_adi=req.urun_adi,
+                kategori=req.kategori,
+                marka=req.marka,
+            )
+            results.append({"url": url, "status": "ok", "alt_text": alt_text})
+        except Exception as e:
+            results.append({"url": url, "status": "error", "alt_text": "", "error": str(e)[:100]})
+        finally:
+            safe_file_cleanup(tmp_path)
+
+    return {
+        "stok_kodu": req.stok_kodu,
+        "results": results,
+        "cost_tl": round(engine.last_usage.get("cost_tl", 0), 4),
+    }
+
+
 # ──────────────── TICIMAX'E GONDERME ────────────────
 
 @app.post("/api/ticimax/send")
