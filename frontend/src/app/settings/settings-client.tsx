@@ -144,18 +144,22 @@ export default function SettingsClient({ user, firm, readOnly = false }: { user:
   const saveGoogleOAuth = async () => {
     if (!firm) return
     setSavingOAuth(true)
-    // Mevcut firma_profil'i koru, sadece __google_oauth__ güncelle
-    const currentProfil = (firm.firma_profil as Record<string, unknown>) || {}
-    const merged = {
-      ...currentProfil,
-      __google_oauth__: {
-        client_id: googleOAuth.client_id.trim(),
-        client_secret: googleOAuth.client_secret.trim(),
-      },
+    try {
+      const res = await fetch(`${API}/api/integrations/gsc/save-credentials`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          org_id: firm.id,
+          client_id: googleOAuth.client_id.trim(),
+          client_secret: googleOAuth.client_secret.trim(),
+        }),
+      })
+      if (!res.ok) throw new Error('Kayıt başarısız')
+      toast.show('Google OAuth bilgileri kaydedildi', 'success')
+    } catch {
+      toast.show('Kaydedilemedi, tekrar dene', 'error')
     }
-    await supabase.from('organizations').update({ firma_profil: merged }).eq('id', firm.id)
     setSavingOAuth(false)
-    toast.show('Google OAuth bilgileri kaydedildi', 'success')
   }
 
   const disconnectGsc = async () => {

@@ -2143,6 +2143,37 @@ def _fetch_gsc_top_queries(org_id: str, limit: int = 20) -> list[str]:
     return [row["keys"][0] for row in rows if row.get("keys")]
 
 
+class SaveGoogleOAuthRequest(BaseModel):
+    org_id: str
+    client_id: str
+    client_secret: str
+
+@app.post("/api/integrations/gsc/save-credentials")
+def gsc_save_credentials(req: SaveGoogleOAuthRequest):
+    """Google OAuth credentials'ı firma_profil.__google_oauth__ altına kaydeder (service role)."""
+    import httpx as _httpx
+    sb_url = os.getenv("SUPABASE_URL", "")
+    sb_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
+
+    # Mevcut profili koru
+    profil = _get_org_profil(req.org_id) if sb_url else {}
+    profil["__google_oauth__"] = {
+        "client_id": req.client_id.strip(),
+        "client_secret": req.client_secret.strip(),
+    }
+
+    r = _httpx.patch(
+        f"{sb_url}/rest/v1/organizations?id=eq.{req.org_id}",
+        headers={**headers, "Content-Type": "application/json"},
+        json={"firma_profil": profil},
+        timeout=10,
+    )
+    if r.status_code not in (200, 204):
+        raise HTTPException(status_code=500, detail="Kayıt başarısız")
+    return {"ok": True}
+
+
 def _get_org_profil(org_id: str) -> dict:
     """Org'un firma_profil JSONB'sini Supabase'den çeker."""
     import httpx as _httpx
