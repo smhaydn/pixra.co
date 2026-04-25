@@ -1,13 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const supabase = createClient()
+  // SSR sırasında çalışmasın: useMemo ile client-side'da oluştur
+  const supabase = useMemo(() => createClient(), [])
 
   const [checking, setChecking] = useState(true)
   const [validSession, setValidSession] = useState(false)
